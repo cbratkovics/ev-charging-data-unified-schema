@@ -13,7 +13,7 @@ from ev_charging_data_unified_schema.config import PROJECT, REPO_ROOT
 
 
 class _Minimal:
-    SOURCE = "palo_alto"
+    SOURCE = "boulder"
     URLS = ("https://example.invalid/sessions.csv",)
 
     def download(self, raw_dir: Path, *, refresh: bool = False) -> list[Path]:

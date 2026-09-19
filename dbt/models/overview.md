@@ -2,8 +2,8 @@
 
 # ev_charging_data_unified_schema_dbt
 
-Consolidates public EV-charging session data from four operators, each published in a different
-shape, into one tested, documented schema on DuckDB. Every source is a file the repository's own
+Consolidates public EV-charging session data from several operators, each published in a different
+shape and each under an explicit open licence, into one tested, documented schema on DuckDB. Every source is a file the repository's own
 loaders landed; there is no managed database and no paid service.
 
 ## Layers

@@ -1,10 +1,14 @@
 # Data sources
 
-Four public session sources and one reference registry. Per source: the exact endpoints used,
-the licence **verbatim as published** with the URL it was read from, and what this repository
-commits (docs/adr/0002-source-redistribution.md). Retrieval time, size, row count and SHA-256 of
-every downloaded file are in the generated inventory at the end of this page; the full hashes
-are in `artifacts/profile/<run_id>.json`. Discovery was done on 2026-09-19.
+Three public session sources and one reference registry, every one under an explicit open
+licence (docs/adr/0004-source-policy.md). Per source: the exact endpoints used, the licence
+**verbatim as published** with the URL it was read from, and what this repository commits
+(docs/adr/0002-source-redistribution.md). Retrieval time, size, row count and SHA-256 of every
+downloaded file are in the generated inventory at the end of this page; the full hashes are in
+`artifacts/profile/<run_id>.json`. Discovery was done on 2026-09-19.
+
+Attribution required by the Open Government Licence: *Contains public sector information
+licensed under the Open Government Licence v3.0.*
 
 ## Cary, NC — Town of Cary, "Electric Vehicle Charging Stations"
 
@@ -53,52 +57,71 @@ are in `artifacts/profile/<run_id>.json`. Discovery was done on 2026-09-19.
   (docs/PROFILE.md).
 - Committed: nothing from the file (see ADR-0002); inventory row and profile aggregates.
 
-## Dundee, UK — Dundee City Council, "Public EV Charge Point Usage"
+## UK Department for Transport — "Electric Chargepoint Analysis 2017"
 
-- Portal: ArcGIS Hub. All six items are plain CSV attachments (no feature service). Item pages:
-  - 2021 (27 Jul–31 Dec): <https://data.dundeecity.gov.uk/datasets/189b838f51e74f6bb77509d91c47d7c0>
-  - 2022: <https://data.dundeecity.gov.uk/datasets/f1a6b5df441d4606821d5f1a78e92d7e>
-  - 2023: <https://data.dundeecity.gov.uk/datasets/80df5f177b8c4a94b2bc692835801e8e>
-  - 2024: <https://data.dundeecity.gov.uk/datasets/8b443deaf9174b7aa9d3e10eaa906422>
-  - 2024, earlier upload of the same year (header `Column1` instead of `Postcode`, blank rows, newest-first order): <https://data.dundeecity.gov.uk/datasets/701795ab29c04e4bbf21f6a4be3404cd>
-  - 2025 (1 Jan–31 Aug): <https://data.dundeecity.gov.uk/datasets/e185a3a1cfc948a69ada76e950b9d447>
-- Endpoints used: `https://www.arcgis.com/sharing/rest/content/items/<item id>/data` for each item.
-- Licence: **unstated** on every item. `licenseInfo: null` and `accessInformation: null` in the
-  item metadata (`https://www.arcgis.com/sharing/rest/content/items/<item id>?f=json`);
-  `"license": "none"` from the Hub API (`https://data.dundeecity.gov.uk/api/v3/datasets/<item id>`).
-  The portal's footer "Terms of Service" and "Privacy Policy" links point to `#`; no site-wide
-  terms page exists. Other items on the same portal do carry per-item licence text, so the
-  absence here is a per-item choice, not a portal default. Not assumed to be OGL.
-- Publisher description, verbatim (2022, 2023, 2024 items): "This file contains charging data
-  from sessions completed at DCC-owned public charge points in {year}." 2021 item: "File contains
-  all charging sessions at DCC-owned public charge points from end of July 2021 to 31 December
-  2021. Any data before the end of July is not accessible to us due to the backoffice change."
-  No 2018–2020 files exist.
-- A charge-point location feature layer ("All public chargers one layer", item
-  6f7be3e24dd344ad8b69027e7ba5ece7, licence also unstated) was queried once for profiling; it
-  matches almost none of the usage charge-point ids (docs/PROFILE.md) and is not used.
-- Committed: nothing from the files (see ADR-0002); inventory rows and profile aggregates.
+Two statistical releases with raw charging-event files: Local Authority Rapids (revised
+13 December 2018) and Public Sector Fasts (published 13 December 2018). Both are badged
+Experimental Statistics by the publisher.
 
-## Palo Alto, CA — "Electric Vehicle Charging Station Usage (July 2011 - Dec 2020)"
-
-- **Not downloaded.** The city portal moved from `data.cityofpaloalto.org` (now 404 on every
-  path) to `data.paloalto.gov`, whose file endpoint returned HTTP 502 on every attempt on
-  2026-09-19. The ORNL mirror named in the brief
-  (<https://openenergyhub.ornl.gov/explore/dataset/electric-vehicle-charging-station-usage-july-2011-dec-2020/>)
-  is a catalogue stub: `records_count: 0`, `fields: []`, and its CSV export is a header-only file.
-- Full-file URL from an archived copy of the dataset page (2026-01-21):
-  `https://data.paloalto.gov/datasets/194693-electric-vehicle-charging-station-usage-july-2011-dec-2020.download/`
-  (file "ChargePoint Data CY20Q4.csv"; the page's own note says the export button caps at 10,000
-  rows and the full file is under Information → "Data Collected from").
-- Licence: **unstated at dataset level**. The archived page shows no licence field. The ORNL
-  metadata records, verbatim: "No license, or terms of use, asserted by data producer for this
-  dataset was found." The city's portal-wide "Open Data Terms and Conditions of Use" (Feb. 16,
-  2018, <https://www.paloalto.gov/Departments/Information-Technology/Open-Data-Portal/Terms-of-Use>)
-  states, verbatim: "The City grants any interested user (the "User") access to and use of the
-  Data subject to the City's Open Data Terms and Conditions of Use (the "Terms") and applicable
-  laws." and "The Data, including the Derivative Work, are made available on an "as is" and "as
-  available" basis without any express or implied warranty". It names no open licence.
-- Committed: nothing. Treated as Dundee once downloadable (ADR-0002).
+- Publication pages:
+  - Rapids: <https://www.gov.uk/government/statistics/electric-chargepoint-analysis-2017-local-authority-rapids>
+    (published 21 June 2018, last updated 13 December 2018)
+  - Fasts: <https://www.gov.uk/government/statistics/electric-chargepoint-analysis-2017-public-sector-fasts>
+    (published 13 December 2018)
+- Files used (all `assets.publishing.service.gov.uk`):
+  - Rapids raw data (revised): `https://assets.publishing.service.gov.uk/media/5c1147ece5274a0bcac5f8d5/electric-chargepoint-analysis-2017-raw-rapids-data.csv`
+  - Rapids incomplete or anomalous raw data (revised): `https://assets.publishing.service.gov.uk/media/5c114827e5274a0bd964df2b/electric-chargepoint-analysis-2017-rapids-incomplete-anomalies.csv`
+  - Fasts raw data: `https://assets.publishing.service.gov.uk/media/5c128fa5e5274a0ba8c4ba79/electric-chargepoint-analysis-2017-raw-public-sector-fasts-data.csv`
+  - Fasts incomplete or anomalous raw data: `https://assets.publishing.service.gov.uk/media/5c128de8e5274a0ae06bd792/electric-chargepoint-analysis-2017-public-sector-fasts-incomplete-anomalies.csv`
+  - The two PDF reports (rapids revised, fasts) for definitions; not data.
+- Licence, verbatim from both publication pages: "All content is available under the Open
+  Government Licence v3.0, except where otherwise stated", linked to
+  <https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>, with
+  "© Crown copyright". The licence grants, verbatim: "copy, publish, distribute and transmit the
+  Information; adapt the Information; exploit the Information commercially and non-commercially"
+  and requires that you "acknowledge the source of the Information in your product or application
+  by including or linking to any attribution statement specified by the Information Provider(s)";
+  the default statement is "Contains public sector information licensed under the Open Government
+  Licence v3.0." Read from the OGL page above.
+- What the revised rapids release changed, verbatim from the publication page: "The original
+  release omitted data from Cornwall Council, approximately 2,500 charging events. This has now
+  been added to the underlying data and analysis presented in this release. Some of the chargepoints
+  reported to DfT as rapids were actually fast chargers. Charging events from fast chargers have
+  been removed and added to our separate publication on Public Sector Fasts. This removed
+  approximately 25,000 events from the dataset and resulted in slightly higher average energy
+  supplied per event and shorter average durations. Most of the figures in the release have been
+  revised. Further analysis has revealed that several local authorities received funding for
+  chargepoints outside their geographical boundaries, for example via joint bids. Therefore the
+  local authority name does not indicate where the chargepoint is located. Less than half of the
+  chargepoints had an identifiable location, so geographical analysis is not possible and the local
+  authority map has been removed."
+- Publisher's exclusion rule, verbatim (rapids report p2; the fasts report says the same): "All
+  analyses are restricted to those charging events that actually drew some positive charge.
+  Plug-in events that registered no electric charge or were less than or equal to 3 minutes in
+  length were excluded." Rapids report p14: "Some data has also had to be excluded because it is
+  incomplete, for example no start time or start day, end day or end time. Some events that were
+  not consistent with local rapid chargepoints, and assumed to be accidentally included from other
+  schemes, have also been excluded." and "Depending on the source of the data, there can be marked
+  differences in how the individual charging events have been recorded. With the example of charge
+  time, some organisations and local authorities have rounded their start and end time to the
+  nearest half hour while others have provided the exact hours, minutes and seconds." Events over
+  100 kWh were excluded from the analysis (report p14 note). The "incomplete or anomalous" files
+  are the rows the publisher excluded; this project lands them too so the exclusion is reproduced
+  in silver, not inherited.
+- Publisher's caveats, verbatim (fasts report p2): "Around 6,000 charging events did not have any
+  chargepoint identifier. It is also possible that chargepoint identifiers may not be consistent
+  across time, and a single chargepoint may have more than one ID in the dataset. For this reason,
+  the number of chargepoints should be read as an estimate." and p9: "We attempted to match
+  provided chargepoint IDs to the National Chargepoint Registry in order to determine the location
+  of the chargepoints. A basic matching exercise resulted in less than 10% of IDs matching."
+- Plug-in duration: the reports describe "plug-in duration" as the time the vehicle was plugged
+  in; charging (energy-drawing) time is not recorded ("it is not possible to identify when the
+  vehicle was actually drawing charge", fasts report p1). The published `PluginDuration` column is
+  in minutes in the rapids raw file and in hours in the two fasts files (docs/PROFILE.md); the
+  rapids anomalies file has no duration column and day-first dates.
+- Timezone: not stated by the publisher. Timestamps are treated as UK local wall-clock time
+  (`Europe/London`); docs/PROFILE.md records the evidence.
+- Committed: nothing from the files (ADR-0002); inventory rows and profile aggregates.
 
 ## Station registry — Alternative Fuel Stations API (US and Canada)
 
@@ -123,7 +146,7 @@ are in `artifacts/profile/<run_id>.json`. Discovery was done on 2026-09-19.
   names DOE/NLR/Alliance shall not be used in any representation, advertising, publicity or other
   manner whatsoever to endorse or promote any entity that adopts or uses the Data." followed by
   an as-is warranty disclaimer, indemnification and limitation of liability.
-- Coverage: US and Canada only. Dundee stations are out of coverage and will carry an explicit
+- Coverage: US and Canada only. The UK chargepoints are out of coverage and will carry an explicit
   `out_of_coverage` status (Phase 5).
 - Status: the registry pull is deferred until `NREL_API_KEY` is set; the response shape above was
   captured with `DEMO_KEY` on one record.
@@ -131,17 +154,4 @@ are in `artifacts/profile/<run_id>.json`. Discovery was done on 2026-09-19.
 ## Inventory of downloaded files
 
 <!-- generated:inventory start -->
-_Generated by `scripts/render_profile.py` from `artifacts/profile/profile-20260919T232735Z.json` (code commit `ae6997d9c181`); full hashes are in the artifact._
-
-| Source | File | Retrieved (UTC) | Bytes | Data rows | SHA-256 (prefix) |
-|---|---|---|---|---|---|
-| Boulder, CO | `Electric_Vehicle_Charging_Station_Data.csv` | 2026-09-19T23:10:30+00:00 | 23,276,419 | 148,136 | `f1f620bb616fa6c0…` |
-| Cary, NC | `electric-vehicle-charging-stations.csv` | 2026-09-19T23:08:39+00:00 | 2,500,986 | 20,142 | `9f8037bfd9246cce…` |
-| Dundee, UK | `dundee_2021_jul_dec.csv` | 2026-09-19T23:11:36+00:00 | 4,155,268 | 35,871 | `18008320bca59b19…` |
-| Dundee, UK | `dundee_2022.csv` | 2026-09-19T23:11:38+00:00 | 10,264,136 | 88,145 | `242bebd2832a11ef…` |
-| Dundee, UK | `dundee_2023.csv` | 2026-09-19T23:11:41+00:00 | 13,743,007 | 119,065 | `d700deb970a2db41…` |
-| Dundee, UK | `dundee_2024.csv` | 2026-09-19T23:11:44+00:00 | 10,883,129 | 94,661 | `88796251376700b5…` |
-| Dundee, UK | `dundee_2024_duplicate_upload.csv` | 2026-09-19T23:11:46+00:00 | 11,255,144 | 113,607 | `2e306b926e0b9664…` |
-| Dundee, UK | `dundee_2025_jan_aug.csv` | 2026-09-19T23:11:49+00:00 | 5,755,833 | 50,101 | `3add50e66e68d18c…` |
-| Palo Alto, CA | (none downloaded) | n/a | n/a | n/a | n/a |
 <!-- generated:inventory end -->

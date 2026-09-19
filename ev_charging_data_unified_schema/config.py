@@ -48,6 +48,9 @@ class SourceSpec:
     """IANA zone of the stations (station-local time)."""
     registry_coverage: bool
     """False where the station registry (US / Canada) cannot cover the stations."""
+    licence: str
+    """Short licence label; the verbatim text and its URL live in docs/DATA_SOURCES.md. Only
+    sources with an explicit open licence are admitted (docs/adr/0004-source-policy.md)."""
 
 
 @dataclass(frozen=True)
@@ -90,10 +93,11 @@ PROJECT = ProjectConfig(
         "dbt schema on DuckDB."
     ),
     sources=(
-        SourceSpec("palo_alto", "Palo Alto, CA", "US", "America/Los_Angeles", True),
-        SourceSpec("boulder", "Boulder, CO", "US", "America/Denver", True),
-        SourceSpec("cary", "Cary, NC", "US", "America/New_York", True),
-        SourceSpec("dundee", "Dundee, UK", "GB", "Europe/London", False),
+        SourceSpec("boulder", "Boulder, CO", "US", "America/Denver", True, "CC0-1.0"),
+        SourceSpec("cary", "Cary, NC", "US", "America/New_York", True, "CC0-1.0"),
+        SourceSpec(
+            "dft_2017", "UK DfT chargepoint analysis 2017", "GB", "Europe/London", False, "OGL-3.0"
+        ),
     ),
     dbt_project_name="ev_charging_data_unified_schema_dbt",
     github_owner="cbratkovics",

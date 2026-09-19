@@ -47,16 +47,6 @@ DST_DENVER = [
     "2023-03-12",
     "2023-11-05",
 ]
-DST_LONDON = [
-    "2021-10-31",
-    "2022-03-27",
-    "2022-10-30",
-    "2023-03-26",
-    "2023-10-29",
-    "2024-03-31",
-    "2024-10-27",
-    "2025-03-30",
-]
 
 # Column roles per source. Names are the raw headers exactly as published.
 ROLES: dict[str, dict[str, Any]] = {
@@ -78,6 +68,7 @@ ROLES: dict[str, dict[str, Any]] = {
         "user_level_columns": [],
         "natural_key": ["station_name", "start_date"],
         "rated_kw_ceiling": 20.0,
+        "seasonal_shift_check": True,
     },
     "boulder": {
         "files": ["Electric_Vehicle_Charging_Station_Data.csv"],
@@ -103,46 +94,49 @@ ROLES: dict[str, dict[str, Any]] = {
         "dst_transitions": DST_DENVER,
         "rated_kw_ceiling": 20.0,
     },
-    "dundee": {
+    "dft_2017": {
         "files": [
-            "dundee_2021_jul_dec.csv",
-            "dundee_2022.csv",
-            "dundee_2023.csv",
-            "dundee_2024.csv",
-            "dundee_2024_duplicate_upload.csv",
-            "dundee_2025_jan_aug.csv",
+            "dft_2017_local_authority_rapids_raw.csv",
+            "dft_2017_local_authority_rapids_incomplete_anomalies.csv",
+            "dft_2017_public_sector_fasts_raw.csv",
+            "dft_2017_public_sector_fasts_incomplete_anomalies.csv",
         ],
         "read": {},
+        "na_tokens": ["NA"],
         "timezone": "Europe/London",
-        "session_id": "SDR ID",
-        "station_id": "CP ID",
-        "station_name": "Site",
-        "port_id": None,
-        "port_type": "Connector Type",
-        "start": "Start",
-        "end": "End",
-        "start_format": "DMY",
-        "charging_duration": "Duration",
-        "connected_duration": None,
-        "energy_kwh": "Consum(kWh)",
+        "session_id": "ChargingEvent",
+        "station_id": "CPID",
+        "station_name": None,
+        "site_key": "Name",
+        "port_id": "Connector",
+        "port_type": None,
+        "start": "StartDate",
+        "start_time": "StartTime",
+        "end": "EndDate",
+        "end_time": "EndTime",
+        "start_format": "DATE_PLUS_TIME",
+        "charging_duration": None,
+        "connected_duration": "PluginDuration",
+        "connected_duration_kind": "numeric",
+        "connected_duration_unit_by_file": {
+            "dft_2017_local_authority_rapids_raw.csv": "minutes",
+            "dft_2017_public_sector_fasts_raw.csv": "hours",
+            "dft_2017_public_sector_fasts_incomplete_anomalies.csv": "hours",
+        },
+        "energy_kwh": "Energy",
         "tz_label": None,
         "user_level_columns": [],
-        "natural_key": ["SDR ID"],
-        "aliases": {"Column1": "Postcode"},
-        "dst_transitions": DST_LONDON,
-        "redelivery_pair": ["dundee_2024.csv", "dundee_2024_duplicate_upload.csv"],
-        "location_layer": "dundee_chargepoints/all_public_chargers_one_layer.json",
+        "natural_key": ["CPID", "Connector", "_start_min", "_end_min", "_energy"],
+        "aliases": {"EnergySupplied": "Energy", "Unnamed: 0": "_publisher_row_index"},
+        "dst_transitions": ["2017-03-26", "2017-10-29"],
+        "file_family": {
+            "dft_2017_local_authority_rapids_raw.csv": "rapids",
+            "dft_2017_local_authority_rapids_incomplete_anomalies.csv": "rapids_anomalies",
+            "dft_2017_public_sector_fasts_raw.csv": "fasts",
+            "dft_2017_public_sector_fasts_incomplete_anomalies.csv": "fasts_anomalies",
+        },
+        "rated_kw_ceiling": 60.0,
     },
-}
-
-# Palo Alto: no file could be downloaded (portal 502 at profiling time). The column list below
-# was recorded by the discovery step from a third-party re-upload's metadata and is NOT verified
-# against the city's file. It is kept only so the personal-data check can name the fields that
-# will need a policy once the file is available.
-PALO_ALTO_UNVERIFIED = {
-    "user_level_columns": ["User ID", "Driver Postal Code"],
-    "device_level_columns": ["MAC Address", "System S/N", "EVSE ID", "Model Number"],
-    "note": "column names from a third-party re-upload's metadata; not verified against the city file",
 }
 
 
@@ -159,16 +153,12 @@ def parse_times(
         start = pd.to_datetime(
             frame[roles["start"]].astype("string"), utc=True, format="ISO8601", errors="coerce"
         ).dt.tz_localize(None)
-    elif fmt == "DMY":
-        start = pd.to_datetime(
-            frame[roles["start"]].astype("string").str.strip(),
-            format="%d/%m/%Y %H:%M",
-            errors="coerce",
+    elif fmt == "DATE_PLUS_TIME":
+        start, notes["start_date_formats"] = parse_date_plus_time(
+            frame[roles["start"]], frame[roles["start_time"]]
         )
-        end = pd.to_datetime(
-            frame[roles["end"]].astype("string").str.strip(),
-            format="%d/%m/%Y %H:%M",
-            errors="coerce",
+        end, notes["end_date_formats"] = parse_date_plus_time(
+            frame[roles["end"]], frame[roles["end_time"]]
         )
     else:  # pragma: no cover
         raise ValueError(fmt)
@@ -176,6 +166,123 @@ def parse_times(
     if end is not None:
         notes["end_parse_failures"] = int(end.isna().sum())
     return start, end, notes
+
+
+def parse_date_plus_time(date: pd.Series, time: pd.Series) -> tuple[pd.Series, dict[str, int]]:
+    """Separate date and time columns; the date is ISO (YYYY-MM-DD) or day-first (DD/MM/YYYY),
+    decided per value. Returns naive timestamps and the count of each date shape."""
+    d = date.astype("string").str.strip()
+    tm = time.astype("string").str.strip()
+    iso = d.str.match(r"^\d{4}-\d{2}-\d{2}$").fillna(False).astype(bool)
+    dmy = d.str.match(r"^\d{1,2}/\d{1,2}/\d{4}$").fillna(False).astype(bool)
+    out = pd.Series(pd.NaT, index=date.index, dtype="datetime64[ns]")
+    out[iso] = pd.to_datetime(d[iso] + " " + tm[iso], format="%Y-%m-%d %H:%M:%S", errors="coerce")
+    out[dmy] = pd.to_datetime(d[dmy] + " " + tm[dmy], format="%d/%m/%Y %H:%M:%S", errors="coerce")
+    return out, {
+        "iso_rows": int(iso.sum()),
+        "slash_rows": int(dmy.sum()),
+        "other_rows": int((~iso & ~dmy).sum()),
+    }
+
+
+def duration_minutes(rows: pd.DataFrame, roles: dict[str, Any], col_key: str) -> pd.Series | None:
+    """A duration column as minutes: hh:mm:ss text, or a number whose unit is declared per file
+    (the DfT files publish PluginDuration in minutes in one file and hours in the others)."""
+    col = roles.get(col_key)
+    if not col:
+        return None
+    if roles.get(col_key + "_kind") != "numeric":
+        return hms_to_minutes(rows[col])
+    num = pd.to_numeric(rows[col], errors="coerce")
+    units = roles.get(col_key + "_unit_by_file", {})
+    factor = rows["_file"].map(
+        lambda f: {"minutes": 1.0, "hours": 60.0}.get(units.get(f), float("nan"))
+    )
+    return num * factor
+
+
+def days_at_level(
+    start: pd.Series, end: pd.Series, by: pd.Series, levels: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 8)
+) -> pd.DataFrame:
+    """Per key: the number of distinct local dates on which the concurrency reaches each level.
+    A sweep per key; a day counts for level k when at some instant on that day k sessions overlap.
+    Basis for the robust-max port count (a level counts only if reached on >= N distinct days)."""
+    df = pd.DataFrame({"s": start, "e": end, "k": by}).dropna()
+    df = df[df["e"] >= df["s"]]
+    out = {}
+    for key, g in df.groupby("k"):
+        ev = pd.concat(
+            [pd.DataFrame({"t": g["s"], "d": 1}), pd.DataFrame({"t": g["e"], "d": -1})]
+        ).sort_values(["t", "d"])
+        ev["c"] = ev["d"].cumsum()
+        ev = ev[ev["d"] == 1]
+        day = ev["t"].dt.normalize()
+        out[str(key)] = {str(k): int(day[ev["c"] >= k].nunique()) for k in levels}
+    return pd.DataFrame(out).T.fillna(0).astype(int)
+
+
+def robust_max_distribution(
+    dal: pd.DataFrame, n_values: tuple[int, ...] = (1, 2, 3, 5, 10, 20, 30)
+) -> dict[str, dict[str, int]]:
+    """For each N: histogram over keys of the highest level reached on at least N distinct days."""
+    levels = sorted(int(c) for c in dal.columns)
+    out = {}
+    for n in n_values:
+        rm = pd.Series(0, index=dal.index)
+        for k in levels:
+            rm[dal[str(k)] >= n] = k
+        out[str(n)] = hist(rm)
+    return out
+
+
+def inter_session_gaps(start: pd.Series, end: pd.Series, by: pd.Series) -> dict[str, Any]:
+    """Per key, the gap in days between one session's end and the next session's start. The
+    distribution calibrates the zero-session-gap threshold for the active window."""
+    df = pd.DataFrame({"s": start, "e": end, "k": by}).dropna().sort_values(["k", "s"])
+    df["next_s"] = df.groupby("k")["s"].shift(-1)
+    gap = (df["next_s"] - df["e"]).dt.total_seconds() / 86400
+    gap = gap.dropna()
+    gap = gap[gap >= 0]
+    q = gap.quantile([0.5, 0.9, 0.99, 0.999, 1.0])
+    return {
+        "gaps": int(len(gap)),
+        "quantiles_days": {str(k): round(float(v), 3) for k, v in q.items()},
+        "gaps_over_days": {str(d): int((gap > d).sum()) for d in (1, 3, 7, 14, 30, 60, 90)},
+        "keys_with_a_gap_over_30d": int(
+            df.assign(g=(df["next_s"] - df["e"]).dt.total_seconds() / 86400)
+            .query("g > 30")["k"]
+            .nunique()
+        ),
+    }
+
+
+def seasonal_hour_shift(start_utc: pd.Series, zone: str) -> dict[str, Any]:
+    """Amendment (c): if the published +00:00 timestamps are true UTC, the raw-hour usage profile
+    shifts by one hour between summer (DST) and winter, because people keep local habits. If they
+    were local time mislabelled, the raw profiles would coincide. Reports the circular mean hour
+    of the raw profile in each half and the difference."""
+    import math
+
+    local = start_utc.dt.tz_localize("UTC").dt.tz_convert(zone)
+    is_dst = local.map(lambda x: bool(x.dst())) if len(local) else pd.Series([], dtype=bool)
+    out: dict[str, Any] = {}
+    means = {}
+    for label, mask in (("summer_dst", is_dst), ("winter_std", ~is_dst)):
+        h = start_utc[mask].dt.hour + start_utc[mask].dt.minute / 60
+        ang = h * 2 * math.pi / 24
+        m = math.atan2(ang.map(math.sin).mean(), ang.map(math.cos).mean()) * 24 / (2 * math.pi) % 24
+        means[label] = round(float(m), 3)
+        out[label] = {
+            "rows": int(mask.sum()),
+            "raw_hour_histogram": hist(start_utc[mask].dt.hour),
+            "circular_mean_raw_hour": means[label],
+        }
+    diff = (means["summer_dst"] - means["winter_std"] + 12) % 24 - 12
+    out["summer_minus_winter_mean_raw_hour"] = round(float(diff), 3)
+    out["reading"] = (
+        "about -1 means the raw hours are true UTC (local habits fixed, UTC hour earlier in summer); about 0 means the raw hours are already local"
+    )
+    return out
 
 
 def hist(s: pd.Series) -> dict[str, int]:
@@ -248,6 +355,15 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
             continue
         frame = pr.read_raw_strings(path, **roles.get("read", {}))
         fp = pr.file_profile_dict(pr.profile_file(path, frame))
+        if roles.get("na_tokens"):
+            fp["na_token_counts"] = {
+                c: int(frame[c].isin(roles["na_tokens"]).sum())
+                for c in frame.columns
+                if frame[c].isin(roles["na_tokens"]).any()
+            }
+            frame = frame.mask(frame.isin(roles["na_tokens"]))
+        if roles.get("file_family"):
+            fp["family"] = roles["file_family"].get(fname)
         rec = downloads.get(fname)
         fp["download"] = (
             {
@@ -276,8 +392,8 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
     rows["_start"] = start
     energy = pd.to_numeric(rows[roles["energy_kwh"]], errors="coerce")
     rows["_energy"] = energy
-    chg = hms_to_minutes(rows[roles["charging_duration"]]) if roles["charging_duration"] else None
-    con = hms_to_minutes(rows[roles["connected_duration"]]) if roles["connected_duration"] else None
+    chg = duration_minutes(rows, roles, "charging_duration")
+    con = duration_minutes(rows, roles, "connected_duration")
     if end is not None:
         rows["_start_min"], rows["_end_min"] = start.dt.floor("min"), end.dt.floor("min")
 
@@ -318,6 +434,28 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
     }
     if roles.get("delivery_row_id"):
         answers["overlap"]["delivery_blocks"] = delivery_blocks(rows, roles, nk)
+    if roles["charging_duration"] and not roles["end"]:
+        # natural-key conflicts: what differs between the rows sharing a key
+        dup = rows[rows.duplicated(nk, keep=False)]
+        if len(dup):
+            g = dup.groupby(nk)
+            answers["overlap"]["natural_key_conflicts"] = {
+                "groups": int(g.ngroups),
+                "groups_where_one_row_has_zero_charging_and_zero_energy": int(
+                    g.apply(
+                        lambda x: bool(
+                            (
+                                (hms_to_minutes(x[roles["charging_duration"]]) == 0)
+                                & (pd.to_numeric(x[roles["energy_kwh"]], errors="coerce") == 0)
+                            ).any()
+                        )
+                    ).sum()
+                ),
+                "groups_where_rows_differ_in_energy": int(
+                    g[roles["energy_kwh"]].nunique().gt(1).sum()
+                ),
+                "note": "a zero-duration, zero-energy row beside a real row at the same second is an aborted plug-in; the rule keeps the row with the larger charging time",
+            }
     if roles.get("redelivery_pair"):
         a, b = roles["redelivery_pair"]
         answers["overlap"]["redelivery_diff"] = redelivery_diff(
@@ -327,23 +465,27 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
     # 3. station ids vs names
     st_id, st_name = roles["station_id"], roles["station_name"]
     st: dict[str, Any] = {"station_id_column": st_id, "station_name_column": st_name}
-    st["distinct_names"] = int(rows[st_name].nunique())
-    st["null_names"] = int(rows[st_name].isna().sum())
+    if st_name:
+        st["distinct_names"] = int(rows[st_name].nunique())
+        st["null_names"] = int(rows[st_name].isna().sum())
     if roles.get("site_key"):
         st["site_key_column"] = roles["site_key"]
         st["distinct_site_keys"] = int(rows[roles["site_key"]].nunique())
-        st["names_per_site_key"] = hist(rows.groupby(roles["site_key"])[st_name].nunique())
+        st["names_per_site_key"] = hist(rows.groupby(roles["site_key"])[st_name or st_id].nunique())
     if st_id:
         st["distinct_ids"] = int(rows[st_id].nunique())
         st["null_ids"] = int(rows[st_id].isna().sum())
-        both = rows.dropna(subset=[st_id, st_name])
-        st["names_with_multiple_ids"] = int((both.groupby(st_name)[st_id].nunique() > 1).sum())
-        st["ids_with_multiple_names"] = int((both.groupby(st_id)[st_name].nunique() > 1).sum())
+        grp = st_name or roles.get("site_key")
+        if grp:
+            both = rows.dropna(subset=[st_id, grp])
+            st["names_with_multiple_ids"] = int((both.groupby(grp)[st_id].nunique() > 1).sum())
+            st["ids_with_multiple_names"] = int((both.groupby(st_id)[grp].nunique() > 1).sum())
+            st["grouping_column_for_the_two_counts_above"] = grp
         ids = rows[st_id].astype("string")
         st["id_forms"] = {
             "numeric": int(ids.str.fullmatch(r"\d+").fillna(False).sum()),
-            "apt_prefixed": int(ids.str.startswith("APT").fillna(False).sum()),
-            "other": int((~ids.str.fullmatch(r"\d+|APT.*").fillna(True)).sum()),
+            "prefixed_or_text": int((~ids.str.fullmatch(r"\d+").fillna(True)).sum()),
+            "null": int(ids.isna().sum()),
         }
     per = rows.groupby(st_id or st_name)["_start"].agg(["size", "min", "max"])
     st["sessions_per_station"] = {
@@ -356,7 +498,19 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
     answers["stations"] = st
 
     # 4. port / plug identifier
+    if roles["port_id"] and st_id:
+        pp = (
+            rows.dropna(subset=[st_id, roles["port_id"]]).groupby(st_id)[roles["port_id"]].nunique()
+        )
+        port_info = {
+            "port_id_values": hist(rows[roles["port_id"]].fillna("<null>")),
+            "ports_per_station_id": hist(pp),
+            "rows_with_null_port_id": int(rows[roles["port_id"]].isna().sum()),
+        }
+    else:
+        port_info = {}
     answers["port"] = {
+        **port_info,
         "port_id_column": roles["port_id"],
         "port_type_column": roles.get("port_type"),
         "port_type_values": (
@@ -366,6 +520,16 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
 
     # 5. durations available
     answers["durations"] = {
+        "availability": (
+            "both"
+            if roles["charging_duration"] and (roles["connected_duration"] or roles["end"])
+            else (
+                "charging_only"
+                if roles["charging_duration"]
+                else "plug_in_only" if (roles["connected_duration"] or roles["end"]) else "none"
+            )
+        ),
+        "connected_duration_unit_by_file": roles.get("connected_duration_unit_by_file"),
         "charging_duration_column": roles["charging_duration"],
         "connected_duration_column": roles["connected_duration"],
         "start_column": roles["start"],
@@ -415,9 +579,11 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
             int(((energy > 0) & (chg == 0)).sum()) if chg is not None else None
         ),
     }
-    if chg is not None:
-        kw = energy / (chg / 60)
-        ok = chg > 0
+    kw_basis = chg if chg is not None else con
+    if kw_basis is not None:
+        kw = energy / (kw_basis / 60)
+        ok = kw_basis > 0
+        imp["implied_kw_basis"] = "charging_minutes" if chg is not None else "connected_minutes"
         imp["implied_kw_quantiles"] = {
             str(q): round(float(v), 3) for q, v in kw[ok].quantile([0.5, 0.9, 0.99, 0.999]).items()
         }
@@ -426,7 +592,7 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
                 "ceiling_kw": roles["rated_kw_ceiling"],
                 "rows": int((kw[ok] > roles["rated_kw_ceiling"]).sum()),
             }
-        if roles.get("port_type"):
+        if roles.get("port_type") and kw_basis is not None:
             imp["implied_kw_p50_by_port_type"] = {
                 str(k): round(float(v), 3)
                 for k, v in kw[ok].groupby(rows.loc[ok, roles["port_type"]]).median().items()
@@ -458,6 +624,8 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
         tz["note"] = (
             "if the +00:00 offset were really local time mislabelled, the overnight trough would sit at the published hours; if it is true UTC, the trough sits at the converted hours"
         )
+    if roles.get("seasonal_shift_check"):
+        tz["seasonal_shift"] = seasonal_hour_shift(start, roles["timezone"])
     if roles["tz_label"]:
         lab = rows[roles["tz_label"]]
         tz["tz_label_values"] = hist(lab.fillna("<null>"))
@@ -512,9 +680,32 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
                     "distribution": hist(pd.Series(conc)),
                     "top": dict(sorted(conc.items(), key=lambda kv: -kv[1])[:8]),
                 }
+        # amendment (f): a level counts only if reached on >= N distinct days
+        skey = st_id or st_name
+        dal = days_at_level(start[real], end[real], rows.loc[real, skey])
+        plain = dal.apply(lambda r: max([int(k) for k in dal.columns if r[k] >= 1] or [0]), axis=1)
+        robust5 = dal.apply(
+            lambda r: max([int(k) for k in dal.columns if r[k] >= 5] or [0]), axis=1
+        )
+        cap["days_at_level"] = {
+            "key": skey,
+            "note": "per key, distinct local dates on which concurrency reaches the level; robust_max(N) = highest level reached on >= N days",
+            "robust_max_histogram_by_n": robust_max_distribution(dal),
+            "keys_where_plain_max_exceeds_robust_max_n5": int((plain > robust5).sum()),
+            "days_at_level_quantiles": {
+                lvl: {str(q): int(v) for q, v in dal[lvl].quantile([0.1, 0.5, 0.9]).items()}
+                for lvl in dal.columns
+            },
+        }
+        # amendment (g): inter-session gaps calibrate the active-window threshold
+        cap["inter_session_gaps"] = {
+            "key": skey,
+            **inter_session_gaps(start[dedup], end[dedup], rows.loc[dedup, skey]),
+        }
         answers["observed_concurrency"] = cap
     if st_id:
-        cps = rows.dropna(subset=[st_id, st_name]).groupby(st_name)[st_id].nunique()
+        grp = st_name or roles.get("site_key")
+        cps = rows.dropna(subset=[st_id, grp]).groupby(grp)[st_id].nunique()
         answers["charge_points_per_site"] = {
             "sites": int(len(cps)),
             "distribution": hist(cps),
@@ -585,16 +776,10 @@ def main(argv: list[str] | None = None) -> int:
         "pandas_version": pd.__version__,
         "definitions": DEFINITIONS,
         "sources": {},
-        "palo_alto_unverified": PALO_ALTO_UNVERIFIED,
     }
     for name, roles in ROLES.items():
         print(f"profiling {name} ...", flush=True)
         payload["sources"][name] = profile_source(name, roles, a.raw_dir)
-    payload["sources"]["palo_alto"] = {
-        "available": False,
-        "files": [],
-        "reason": "the city portal's file endpoint returned HTTP 502 on every attempt during profiling; the ORNL mirror holds zero records",
-    }
     path = pr.write_artifact(payload, a.out, rid)
     print(f"wrote {path}")
     return 0

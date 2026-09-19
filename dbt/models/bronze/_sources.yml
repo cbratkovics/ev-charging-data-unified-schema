@@ -16,11 +16,6 @@ sources:
     meta:
       owner: "cbratkovics"
     tables:
-      - name: palo_alto
-        description: Palo Alto, CA charging sessions (operator export, July 2011 to December 2020), landed as strings.
-        meta:
-          formatter: template
-          external_location: "read_parquet('{{ var('landed_dir') }}/palo_alto/*.parquet', union_by_name = true)"
       - name: boulder
         description: Boulder, CO charging sessions (one row per transaction, from 2018), landed as strings.
         meta:
@@ -31,8 +26,8 @@ sources:
         meta:
           formatter: template
           external_location: "read_parquet('{{ var('landed_dir') }}/cary/*.parquet', union_by_name = true)"
-      - name: dundee
-        description: Dundee, UK charging sessions, one file per year, landed as strings.
+      - name: dft_2017
+        description: UK Department for Transport, Electric Chargepoint Analysis 2017 raw charging events (local-authority rapids and public-sector fasts, with the published incomplete-or-anomalous files), landed as strings.
         meta:
           formatter: template
-          external_location: "read_parquet('{{ var('landed_dir') }}/dundee/*.parquet', union_by_name = true)"
+          external_location: "read_parquet('{{ var('landed_dir') }}/dft_2017/*.parquet', union_by_name = true)"

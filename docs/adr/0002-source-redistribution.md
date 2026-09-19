@@ -1,4 +1,4 @@
-# ADR-0002 — What is committed per source, by licence (2026-09-19)
+# ADR-0002 — What is committed per source, by licence (2026-09-19; amended the same day by ADR-0004)
 
 **Context.** Brief § 3.4: commit raw or sampled rows only from a source whose licence clearly
 permits redistribution; where the licence is unstated or unclear, download at build time and
@@ -9,8 +9,7 @@ commit only aggregates and hashes. Phase 1 recorded each source's licence exactl
 |---|---|---|
 | Cary, NC | `"license": "CC0 1.0 Universal"`, `license_url` creativecommons.org/publicdomain/zero/1.0/ | dataset metadata JSON on the Opendatasoft portal |
 | Boulder, CO | `licenseInfo` = "CC0 License" linked to creativecommons.org/publicdomain/zero/1.0/ | ArcGIS item metadata for the dataset itself |
-| Dundee, UK | `licenseInfo: null` on all six items; Hub API `license: "none"`; no site terms page | ArcGIS item metadata and Hub v3 API |
-| Palo Alto, CA | no dataset-level licence on the city page; ORNL mirror: "No license, or terms of use, asserted by data producer for this dataset was found."; city-wide Open Data Terms of Use (a use agreement naming no open licence) | city page (archived), ORNL metadata, city terms page |
+| UK DfT, Electric Chargepoint Analysis 2017 | "All content is available under the Open Government Licence v3.0, except where otherwise stated" | the publication pages on gov.uk |
 | Station registry (NLR / AFDC) | "may be used for any purpose whatsoever" with an endorsement restriction | afdc.energy.gov/data_download, "Data Download Terms and Conditions" |
 
 **Decision.**
@@ -23,21 +22,16 @@ commit only aggregates and hashes. Phase 1 recorded each source's licence exactl
    `artifacts/`. A small sampled extract of each may be committed later under
    `tests/fixtures/` **only** if a fixture built from real rows proves necessary; the default
    fixture is hand-built (tests/fixtures/README.md).
-2. *Dundee (unstated):* no rows are committed, not even samples. Download at build time; commit
-   the manifest and aggregates. The owner may write to the publisher to ask for a licence
-   statement; until one exists the data is treated as "publicly accessible, redistribution
-   not granted".
-3. *Palo Alto (unstated at dataset level; city-wide use terms):* same treatment as Dundee once
-   the file can be downloaded. The city Terms of Use grant "access to and use of the Data"
-   without naming a redistribution licence; the ORNL mirror explicitly records no licence.
-4. *Station registry:* the terms permit any use. Registry pulls are committed as aggregates
+2. *UK DfT (OGL v3.0):* the raw CSV files may be committed under the licence's attribution
+   requirement; they are treated exactly like (1): not committed, manifest and aggregates only.
+   The attribution statement the licence asks for appears in docs/DATA_SOURCES.md and the README.
+3. *Station registry:* the terms permit any use. Registry pulls are committed as aggregates
    and the matching table (Phase 5); the raw pull is cached, not committed, for the same size
    reason as (1). The endorsement restriction is respected by never naming DOE, NLR or the
    Alliance as endorsing this project.
-5. *The Dundee charge-point location layer* (ArcGIS feature service, licence also unstated)
-   was pulled once for profiling; it matched 1 of 101 usage charge-point ids
-   (`artifacts/profile/<run_id>.json`, `sources.dundee.answers.location_layer_match`) and is
-   not used further. Nothing from it is committed.
+4. Sources whose licence is unstated or unclear are not used at all, whatever their access
+   terms (ADR-0004). This supersedes the brief's "download at build time, commit aggregates"
+   path for such sources.
 
 **Consequences.** `data/raw/` and `data/landed/` stay git-ignored for every source. The
 full-build workflow (Phase 7) must download every source on each run, with `actions/cache`

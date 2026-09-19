@@ -27,7 +27,7 @@ vars:
   # fixture under tests/fixtures/landed has the same layout for offline runs).
   landed_dir: "data/landed"
   # The session sources in scope, by short name.
-  sources: [palo_alto, boulder, cary, dundee]
+  sources: [boulder, cary, dft_2017]
   # fct_charging_session is incremental: an incremental run reprocesses sessions whose
   # start falls within this many days of the newest start already loaded, so late or
   # re-delivered rows are picked up without a full refresh. Not calibrated until Phase 4.
