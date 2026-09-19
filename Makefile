@@ -1,4 +1,4 @@
-.PHONY: help install test lint format dbt-deps dbt-parse dbt-dev dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format profile render-profile check-profile dbt-deps dbt-parse dbt-dev dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -13,6 +13,8 @@ help:
 	@echo "test          - pytest (offline; runs on the fixture under tests/fixtures/)"
 	@echo "lint          - ruff + black --check"
 	@echo "ingest        - download the real sources into data/raw/ and land them as parquet (network)"
+	@echo "profile       - profile data/raw/ into artifacts/profile/<run_id>.json, then render the docs"
+	@echo "check-profile - docs/PROFILE.md and the DATA_SOURCES inventory match the newest profile artifact"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
 	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
@@ -40,6 +42,16 @@ format:
 
 ingest:
 	$(PY) -m $(PKG).ingest
+
+profile:
+	$(PY) scripts/profile_sources.py
+	$(PY) scripts/render_profile.py
+
+render-profile:
+	$(PY) scripts/render_profile.py
+
+check-profile:
+	$(PY) scripts/render_profile.py --check
 
 dbt-deps:
 	$(DBT) deps $(DBT_FLAGS)

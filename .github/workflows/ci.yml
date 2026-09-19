@@ -43,6 +43,8 @@ jobs:
           black --check $PKG tests scripts
       - name: Tests (offline, fixture only)
         run: python -m pytest tests
+      - name: Rendered profile docs match the committed artifact
+        run: python scripts/render_profile.py --check
       - name: dbt parse
         run: make dbt-parse DBT=dbt
       - name: sqlfluff
