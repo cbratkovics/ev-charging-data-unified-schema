@@ -1,0 +1,2821 @@
+{
+  "artifact": "profile",
+  "code_commit": "b6841cdc92564a4bf35ac37a59afbcb44d4bf37f",
+  "definitions": {
+    "charging_over_24h": "rows whose hh:mm:ss charging duration exceeds 1440 minutes",
+    "delivery_blocks": "segments of one file delimited by the per-delivery row id restarting at 0; each compared with the last block on the natural key",
+    "dst_transition_gaps": "sessions spanning local 01:00-02:00 on a DST transition date, with (end - start) - recorded duration in minutes",
+    "end_before_start_excluding_sentinel": "rows whose parsed end is earlier than start, excluding ends in 1970 (a missing-value sentinel)",
+    "energy_zero": "rows whose energy parses to exactly 0",
+    "exact_duplicate_rows": "rows identical on every source column to an earlier row (pandas duplicated, first kept)",
+    "idle_share_of_connected_minutes": "1 - sum(charging minutes) / sum(connected minutes) over all rows",
+    "implied_kw": "energy_kwh / (charging_minutes / 60) on rows with charging_minutes > 0",
+    "natural_key_duplicate_rows": "rows whose natural key repeats an earlier row across all of the source's files",
+    "null_rate": "share of rows whose value is null or an empty/whitespace string",
+    "observed_concurrency": "after natural-key deduplication, the maximum number of sessions (>= 5 minutes) at one key whose [start, end] intervals overlap; a lower bound on ports in service",
+    "one_hour_gap_rows": "rows where (end - start) differs from the recorded duration by 55..65 minutes",
+    "span_over_24h": "rows whose parsed end minus start exceeds 1440 minutes"
+  },
+  "generated_at_utc": "2026-09-19T23:51:37+00:00",
+  "package_version": "0.1.0",
+  "pandas_version": "3.0.6",
+  "run_id": "profile-20260919T235137Z",
+  "sources": {
+    "boulder": {
+      "answers": {
+        "coverage": {
+          "files_by_start_range": {
+            "Electric_Vehicle_Charging_Station_Data.csv": {
+              "rows": 148136,
+              "start_max": "2023-11-30 23:27:00",
+              "start_min": "2018-01-01 17:49:00"
+            }
+          },
+          "sessions_by_year": {
+            "2018": 13710,
+            "2019": 21620,
+            "2020": 10200,
+            "2021": 21850,
+            "2022": 37654,
+            "2023": 43102
+          },
+          "start_max": "2023-11-30 23:27:00",
+          "start_min": "2018-01-01 17:49:00"
+        },
+        "durations": {
+          "availability": "both",
+          "charging_duration_column": "Charging_Time__hh_mm_ss_",
+          "connected_duration_column": "Total_Duration__hh_mm_ss_",
+          "connected_duration_derivable_from_start_end": true,
+          "connected_duration_unit_by_file": null,
+          "end_column": "End_Date___Time",
+          "idle_share_of_connected_minutes": 0.463725,
+          "span_vs_recorded_duration": {
+            "compared_with": "Total_Duration__hh_mm_ss_",
+            "one_hour_gap_by_month": {
+              "2018-03": 2,
+              "2018-11": 4,
+              "2019-03": 6,
+              "2019-10": 2,
+              "2019-11": 2,
+              "2020-03": 4,
+              "2020-10": 6,
+              "2021-11": 2,
+              "2022-03": 4,
+              "2022-11": 8,
+              "2023-03": 20,
+              "2023-05": 2,
+              "2023-09": 1,
+              "2023-10": 5,
+              "2023-11": 10
+            },
+            "one_hour_gap_rows": 78,
+            "rows_compared": 148132,
+            "span_longer_by_over_5_min": 272,
+            "span_shorter_by_over_5_min": 37,
+            "within_2_min": 147795
+          },
+          "start_column": "Start_Date___Time"
+        },
+        "fully_blank_rows": 0,
+        "implausible": {
+          "charging_exceeds_connected": 0,
+          "charging_minutes_null": 0,
+          "charging_minutes_zero": 15105,
+          "charging_over_24h": 13,
+          "connected_minutes_zero": 8,
+          "connected_over_24h": 1683,
+          "crosses_local_midnight": 6604,
+          "crosses_year_boundary": 26,
+          "end_before_start_excluding_sentinel": 0,
+          "end_equals_start": 1535,
+          "end_is_1970_epoch_sentinel": 0,
+          "end_null": 4,
+          "energy_min": 0.0,
+          "energy_negative": 0,
+          "energy_null": 0,
+          "energy_over_0_with_charging_minutes_zero": 0,
+          "energy_zero": 16113,
+          "energy_zero_with_charging_minutes_over_0": 1008,
+          "implied_kw_basis": "charging_minutes",
+          "implied_kw_over_ceiling": {
+            "ceiling_kw": 20.0,
+            "rows": 0
+          },
+          "implied_kw_p50_by_port_type": {
+            "Level 2": 5.504
+          },
+          "implied_kw_quantiles": {
+            "0.5": 5.504,
+            "0.9": 6.472,
+            "0.99": 7.038,
+            "0.999": 7.209
+          },
+          "rows": 148136,
+          "span_over_24h": 1704,
+          "span_over_7d": 126
+        },
+        "observed_concurrency": {
+          "by_site_key": {
+            "distribution": {
+              "2": 18,
+              "3": 1,
+              "4": 6,
+              "5": 2
+            },
+            "key": "Address",
+            "keys": 27,
+            "top": {
+              "1360 Gillaspie Dr": 5,
+              "1500 Pearl St": 5,
+              "1505 30th St": 4,
+              "1739 Broadway": 4,
+              "5064 Pearl St": 4,
+              "5333 Valmont Rd": 4,
+              "5565 51st St": 4,
+              "900 Walnut St": 4
+            }
+          },
+          "by_station_key": {
+            "distribution": {
+              "1": 12,
+              "2": 32,
+              "3": 6
+            },
+            "key": "Station_Name",
+            "keys": 50,
+            "top": {
+              "BOULDER / AIRPORT ST1": 2,
+              "BOULDER / ALPINE ST1": 2,
+              "BOULDER / BASELINE ST1": 3,
+              "BOULDER / CARPENTER PARK1": 3,
+              "BOULDER / REC CENTER ST1": 3,
+              "BOULDER / REC CENTER ST2": 3,
+              "COMM VITALITY / 1500PEARL1": 3,
+              "COMM VITALITY / 1500PEARL2": 3
+            }
+          },
+          "days_at_level": {
+            "days_at_level_quantiles": {
+              "1": {
+                "0.1": 4,
+                "0.5": 246,
+                "0.9": 1357
+              },
+              "2": {
+                "0.1": 0,
+                "0.5": 78,
+                "0.9": 594
+              },
+              "3": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 1
+              },
+              "4": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "5": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "6": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "8": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              }
+            },
+            "key": "Station_Name",
+            "keys_where_plain_max_exceeds_robust_max_n5": 12,
+            "note": "per key, distinct local dates on which concurrency reaches the level; robust_max(N) = highest level reached on >= N days",
+            "robust_max_histogram_by_n": {
+              "1": {
+                "1": 12,
+                "2": 32,
+                "3": 6
+              },
+              "10": {
+                "0": 8,
+                "1": 8,
+                "2": 33,
+                "3": 1
+              },
+              "2": {
+                "0": 2,
+                "1": 11,
+                "2": 34,
+                "3": 3
+              },
+              "20": {
+                "0": 8,
+                "1": 10,
+                "2": 31,
+                "3": 1
+              },
+              "3": {
+                "0": 3,
+                "1": 11,
+                "2": 33,
+                "3": 3
+              },
+              "30": {
+                "0": 11,
+                "1": 8,
+                "2": 31
+              },
+              "5": {
+                "0": 5,
+                "1": 9,
+                "2": 35,
+                "3": 1
+              }
+            }
+          },
+          "inter_session_gaps": {
+            "gaps": 60423,
+            "gaps_over_days": {
+              "1": 8079,
+              "14": 210,
+              "3": 2074,
+              "30": 66,
+              "60": 27,
+              "7": 582,
+              "90": 11
+            },
+            "key": "Station_Name",
+            "keys_with_a_gap_over_30d": 25,
+            "quantiles_days": {
+              "0.5": 0.165,
+              "0.9": 1.401,
+              "0.99": 6.951,
+              "0.999": 31.988,
+              "1.0": 415.96
+            }
+          },
+          "min_session_minutes": 5,
+          "natural_key_deduplicated_first": true,
+          "sessions_used": 69276
+        },
+        "overlap": {
+          "delivery_blocks": {
+            "blocks": [
+              {
+                "first_row": 0,
+                "index": 0,
+                "iso_format_rows": 7816,
+                "natural_key_duplicates_within_block": 93,
+                "rows": 70194,
+                "rows_with_key_in_last_block": 70194,
+                "start_max": "2023-08-31 21:14:46",
+                "start_min": "2018-01-01 17:49:00"
+              },
+              {
+                "first_row": 70194,
+                "index": 1,
+                "iso_format_rows": 0,
+                "natural_key_duplicates_within_block": 111,
+                "rows": 77942,
+                "rows_with_key_in_last_block": null,
+                "start_max": "2023-11-30 23:27:00",
+                "start_min": "2018-01-01 17:49:00"
+              }
+            ],
+            "note": "block i is compared with the last block on the natural key"
+          },
+          "exact_duplicate_rows": 0,
+          "keys_shared_between_files": {},
+          "natural_key": [
+            "Station_Name",
+            "_start_min",
+            "_end_min",
+            "_energy"
+          ],
+          "natural_key_duplicate_rows": 70305
+        },
+        "personal_data": {
+          "columns_present": [
+            "Station_Name",
+            "Address",
+            "City",
+            "State_Province",
+            "Zip_Postal_Code",
+            "Start_Date___Time",
+            "Start_Time_Zone",
+            "End_Date___Time",
+            "End_Time_Zone",
+            "Total_Duration__hh_mm_ss_",
+            "Charging_Time__hh_mm_ss_",
+            "Energy__kWh_",
+            "GHG_Savings__kg_",
+            "Gasoline_Savings__gallons_",
+            "Port_Type",
+            "ObjectID",
+            "ObjectId2"
+          ],
+          "user_level_columns": []
+        },
+        "port": {
+          "port_id_column": null,
+          "port_type_column": "Port_Type",
+          "port_type_values": {
+            "Level 2": 148136
+          }
+        },
+        "rows_all_files": 148136,
+        "session_id": {
+          "column": null,
+          "note": "no session identifier published"
+        },
+        "stations": {
+          "distinct_names": 50,
+          "distinct_site_keys": 27,
+          "names_per_site_key": {
+            "1": 12,
+            "2": 11,
+            "3": 1,
+            "4": 2,
+            "8": 1
+          },
+          "null_names": 0,
+          "sessions_per_station": {
+            "count": 50,
+            "max": 16278,
+            "median": 1103.0,
+            "min": 1,
+            "stations_under_30_sessions": 9
+          },
+          "site_key_column": "Address",
+          "station_id_column": null,
+          "station_name_column": "Station_Name"
+        },
+        "time_parsing": {
+          "end_formats": {
+            "iso_rows": 7816,
+            "slash_rows": 140320
+          },
+          "end_parse_failures": 4,
+          "start_formats": {
+            "iso_rows": 7816,
+            "slash_rows": 140320
+          },
+          "start_parse_failures": 0
+        },
+        "timezone": {
+          "assumed_zone": "America/Denver",
+          "dst_note": "+60 on spring-forward and -60 on fall-back dates means wall-clock local timestamps; 0 would mean UTC",
+          "dst_transition_gaps": {
+            "2018-03-11": {
+              "gap_minutes_counts": {
+                "60": 2
+              },
+              "sessions_spanning_window": 2
+            },
+            "2018-11-04": {
+              "gap_minutes_counts": {
+                "-60": 4
+              },
+              "sessions_spanning_window": 4
+            },
+            "2019-03-10": {
+              "gap_minutes_counts": {
+                "60": 6
+              },
+              "sessions_spanning_window": 6
+            },
+            "2019-11-03": {
+              "gap_minutes_counts": {
+                "-59": 2,
+                "-61": 2
+              },
+              "sessions_spanning_window": 4
+            },
+            "2020-03-08": {
+              "gap_minutes_counts": {
+                "60": 2,
+                "61": 2
+              },
+              "sessions_spanning_window": 4
+            },
+            "2020-11-01": {
+              "gap_minutes_counts": {
+                "-60": 4,
+                "-61": 2
+              },
+              "sessions_spanning_window": 6
+            },
+            "2021-03-14": {
+              "gap_minutes_counts": {},
+              "sessions_spanning_window": 0
+            },
+            "2021-11-07": {
+              "gap_minutes_counts": {
+                "-60": 2
+              },
+              "sessions_spanning_window": 2
+            },
+            "2022-03-13": {
+              "gap_minutes_counts": {
+                "59": 2
+              },
+              "sessions_spanning_window": 2
+            },
+            "2022-11-06": {
+              "gap_minutes_counts": {
+                "-60": 4,
+                "-61": 4,
+                "0": 2
+              },
+              "sessions_spanning_window": 10
+            },
+            "2023-03-12": {
+              "gap_minutes_counts": {
+                "0": 2,
+                "60": 20
+              },
+              "sessions_spanning_window": 22
+            },
+            "2023-11-05": {
+              "gap_minutes_counts": {
+                "-59": 1,
+                "-60": 4,
+                "-61": 4,
+                "492": 1
+              },
+              "sessions_spanning_window": 10
+            }
+          },
+          "start_format": "MIXED_US",
+          "start_hour_histogram_as_published": {
+            "0": 280,
+            "1": 210,
+            "10": 10772,
+            "11": 11758,
+            "12": 12571,
+            "13": 11675,
+            "14": 9947,
+            "15": 10273,
+            "16": 10814,
+            "17": 12246,
+            "18": 9822,
+            "19": 6140,
+            "2": 127,
+            "20": 2800,
+            "21": 1385,
+            "22": 718,
+            "23": 427,
+            "3": 82,
+            "4": 144,
+            "5": 1524,
+            "6": 4622,
+            "7": 6994,
+            "8": 12128,
+            "9": 10677
+          },
+          "tz_label_by_start_month": {
+            "1": {
+              "MDT": 4950,
+              "MST": 5408
+            },
+            "10": {
+              "MDT": 13274,
+              "MST": 0
+            },
+            "11": {
+              "MDT": 5333,
+              "MST": 6140
+            },
+            "12": {
+              "MDT": 4408,
+              "MST": 5212
+            },
+            "2": {
+              "MDT": 4530,
+              "MST": 5514
+            },
+            "3": {
+              "MDT": 8266,
+              "MST": 2250
+            },
+            "4": {
+              "MDT": 11684,
+              "MST": 0
+            },
+            "5": {
+              "MDT": 12634,
+              "MST": 0
+            },
+            "6": {
+              "MDT": 13976,
+              "MST": 0
+            },
+            "7": {
+              "MDT": 15392,
+              "MST": 0
+            },
+            "8": {
+              "MDT": 16158,
+              "MST": 0
+            },
+            "9": {
+              "MDT": 13007,
+              "MST": 0
+            }
+          },
+          "tz_label_values": {
+            "MDT": 123612,
+            "MST": 24524
+          }
+        }
+      },
+      "available": true,
+      "files": [
+        {
+          "bytes": 23276419,
+          "column_profiles": [
+            {
+              "distinct": 50,
+              "inferred_type": "text",
+              "name": "Station_Name",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "BOULDER / JUNCTION ST1",
+                "BOULDER / ALPINE ST1",
+                "BOULDER / BASELINE ST1",
+                "BOULDER / FACILITIES ST1",
+                "COMM VITALITY / 1500PEARL2"
+              ]
+            },
+            {
+              "distinct": 27,
+              "inferred_type": "text",
+              "name": "Address",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "2280 Junction Pl",
+                "1275 Alpine Ave",
+                "900 Baseline Rd",
+                "1745 14th street",
+                "1500 Pearl St"
+              ]
+            },
+            {
+              "distinct": 1,
+              "inferred_type": "text",
+              "name": "City",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "Boulder"
+              ]
+            },
+            {
+              "distinct": 1,
+              "inferred_type": "text",
+              "name": "State_Province",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "Colorado"
+              ]
+            },
+            {
+              "distinct": 5,
+              "inferred_type": "integer",
+              "max": 80305.0,
+              "mean": 80302.583045,
+              "min": 80301.0,
+              "name": "Zip_Postal_Code",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "80301",
+                "80304",
+                "80302",
+                "80305",
+                "80303"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 83015,
+              "inferred_type": "text",
+              "name": "Start_Date___Time",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "1/1/2018 17:49",
+                "1/2/2018 8:52",
+                "1/2/2018 21:11",
+                "1/3/2018 9:19",
+                "1/3/2018 14:13"
+              ]
+            },
+            {
+              "distinct": 2,
+              "inferred_type": "text",
+              "name": "Start_Time_Zone",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "MDT",
+                "MST"
+              ]
+            },
+            {
+              "distinct": 83224,
+              "inferred_type": "text",
+              "name": "End_Date___Time",
+              "null_or_blank": 4,
+              "null_rate": 2.7e-05,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "1/1/2018 19:52",
+                "1/2/2018 9:16",
+                "1/3/2018 6:23",
+                "1/3/2018 11:14",
+                "1/3/2018 14:30"
+              ]
+            },
+            {
+              "distinct": 2,
+              "inferred_type": "text",
+              "name": "End_Time_Zone",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "MDT",
+                "MST"
+              ]
+            },
+            {
+              "distinct": 27381,
+              "inferred_type": "duration_hms",
+              "max_minutes": 50339.983,
+              "min_minutes": 0.0,
+              "name": "Total_Duration__hh_mm_ss_",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 1683,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "2:03:02",
+                "0:24:34",
+                "9:12:21",
+                "1:54:51",
+                "0:16:58"
+              ],
+              "zero_count": 8
+            },
+            {
+              "distinct": 23559,
+              "inferred_type": "duration_hms",
+              "max_minutes": 3024.017,
+              "min_minutes": 0.0,
+              "name": "Charging_Time__hh_mm_ss_",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 13,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "2:02:44",
+                "0:24:19",
+                "3:40:52",
+                "1:54:29",
+                "0:16:44"
+              ],
+              "zero_count": 15105
+            },
+            {
+              "distinct": 23064,
+              "inferred_type": "decimal",
+              "max": 92.691,
+              "mean": 8.456551,
+              "min": 0.0,
+              "name": "Energy__kWh_",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "6.504",
+                "2.481",
+                "15.046",
+                "6.947",
+                "1.8"
+              ],
+              "zero_count": 16113
+            },
+            {
+              "distinct": 17332,
+              "inferred_type": "decimal",
+              "max": 65.811,
+              "mean": 5.300949,
+              "min": 0.0,
+              "name": "GHG_Savings__kg_",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "2.732",
+                "1.042",
+                "6.319",
+                "2.918",
+                "0.756"
+              ],
+              "zero_count": 16140
+            },
+            {
+              "distinct": 5450,
+              "inferred_type": "decimal",
+              "max": 11.633,
+              "mean": 1.061298,
+              "min": 0.0,
+              "name": "Gasoline_Savings__gallons_",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "0.816",
+                "0.311",
+                "1.888",
+                "0.872",
+                "0.226"
+              ],
+              "zero_count": 16269
+            },
+            {
+              "distinct": 1,
+              "inferred_type": "text",
+              "name": "Port_Type",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "Level 2"
+              ]
+            },
+            {
+              "distinct": 77942,
+              "inferred_type": "integer",
+              "max": 77941.0,
+              "mean": 37134.811471,
+              "min": 0.0,
+              "name": "ObjectID",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "zero_count": 2
+            },
+            {
+              "distinct": 148136,
+              "inferred_type": "integer",
+              "max": 148136.0,
+              "mean": 74068.5,
+              "min": 1.0,
+              "name": "ObjectId2",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 148136,
+              "sample_values": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "zero_count": 0
+            }
+          ],
+          "columns": [
+            "Station_Name",
+            "Address",
+            "City",
+            "State_Province",
+            "Zip_Postal_Code",
+            "Start_Date___Time",
+            "Start_Time_Zone",
+            "End_Date___Time",
+            "End_Time_Zone",
+            "Total_Duration__hh_mm_ss_",
+            "Charging_Time__hh_mm_ss_",
+            "Energy__kWh_",
+            "GHG_Savings__kg_",
+            "Gasoline_Savings__gallons_",
+            "Port_Type",
+            "ObjectID",
+            "ObjectId2"
+          ],
+          "download": {
+            "last_modified_header": "Thu, 25 Jun 2026 10:40:12 GMT",
+            "retrieved_at": "2026-09-19T23:10:30+00:00",
+            "url": "https://open-data.bouldercolorado.gov/api/download/v1/items/95992b3938be4622b07f0b05eba95d4c/csv?layers=0"
+          },
+          "exact_duplicate_rows": 0,
+          "path": "data/raw/boulder/Electric_Vehicle_Charging_Station_Data.csv",
+          "rows": 148136,
+          "sha256": "f1f620bb616fa6c0f9382c214c90d491fd1ac085373ffd37643008ae6fe6869a"
+        }
+      ],
+      "roles": {
+        "charging_duration": "Charging_Time__hh_mm_ss_",
+        "connected_duration": "Total_Duration__hh_mm_ss_",
+        "delivery_row_id": "ObjectID",
+        "dst_transitions": [
+          "2018-03-11",
+          "2018-11-04",
+          "2019-03-10",
+          "2019-11-03",
+          "2020-03-08",
+          "2020-11-01",
+          "2021-03-14",
+          "2021-11-07",
+          "2022-03-13",
+          "2022-11-06",
+          "2023-03-12",
+          "2023-11-05"
+        ],
+        "end": "End_Date___Time",
+        "energy_kwh": "Energy__kWh_",
+        "files": [
+          "Electric_Vehicle_Charging_Station_Data.csv"
+        ],
+        "natural_key": [
+          "Station_Name",
+          "_start_min",
+          "_end_min",
+          "_energy"
+        ],
+        "port_id": null,
+        "port_type": "Port_Type",
+        "rated_kw_ceiling": 20.0,
+        "read": {
+          "encoding": "utf-8-sig"
+        },
+        "row_id": "ObjectId2",
+        "session_id": null,
+        "site_key": "Address",
+        "start": "Start_Date___Time",
+        "start_format": "MIXED_US",
+        "station_id": null,
+        "station_name": "Station_Name",
+        "timezone": "America/Denver",
+        "tz_label": "Start_Time_Zone",
+        "user_level_columns": []
+      }
+    },
+    "cary": {
+      "answers": {
+        "coverage": {
+          "files_by_start_range": {
+            "electric-vehicle-charging-stations.csv": {
+              "rows": 20142,
+              "start_max": "2023-01-03 17:58:04",
+              "start_min": "2012-04-11 17:51:19"
+            }
+          },
+          "sessions_by_year": {
+            "2012": 100,
+            "2013": 244,
+            "2014": 270,
+            "2015": 229,
+            "2016": 204,
+            "2017": 332,
+            "2018": 1246,
+            "2019": 2152,
+            "2020": 3996,
+            "2021": 4640,
+            "2022": 6687,
+            "2023": 42
+          },
+          "start_max": "2023-01-03 17:58:04",
+          "start_min": "2012-04-11 17:51:19"
+        },
+        "durations": {
+          "availability": "charging_only",
+          "charging_duration_column": "charging_time_hh_mm_ss",
+          "connected_duration_column": null,
+          "connected_duration_derivable_from_start_end": false,
+          "connected_duration_unit_by_file": null,
+          "end_column": null,
+          "start_column": "start_date"
+        },
+        "fully_blank_rows": 0,
+        "implausible": {
+          "charging_exceeds_connected": null,
+          "charging_minutes_null": 0,
+          "charging_minutes_zero": 2052,
+          "charging_over_24h": 1,
+          "connected_minutes_zero": null,
+          "connected_over_24h": null,
+          "energy_min": 0.0,
+          "energy_negative": 0,
+          "energy_null": 0,
+          "energy_over_0_with_charging_minutes_zero": 0,
+          "energy_zero": 2132,
+          "energy_zero_with_charging_minutes_over_0": 80,
+          "implied_kw_basis": "charging_minutes",
+          "implied_kw_over_ceiling": {
+            "ceiling_kw": 20.0,
+            "rows": 43
+          },
+          "implied_kw_quantiles": {
+            "0.5": 5.853,
+            "0.9": 7.198,
+            "0.99": 7.379,
+            "0.999": 44.725
+          },
+          "rows": 20142
+        },
+        "overlap": {
+          "exact_duplicate_rows": 0,
+          "keys_shared_between_files": {},
+          "natural_key": [
+            "station_name",
+            "start_date"
+          ],
+          "natural_key_conflicts": {
+            "groups": 2,
+            "groups_where_one_row_has_zero_charging_and_zero_energy": 2,
+            "groups_where_rows_differ_in_energy": 2,
+            "note": "a zero-duration, zero-energy row beside a real row at the same second is an aborted plug-in; the rule keeps the row with the larger charging time"
+          },
+          "natural_key_duplicate_rows": 2
+        },
+        "personal_data": {
+          "columns_present": [
+            "start_date",
+            "station_name",
+            "charging_time_hh_mm_ss",
+            "energy_kwh",
+            "address_1",
+            "address_2",
+            "city",
+            "state_province",
+            "zip_postal_code"
+          ],
+          "user_level_columns": []
+        },
+        "port": {
+          "port_id_column": null,
+          "port_type_column": null,
+          "port_type_values": null
+        },
+        "rows_all_files": 20142,
+        "session_id": {
+          "column": null,
+          "note": "no session identifier published"
+        },
+        "stations": {
+          "distinct_names": 22,
+          "null_names": 0,
+          "sessions_per_station": {
+            "count": 22,
+            "max": 5608,
+            "median": 400.5,
+            "min": 1,
+            "stations_under_30_sessions": 1
+          },
+          "station_id_column": null,
+          "station_name_column": "station_name"
+        },
+        "time_parsing": {
+          "start_parse_failures": 0
+        },
+        "timezone": {
+          "assumed_zone": "America/New_York",
+          "note": "if the +00:00 offset were really local time mislabelled, the overnight trough would sit at the published hours; if it is true UTC, the trough sits at the converted hours",
+          "seasonal_shift": {
+            "reading": "about -1 means the raw hours are true UTC (local habits fixed, UTC hour earlier in summer); about 0 means the raw hours are already local",
+            "summer_dst": {
+              "circular_mean_raw_hour": 18.135,
+              "raw_hour_histogram": {
+                "0": 408,
+                "1": 255,
+                "10": 200,
+                "11": 615,
+                "12": 929,
+                "13": 985,
+                "14": 902,
+                "15": 924,
+                "16": 866,
+                "17": 894,
+                "18": 871,
+                "19": 920,
+                "2": 80,
+                "20": 1249,
+                "21": 1350,
+                "22": 1019,
+                "23": 700,
+                "3": 34,
+                "4": 29,
+                "5": 28,
+                "6": 24,
+                "7": 21,
+                "8": 3,
+                "9": 39
+              },
+              "rows": 13345
+            },
+            "summer_minus_winter_mean_raw_hour": -0.965,
+            "winter_std": {
+              "circular_mean_raw_hour": 19.1,
+              "raw_hour_histogram": {
+                "0": 229,
+                "1": 164,
+                "10": 11,
+                "11": 46,
+                "12": 184,
+                "13": 351,
+                "14": 532,
+                "15": 435,
+                "16": 499,
+                "17": 553,
+                "18": 631,
+                "19": 594,
+                "2": 84,
+                "20": 594,
+                "21": 718,
+                "22": 679,
+                "23": 358,
+                "3": 53,
+                "4": 24,
+                "5": 30,
+                "6": 12,
+                "7": 7,
+                "8": 5,
+                "9": 4
+              },
+              "rows": 6797
+            }
+          },
+          "start_format": "ISO_UTC",
+          "start_hour_histogram_as_published": {
+            "0": 637,
+            "1": 419,
+            "10": 211,
+            "11": 661,
+            "12": 1113,
+            "13": 1336,
+            "14": 1434,
+            "15": 1359,
+            "16": 1365,
+            "17": 1447,
+            "18": 1502,
+            "19": 1514,
+            "2": 164,
+            "20": 1843,
+            "21": 2068,
+            "22": 1698,
+            "23": 1058,
+            "3": 87,
+            "4": 53,
+            "5": 58,
+            "6": 36,
+            "7": 28,
+            "8": 8,
+            "9": 43
+          },
+          "start_hour_histogram_if_utc_converted_to_local": {
+            "0": 59,
+            "1": 40,
+            "10": 1337,
+            "11": 1423,
+            "12": 1419,
+            "13": 1525,
+            "14": 1465,
+            "15": 1514,
+            "16": 1967,
+            "17": 2029,
+            "18": 1377,
+            "19": 929,
+            "2": 31,
+            "20": 572,
+            "21": 339,
+            "22": 133,
+            "23": 58,
+            "3": 26,
+            "4": 7,
+            "5": 50,
+            "6": 246,
+            "7": 799,
+            "8": 1280,
+            "9": 1517
+          }
+        }
+      },
+      "available": true,
+      "files": [
+        {
+          "bytes": 2500986,
+          "column_profiles": [
+            {
+              "day_first_evidence": null,
+              "distinct": 20132,
+              "inferred_type": "datetime",
+              "max": "2023-01-03 17:58:04+00:00",
+              "min": "2012-04-11 17:51:19+00:00",
+              "name": "start_date",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "ISO",
+              "rows": 20142,
+              "sample_values": [
+                "2023-01-03T17:58:04+00:00",
+                "2023-01-03T17:29:44+00:00",
+                "2023-01-03T16:33:19+00:00",
+                "2023-01-03T15:53:37+00:00",
+                "2023-01-03T15:43:03+00:00"
+              ]
+            },
+            {
+              "distinct": 22,
+              "inferred_type": "text",
+              "name": "station_name",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "TOWN OF CARY / TOWN HALL-PWH",
+                "TOWN OF CARY / DT DECK P2 (2)",
+                "TOWN OF CARY / DT DECK P3 WEST",
+                "TOWN OF CARY / DT DECK P3 EAST",
+                "TOWN OF CARY / DT DECK P5"
+              ]
+            },
+            {
+              "distinct": 9955,
+              "inferred_type": "duration_hms",
+              "max_minutes": 2829.75,
+              "min_minutes": 0.0,
+              "name": "charging_time_hh_mm_ss",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 1,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "00:54:50",
+                "01:22:28",
+                "02:19:48",
+                "02:59:48",
+                "01:39:02"
+              ],
+              "zero_count": 2052
+            },
+            {
+              "distinct": 11398,
+              "inferred_type": "decimal",
+              "max": 209.455,
+              "mean": 8.102529,
+              "min": 0.0,
+              "name": "energy_kwh",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "3.976",
+                "8.463",
+                "14.722",
+                "18.288",
+                "10.152"
+              ],
+              "zero_count": 2132
+            },
+            {
+              "distinct": 6,
+              "inferred_type": "text",
+              "name": "address_1",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "228 Ambassador Loop",
+                "113 Walnut St",
+                "400 James Jackson Ave",
+                "801 High House Road",
+                "117 E Park St"
+              ]
+            },
+            {
+              "distinct": 2,
+              "inferred_type": "text",
+              "name": "address_2",
+              "null_or_blank": 9946,
+              "null_rate": 0.493794,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "Page-Walker Hotel",
+                "Bond Park Boathouse"
+              ]
+            },
+            {
+              "distinct": 1,
+              "inferred_type": "text",
+              "name": "city",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "Cary"
+              ]
+            },
+            {
+              "distinct": 1,
+              "inferred_type": "text",
+              "name": "state_province",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "North Carolina"
+              ]
+            },
+            {
+              "distinct": 2,
+              "inferred_type": "integer",
+              "max": 27513.0,
+              "mean": 27512.235528,
+              "min": 27511.0,
+              "name": "zip_postal_code",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 20142,
+              "sample_values": [
+                "27513",
+                "27511"
+              ],
+              "zero_count": 0
+            }
+          ],
+          "columns": [
+            "start_date",
+            "station_name",
+            "charging_time_hh_mm_ss",
+            "energy_kwh",
+            "address_1",
+            "address_2",
+            "city",
+            "state_province",
+            "zip_postal_code"
+          ],
+          "download": {
+            "last_modified_header": null,
+            "retrieved_at": "2026-09-19T23:08:39+00:00",
+            "url": "https://data.townofcary.org/api/explore/v2.1/catalog/datasets/electric-vehicle-charging-stations/exports/csv?delimiter=,&use_labels=false"
+          },
+          "exact_duplicate_rows": 0,
+          "path": "data/raw/cary/electric-vehicle-charging-stations.csv",
+          "rows": 20142,
+          "sha256": "9f8037bfd9246ccefb0d6f24d35c0e747eca640f2835ec76db22ffb1f8412a2e"
+        }
+      ],
+      "roles": {
+        "charging_duration": "charging_time_hh_mm_ss",
+        "connected_duration": null,
+        "end": null,
+        "energy_kwh": "energy_kwh",
+        "files": [
+          "electric-vehicle-charging-stations.csv"
+        ],
+        "natural_key": [
+          "station_name",
+          "start_date"
+        ],
+        "port_id": null,
+        "rated_kw_ceiling": 20.0,
+        "read": {
+          "encoding": "utf-8-sig"
+        },
+        "seasonal_shift_check": true,
+        "session_id": null,
+        "start": "start_date",
+        "start_format": "ISO_UTC",
+        "station_id": null,
+        "station_name": "station_name",
+        "timezone": "America/New_York",
+        "tz_label": null,
+        "user_level_columns": []
+      }
+    },
+    "dft_2017": {
+      "answers": {
+        "charge_points_per_site": {
+          "distribution": {
+            "1": 6,
+            "10": 2,
+            "11": 3,
+            "12": 1,
+            "13": 1,
+            "14": 2,
+            "15": 2,
+            "159": 1,
+            "16": 1,
+            "17": 3,
+            "18": 1,
+            "2": 6,
+            "24": 2,
+            "25": 1,
+            "27": 2,
+            "3": 9,
+            "31": 1,
+            "4": 6,
+            "40": 1,
+            "5": 4,
+            "6": 3,
+            "68": 1,
+            "72": 1,
+            "78": 1,
+            "9": 1
+          },
+          "sites": 62,
+          "top": {
+            "Cornwall Council": 68,
+            "Hampshire County Council": 27,
+            "Kent County Council": 27,
+            "London Fire and Emergency Planning Authority": 78,
+            "Milton Keynes Council": 159,
+            "Northumberland County Council": 40,
+            "Transport Scotland": 72,
+            "Wiltshire Council": 31
+          }
+        },
+        "coverage": {
+          "files_by_start_range": {
+            "dft_2017_local_authority_rapids_incomplete_anomalies.csv": {
+              "rows": 48619,
+              "start_max": "2017-12-31 23:59:00",
+              "start_min": "2017-01-01 00:12:00"
+            },
+            "dft_2017_local_authority_rapids_raw.csv": {
+              "rows": 108746,
+              "start_max": "2017-12-31 23:59:00",
+              "start_min": "2017-01-01 00:00:00"
+            },
+            "dft_2017_public_sector_fasts_incomplete_anomalies.csv": {
+              "rows": 11606,
+              "start_max": "2017-12-31 15:25:00",
+              "start_min": "2017-01-01 11:26:06"
+            },
+            "dft_2017_public_sector_fasts_raw.csv": {
+              "rows": 103326,
+              "start_max": "2017-12-31 22:50:00",
+              "start_min": "2017-01-01 01:18:00"
+            }
+          },
+          "sessions_by_year": {
+            "2017": 272297
+          },
+          "start_max": "2017-12-31 23:59:00",
+          "start_min": "2017-01-01 00:00:00"
+        },
+        "durations": {
+          "availability": "plug_in_only",
+          "charging_duration_column": null,
+          "connected_duration_column": "PluginDuration",
+          "connected_duration_derivable_from_start_end": true,
+          "connected_duration_unit_by_file": {
+            "dft_2017_local_authority_rapids_raw.csv": "minutes",
+            "dft_2017_public_sector_fasts_incomplete_anomalies.csv": "hours",
+            "dft_2017_public_sector_fasts_raw.csv": "hours"
+          },
+          "end_column": "EndDate",
+          "start_column": "StartDate"
+        },
+        "fully_blank_rows": 0,
+        "implausible": {
+          "charging_exceeds_connected": null,
+          "charging_minutes_null": null,
+          "charging_minutes_zero": null,
+          "charging_over_24h": null,
+          "connected_minutes_zero": 3795,
+          "connected_over_24h": 4115,
+          "crosses_local_midnight": 17244,
+          "crosses_year_boundary": 852,
+          "end_before_start_excluding_sentinel": 260,
+          "end_equals_start": 12539,
+          "end_is_1970_epoch_sentinel": 9,
+          "end_null": 776,
+          "energy_min": -10538.315,
+          "energy_negative": 57,
+          "energy_null": 776,
+          "energy_over_0_with_charging_minutes_zero": null,
+          "energy_zero": 25378,
+          "energy_zero_with_charging_minutes_over_0": null,
+          "implied_kw_basis": "connected_minutes",
+          "implied_kw_over_ceiling": {
+            "ceiling_kw": 60.0,
+            "rows": 67
+          },
+          "implied_kw_quantiles": {
+            "0.5": 6.558,
+            "0.9": 34.027,
+            "0.99": 45.0,
+            "0.999": 48.61
+          },
+          "rows": 272297,
+          "span_over_24h": 4391,
+          "span_over_7d": 255
+        },
+        "observed_concurrency": {
+          "by_site_key": {
+            "distribution": {
+              "1": 6,
+              "10": 2,
+              "11": 2,
+              "12": 1,
+              "13": 1,
+              "14": 2,
+              "16": 1,
+              "18": 2,
+              "2": 9,
+              "21": 2,
+              "22": 1,
+              "3": 8,
+              "4": 8,
+              "45": 1,
+              "5": 6,
+              "6": 3,
+              "68": 1,
+              "7": 4,
+              "9": 1
+            },
+            "key": "Name",
+            "keys": 61,
+            "top": {
+              "Department for Regional Development Northern Ireland": 18,
+              "Kent County Council": 16,
+              "London Fire and Emergency Planning Authority": 22,
+              "Merseytravel": 18,
+              "Milton Keynes Council": 68,
+              "Northumberland County Council": 21,
+              "Plymouth City Council": 21,
+              "Transport Scotland": 45
+            }
+          },
+          "by_station_key": {
+            "distribution": {
+              "1": 342,
+              "2": 466,
+              "3": 25,
+              "4": 2,
+              "5": 3
+            },
+            "key": "CPID",
+            "keys": 838,
+            "top": {
+              "1199": 3,
+              "21028": 3,
+              "2614": 3,
+              "41124": 5,
+              "70612": 4,
+              "70811": 4,
+              "APT_SSE01": 5,
+              "PG-81173": 5
+            }
+          },
+          "days_at_level": {
+            "days_at_level_quantiles": {
+              "1": {
+                "0.1": 9,
+                "0.5": 105,
+                "0.9": 272
+              },
+              "2": {
+                "0.1": 0,
+                "0.5": 2,
+                "0.9": 80
+              },
+              "3": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "4": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "5": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "6": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              },
+              "8": {
+                "0.1": 0,
+                "0.5": 0,
+                "0.9": 0
+              }
+            },
+            "key": "CPID",
+            "keys_where_plain_max_exceeds_robust_max_n5": 229,
+            "note": "per key, distinct local dates on which concurrency reaches the level; robust_max(N) = highest level reached on >= N days",
+            "robust_max_histogram_by_n": {
+              "1": {
+                "1": 342,
+                "2": 466,
+                "3": 25,
+                "4": 2,
+                "5": 3
+              },
+              "10": {
+                "0": 84,
+                "1": 491,
+                "2": 262,
+                "3": 1
+              },
+              "2": {
+                "0": 19,
+                "1": 386,
+                "2": 413,
+                "3": 19,
+                "4": 1
+              },
+              "20": {
+                "0": 129,
+                "1": 500,
+                "2": 209
+              },
+              "3": {
+                "0": 32,
+                "1": 421,
+                "2": 373,
+                "3": 12
+              },
+              "30": {
+                "0": 172,
+                "1": 491,
+                "2": 175
+              },
+              "5": {
+                "0": 45,
+                "1": 458,
+                "2": 330,
+                "3": 5
+              }
+            }
+          },
+          "inter_session_gaps": {
+            "gaps": 230757,
+            "gaps_over_days": {
+              "1": 39889,
+              "14": 1597,
+              "3": 13156,
+              "30": 634,
+              "60": 305,
+              "7": 4011,
+              "90": 237
+            },
+            "key": "CPID",
+            "keys_with_a_gap_over_30d": 366,
+            "quantiles_days": {
+              "0.5": 0.174,
+              "0.9": 1.931,
+              "0.99": 10.893,
+              "0.999": 91.837,
+              "1.0": 17495.378
+            }
+          },
+          "min_session_minutes": 5,
+          "natural_key_deduplicated_first": true,
+          "sessions_used": 233365
+        },
+        "overlap": {
+          "exact_duplicate_rows": 0,
+          "keys_shared_between_files": {
+            "dft_2017_local_authority_rapids_incomplete_anomalies.csv & dft_2017_public_sector_fasts_incomplete_anomalies.csv": 856,
+            "dft_2017_local_authority_rapids_incomplete_anomalies.csv & dft_2017_public_sector_fasts_raw.csv": 9258,
+            "dft_2017_public_sector_fasts_incomplete_anomalies.csv & dft_2017_public_sector_fasts_raw.csv": 101
+          },
+          "natural_key": [
+            "CPID",
+            "Connector",
+            "_start_min",
+            "_end_min",
+            "_energy"
+          ],
+          "natural_key_duplicate_rows": 11799
+        },
+        "personal_data": {
+          "columns_present": [
+            "ChargingEvent",
+            "CPID",
+            "Connector",
+            "StartDate",
+            "StartTime",
+            "EndDate",
+            "EndTime",
+            "Energy",
+            "Price",
+            "PluginDuration",
+            "Name",
+            "Area code",
+            "_publisher_row_index"
+          ],
+          "user_level_columns": []
+        },
+        "port": {
+          "port_id_column": "Connector",
+          "port_id_values": {
+            "1": 56896,
+            "1 - 22kW Type 2 Socket Only": 3,
+            "1 - 7kW Type 2 Socket Only": 11,
+            "2": 52092,
+            "2 - 22kW Type 2 Socket Only": 4,
+            "3": 9682,
+            "<null>": 153609
+          },
+          "port_type_column": null,
+          "port_type_values": null,
+          "ports_per_station_id": {
+            "1": 31,
+            "2": 127,
+            "3": 111
+          },
+          "rows_with_null_port_id": 153609
+        },
+        "rows_all_files": 272297,
+        "session_id": {
+          "column": "ChargingEvent",
+          "distinct": 226330,
+          "duplicate_ids_within_files": 35118,
+          "ids_in_more_than_one_file": 10848,
+          "null_count": 28681,
+          "rows": 272297
+        },
+        "stations": {
+          "distinct_ids": 845,
+          "distinct_site_keys": 63,
+          "grouping_column_for_the_two_counts_above": "Name",
+          "id_forms": {
+            "null": 6136,
+            "numeric": 221597,
+            "prefixed_or_text": 44564
+          },
+          "ids_with_multiple_names": 72,
+          "names_per_site_key": {
+            "0": 1,
+            "1": 6,
+            "10": 2,
+            "11": 3,
+            "12": 1,
+            "13": 1,
+            "14": 2,
+            "15": 2,
+            "159": 1,
+            "16": 1,
+            "17": 3,
+            "18": 1,
+            "2": 6,
+            "24": 2,
+            "25": 1,
+            "27": 2,
+            "3": 9,
+            "31": 1,
+            "4": 6,
+            "40": 1,
+            "5": 4,
+            "6": 3,
+            "68": 1,
+            "72": 1,
+            "78": 1,
+            "9": 1
+          },
+          "names_with_multiple_ids": 56,
+          "null_ids": 6136,
+          "sessions_per_station": {
+            "count": 845,
+            "max": 4603,
+            "median": 155.0,
+            "min": 1,
+            "stations_under_30_sessions": 153
+          },
+          "site_key_column": "Name",
+          "station_id_column": "CPID",
+          "station_name_column": null
+        },
+        "time_parsing": {
+          "end_date_formats": {
+            "iso_rows": 223678,
+            "other_rows": 776,
+            "slash_rows": 47843
+          },
+          "end_parse_failures": 776,
+          "start_date_formats": {
+            "iso_rows": 223678,
+            "other_rows": 0,
+            "slash_rows": 48619
+          },
+          "start_parse_failures": 0
+        },
+        "timezone": {
+          "assumed_zone": "Europe/London",
+          "dst_note": "+60 on spring-forward and -60 on fall-back dates means wall-clock local timestamps; 0 would mean UTC",
+          "dst_transition_gaps": {
+            "2017-03-26": {
+              "gap_minutes_counts": {
+                "0": 1,
+                "60": 50,
+                "61": 8
+              },
+              "sessions_spanning_window": 63
+            },
+            "2017-10-29": {
+              "gap_minutes_counts": {
+                "-59": 10,
+                "-60": 51,
+                "0": 5,
+                "1": 1
+              },
+              "sessions_spanning_window": 71
+            }
+          },
+          "start_format": "DATE_PLUS_TIME",
+          "start_hour_histogram_as_published": {
+            "0": 1498,
+            "1": 1248,
+            "10": 18772,
+            "11": 19805,
+            "12": 22748,
+            "13": 22215,
+            "14": 20531,
+            "15": 19017,
+            "16": 18636,
+            "17": 16575,
+            "18": 15299,
+            "19": 11308,
+            "2": 781,
+            "20": 7377,
+            "21": 4780,
+            "22": 3440,
+            "23": 2483,
+            "3": 648,
+            "4": 791,
+            "5": 1584,
+            "6": 5168,
+            "7": 13506,
+            "8": 22696,
+            "9": 21391
+          }
+        }
+      },
+      "available": true,
+      "files": [
+        {
+          "bytes": 11744472,
+          "column_profiles": [
+            {
+              "distinct": 108746,
+              "inferred_type": "text",
+              "name": "ChargingEvent",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "4096121",
+                "4087939",
+                "4086185",
+                "4085523",
+                "4083610"
+              ]
+            },
+            {
+              "distinct": 237,
+              "inferred_type": "text",
+              "name": "CPID",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "70902",
+                "70900",
+                "70901",
+                "62037",
+                "62031"
+              ]
+            },
+            {
+              "distinct": 4,
+              "inferred_type": "text",
+              "name": "Connector",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "1",
+                "3",
+                "2",
+                "NA"
+              ]
+            },
+            {
+              "day_first_evidence": null,
+              "distinct": 365,
+              "inferred_type": "date",
+              "max": "2017-12-31 00:00:00",
+              "min": "2017-01-01 00:00:00",
+              "name": "StartDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "%Y-%m-%d",
+              "rows": 108746,
+              "sample_values": [
+                "2017-12-27",
+                "2017-12-22",
+                "2017-12-21",
+                "2017-12-20",
+                "2017-12-19"
+              ]
+            },
+            {
+              "distinct": 31830,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.667,
+              "min_minutes": 0.0,
+              "name": "StartTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "13:30:00",
+                "11:35:00",
+                "16:27:00",
+                "13:14:00",
+                "17:41:00"
+              ],
+              "zero_count": 23
+            },
+            {
+              "day_first_evidence": null,
+              "distinct": 366,
+              "inferred_type": "date",
+              "max": "2018-01-01 00:00:00",
+              "min": "2017-01-01 00:00:00",
+              "name": "EndDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "%Y-%m-%d",
+              "rows": 108746,
+              "sample_values": [
+                "2017-12-27",
+                "2017-12-22",
+                "2017-12-21",
+                "2017-12-20",
+                "2017-12-19"
+              ]
+            },
+            {
+              "distinct": 31742,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.883,
+              "min_minutes": 0.0,
+              "name": "EndTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "14:31:00",
+                "12:36:00",
+                "17:22:00",
+                "14:13:00",
+                "18:41:00"
+              ],
+              "zero_count": 19
+            },
+            {
+              "distinct": 21154,
+              "inferred_type": "decimal",
+              "max": 95.6,
+              "mean": 11.020371,
+              "min": 0.001,
+              "name": "EnergySupplied",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "22.7",
+                "2.5",
+                "16.3",
+                "7.6",
+                "9.7"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 865,
+              "inferred_type": "text",
+              "name": "Price",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "0",
+                "8",
+                "3.5",
+                "0.75",
+                "0.3"
+              ]
+            },
+            {
+              "distinct": 510,
+              "inferred_type": "integer",
+              "max": 59970.0,
+              "mean": 38.356418,
+              "min": 3.0,
+              "name": "PluginDuration",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "61",
+                "55",
+                "59",
+                "60",
+                "9"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 27,
+              "inferred_type": "text",
+              "name": "Name",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 108746,
+              "sample_values": [
+                "Aylesbury Vale District Council",
+                "City of York Council",
+                "Bristol City Council",
+                "Cotswold District Council",
+                "Cornwall Council"
+              ]
+            }
+          ],
+          "columns": [
+            "ChargingEvent",
+            "CPID",
+            "Connector",
+            "StartDate",
+            "StartTime",
+            "EndDate",
+            "EndTime",
+            "EnergySupplied",
+            "Price",
+            "PluginDuration",
+            "Name"
+          ],
+          "download": {
+            "last_modified_header": "Wed, 12 Dec 2018 17:39:56 GMT",
+            "retrieved_at": "2026-09-19T23:38:54+00:00",
+            "url": "https://assets.publishing.service.gov.uk/media/5c1147ece5274a0bcac5f8d5/electric-chargepoint-analysis-2017-raw-rapids-data.csv"
+          },
+          "exact_duplicate_rows": 0,
+          "family": "rapids",
+          "na_token_counts": {
+            "Connector": 54905,
+            "Price": 25532
+          },
+          "path": "data/raw/dft_2017/dft_2017_local_authority_rapids_raw.csv",
+          "rows": 108746,
+          "sha256": "466c9b55bbdf6fcef08636400ca654e5e64fb72b6375e053d54a7991e1a93568"
+        },
+        {
+          "bytes": 4895356,
+          "column_profiles": [
+            {
+              "distinct": 48616,
+              "inferred_type": "text",
+              "name": "ChargingEvent",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "4087937",
+                "4087934",
+                "4087930",
+                "4085518",
+                "4085507"
+              ]
+            },
+            {
+              "distinct": 282,
+              "inferred_type": "text",
+              "name": "CPID",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "70900",
+                "70902",
+                "70901",
+                "62038",
+                "62036"
+              ]
+            },
+            {
+              "distinct": 4,
+              "inferred_type": "text",
+              "name": "Connector",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "1",
+                "3",
+                "NA",
+                "2"
+              ]
+            },
+            {
+              "day_first_evidence": {
+                "first_field_gt_12": 29091,
+                "second_field_gt_12": 0,
+                "verdict": "day_first"
+              },
+              "distinct": 365,
+              "inferred_type": "date",
+              "max": "2017-12-31 00:00:00",
+              "min": "2017-01-01 00:00:00",
+              "name": "StartDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "MDY_OR_DMY_DATE",
+              "rows": 48619,
+              "sample_values": [
+                "22/12/2017",
+                "21/12/2017",
+                "19/12/2017",
+                "18/12/2017",
+                "15/12/2017"
+              ]
+            },
+            {
+              "distinct": 8685,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.7,
+              "min_minutes": 0.0,
+              "name": "StartTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "11:35:00",
+                "11:34:00",
+                "11:33:00",
+                "13:13:00",
+                "11:41:00"
+              ],
+              "zero_count": 6
+            },
+            {
+              "distinct": 368,
+              "inferred_type": "text",
+              "name": "EndDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "22/12/2017",
+                "21/12/2017",
+                "19/12/2017",
+                "18/12/2017",
+                "15/12/2017"
+              ]
+            },
+            {
+              "distinct": 8678,
+              "inferred_type": "text",
+              "name": "EndTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "11:35:00",
+                "11:34:00",
+                "11:33:00",
+                "13:13:00",
+                "11:42:00"
+              ]
+            },
+            {
+              "distinct": 10650,
+              "inferred_type": "text",
+              "name": "EnergySupplied",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "0",
+                "NA",
+                "35.79",
+                "32.659",
+                "30.13"
+              ]
+            },
+            {
+              "distinct": 402,
+              "inferred_type": "text",
+              "name": "Price",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "0",
+                "NA",
+                "0.6",
+                "0.3",
+                "0.15"
+              ]
+            },
+            {
+              "distinct": 19,
+              "inferred_type": "text",
+              "name": "Area code",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "E07000004",
+                "E06000014",
+                "E06000023",
+                "E07000079",
+                "E06000052"
+              ]
+            },
+            {
+              "distinct": 27,
+              "inferred_type": "text",
+              "name": "Name",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 48619,
+              "sample_values": [
+                "Aylesbury Vale District Council",
+                "City of York Council",
+                "Bristol City Council",
+                "Cotswold District Council",
+                "Cornwall Council"
+              ]
+            }
+          ],
+          "columns": [
+            "ChargingEvent",
+            "CPID",
+            "Connector",
+            "StartDate",
+            "StartTime",
+            "EndDate",
+            "EndTime",
+            "EnergySupplied",
+            "Price",
+            "Area code",
+            "Name"
+          ],
+          "download": {
+            "last_modified_header": "Wed, 12 Dec 2018 17:40:55 GMT",
+            "retrieved_at": "2026-09-19T23:38:58+00:00",
+            "url": "https://assets.publishing.service.gov.uk/media/5c114827e5274a0bd964df2b/electric-chargepoint-analysis-2017-rapids-incomplete-anomalies.csv"
+          },
+          "exact_duplicate_rows": 0,
+          "family": "rapids_anomalies",
+          "na_token_counts": {
+            "Area code": 12710,
+            "Connector": 21101,
+            "EndDate": 776,
+            "EndTime": 776,
+            "EnergySupplied": 776,
+            "Price": 6700
+          },
+          "path": "data/raw/dft_2017/dft_2017_local_authority_rapids_incomplete_anomalies.csv",
+          "rows": 48619,
+          "sha256": "169c0c359544fb43a1910854c37b99680067f10e6e6d0297c9a3e0753070bf09"
+        },
+        {
+          "bytes": 11819515,
+          "column_profiles": [
+            {
+              "distinct": 103326,
+              "inferred_type": "integer",
+              "max": 103326.0,
+              "mean": 51663.5,
+              "min": 1.0,
+              "name": "Unnamed: 0",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 73748,
+              "inferred_type": "text",
+              "name": "ChargingEvent",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "NA",
+                "7914",
+                "16678608",
+                "4104425",
+                "7913"
+              ]
+            },
+            {
+              "distinct": 543,
+              "inferred_type": "text",
+              "name": "CPID",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "50962",
+                "PG-80153",
+                "2090",
+                "70211",
+                "PG-80025"
+              ]
+            },
+            {
+              "distinct": 4,
+              "inferred_type": "text",
+              "name": "Connector",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "1",
+                "NA",
+                "2",
+                "3"
+              ]
+            },
+            {
+              "day_first_evidence": null,
+              "distinct": 365,
+              "inferred_type": "date",
+              "max": "2017-12-31 00:00:00",
+              "min": "2017-01-01 00:00:00",
+              "name": "StartDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "%Y-%m-%d",
+              "rows": 103326,
+              "sample_values": [
+                "2017-12-31",
+                "2017-12-30",
+                "2017-12-29",
+                "2017-12-28",
+                "2017-12-27"
+              ]
+            },
+            {
+              "distinct": 32110,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.967,
+              "min_minutes": 0.617,
+              "name": "StartTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "22:50:00",
+                "22:42:37",
+                "22:35:53",
+                "21:14:00",
+                "21:04:24"
+              ],
+              "zero_count": 0
+            },
+            {
+              "day_first_evidence": null,
+              "distinct": 377,
+              "inferred_type": "date",
+              "max": "2018-02-15 00:00:00",
+              "min": "2017-01-01 00:00:00",
+              "name": "EndDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "%Y-%m-%d",
+              "rows": 103326,
+              "sample_values": [
+                "2018-01-01",
+                "2017-12-31",
+                "2018-01-02",
+                "2017-12-30",
+                "2018-01-03"
+              ]
+            },
+            {
+              "distinct": 32246,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.8,
+              "min_minutes": 0.933,
+              "name": "EndTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "00:42:00",
+                "22:57:16",
+                "08:17:47",
+                "00:49:00",
+                "23:28:02"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 18969,
+              "inferred_type": "decimal",
+              "max": 97.7,
+              "mean": 8.623252,
+              "min": 0.001,
+              "name": "Energy",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "6.662",
+                "1.5",
+                "3.3",
+                "4.08",
+                "6"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 35,
+              "inferred_type": "text",
+              "name": "Name",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "Transport Scotland",
+                "Plymouth City Council",
+                "Milton Keynes Council",
+                "University of Leeds",
+                "Exeter City Council"
+              ]
+            },
+            {
+              "distinct": 6320,
+              "inferred_type": "decimal",
+              "max": 8336.46666666667,
+              "mean": 7.415606,
+              "min": 0.0502777777777778,
+              "name": "PluginDuration",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 103326,
+              "sample_values": [
+                "1.86666666666667",
+                "0.233333333333333",
+                "9.68333333333333",
+                "3.58333333333333",
+                "2.38333333333333"
+              ],
+              "zero_count": 0
+            }
+          ],
+          "columns": [
+            "Unnamed: 0",
+            "ChargingEvent",
+            "CPID",
+            "Connector",
+            "StartDate",
+            "StartTime",
+            "EndDate",
+            "EndTime",
+            "Energy",
+            "Name",
+            "PluginDuration"
+          ],
+          "download": {
+            "last_modified_header": "Thu, 13 Dec 2018 16:58:13 GMT",
+            "retrieved_at": "2026-09-19T23:39:02+00:00",
+            "url": "https://assets.publishing.service.gov.uk/media/5c128fa5e5274a0ba8c4ba79/electric-chargepoint-analysis-2017-raw-public-sector-fasts-data.csv"
+          },
+          "exact_duplicate_rows": 0,
+          "family": "fasts",
+          "na_token_counts": {
+            "CPID": 6009,
+            "ChargingEvent": 23408,
+            "Connector": 71862
+          },
+          "path": "data/raw/dft_2017/dft_2017_public_sector_fasts_raw.csv",
+          "rows": 103326,
+          "sha256": "c96a8c06b54c659107e77ecf2801250f5fedd6649045766160495fb61e413c35"
+        },
+        {
+          "bytes": 1240348,
+          "column_profiles": [
+            {
+              "distinct": 11606,
+              "inferred_type": "integer",
+              "max": 11606.0,
+              "mean": 5803.5,
+              "min": 1.0,
+              "name": "Unnamed: 0",
+              "negative_count": 0,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 6069,
+              "inferred_type": "text",
+              "name": "ChargingEvent",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "NA",
+                "11352672",
+                "11417012",
+                "12126107",
+                "12246393"
+              ]
+            },
+            {
+              "distinct": 345,
+              "inferred_type": "text",
+              "name": "CPID",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "51088",
+                "50817",
+                "51144",
+                "50936",
+                "51094"
+              ]
+            },
+            {
+              "distinct": 6,
+              "inferred_type": "text",
+              "name": "Connector",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "1",
+                "2",
+                "NA",
+                "2 - 22kW Type 2 Socket Only",
+                "1 - 22kW Type 2 Socket Only"
+              ]
+            },
+            {
+              "day_first_evidence": null,
+              "distinct": 365,
+              "inferred_type": "date",
+              "max": "2017-12-31 00:00:00",
+              "min": "2017-01-01 00:00:00",
+              "name": "StartDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "%Y-%m-%d",
+              "rows": 11606,
+              "sample_values": [
+                "2017-12-31",
+                "2017-12-30",
+                "2017-12-29",
+                "2017-12-28",
+                "2017-12-27"
+              ]
+            },
+            {
+              "distinct": 3693,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.0,
+              "min_minutes": 3.0,
+              "name": "StartTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "13:15:00",
+                "11:54:00",
+                "17:26:00",
+                "13:38:00",
+                "11:42:00"
+              ],
+              "zero_count": 0
+            },
+            {
+              "day_first_evidence": null,
+              "distinct": 375,
+              "inferred_type": "date",
+              "max": "2018-01-31 00:00:00",
+              "min": "1970-01-01 00:00:00",
+              "name": "EndDate",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "parse_failures": 0,
+              "pattern": "%Y-%m-%d",
+              "rows": 11606,
+              "sample_values": [
+                "2017-12-31",
+                "2017-12-30",
+                "2017-12-29",
+                "2017-12-28",
+                "2017-12-27"
+              ]
+            },
+            {
+              "distinct": 3724,
+              "inferred_type": "duration_hms",
+              "max_minutes": 1439.0,
+              "min_minutes": 1.0,
+              "name": "EndTime",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "over_24h_count": 0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "13:15:00",
+                "11:54:00",
+                "17:27:00",
+                "13:39:00",
+                "11:43:00"
+              ],
+              "zero_count": 0
+            },
+            {
+              "distinct": 760,
+              "inferred_type": "decimal",
+              "max": 1267.616,
+              "mean": 1.545822,
+              "min": -1619.716,
+              "name": "Energy",
+              "negative_count": 47,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "0",
+                "0.364",
+                "0.108",
+                "0.004",
+                "0.001"
+              ],
+              "zero_count": 9225
+            },
+            {
+              "distinct": 34,
+              "inferred_type": "text",
+              "name": "Name",
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "Transport Scotland",
+                "Milton Keynes Council",
+                "NA",
+                "Southern Health NHS Foundation Trust",
+                "Lancashire Borough Council"
+              ]
+            },
+            {
+              "distinct": 1270,
+              "inferred_type": "decimal",
+              "max": 1512.56666666667,
+              "mean": -567.47574,
+              "min": -419889.983333333,
+              "name": "PluginDuration",
+              "negative_count": 124,
+              "null_or_blank": 0,
+              "null_rate": 0.0,
+              "pattern": null,
+              "rows": 11606,
+              "sample_values": [
+                "0",
+                "0.0166666666666667",
+                "1.33333333333333",
+                "0.433333333333333",
+                "2.11666666666667"
+              ],
+              "zero_count": 3795
+            }
+          ],
+          "columns": [
+            "Unnamed: 0",
+            "ChargingEvent",
+            "CPID",
+            "Connector",
+            "StartDate",
+            "StartTime",
+            "EndDate",
+            "EndTime",
+            "Energy",
+            "Name",
+            "PluginDuration"
+          ],
+          "download": {
+            "last_modified_header": "Thu, 13 Dec 2018 16:50:48 GMT",
+            "retrieved_at": "2026-09-19T23:39:05+00:00",
+            "url": "https://assets.publishing.service.gov.uk/media/5c128de8e5274a0ae06bd792/electric-chargepoint-analysis-2017-public-sector-fasts-incomplete-anomalies.csv"
+          },
+          "exact_duplicate_rows": 0,
+          "family": "fasts_anomalies",
+          "na_token_counts": {
+            "CPID": 127,
+            "ChargingEvent": 5273,
+            "Connector": 5741,
+            "Name": 271
+          },
+          "path": "data/raw/dft_2017/dft_2017_public_sector_fasts_incomplete_anomalies.csv",
+          "rows": 11606,
+          "sha256": "e0dd59631bc42799ab270635d94922720a4addf9cd15ea56cc5c91bf472a3c38"
+        }
+      ],
+      "roles": {
+        "aliases": {
+          "EnergySupplied": "Energy",
+          "Unnamed: 0": "_publisher_row_index"
+        },
+        "charging_duration": null,
+        "connected_duration": "PluginDuration",
+        "connected_duration_kind": "numeric",
+        "connected_duration_unit_by_file": {
+          "dft_2017_local_authority_rapids_raw.csv": "minutes",
+          "dft_2017_public_sector_fasts_incomplete_anomalies.csv": "hours",
+          "dft_2017_public_sector_fasts_raw.csv": "hours"
+        },
+        "dst_transitions": [
+          "2017-03-26",
+          "2017-10-29"
+        ],
+        "end": "EndDate",
+        "end_time": "EndTime",
+        "energy_kwh": "Energy",
+        "file_family": {
+          "dft_2017_local_authority_rapids_incomplete_anomalies.csv": "rapids_anomalies",
+          "dft_2017_local_authority_rapids_raw.csv": "rapids",
+          "dft_2017_public_sector_fasts_incomplete_anomalies.csv": "fasts_anomalies",
+          "dft_2017_public_sector_fasts_raw.csv": "fasts"
+        },
+        "files": [
+          "dft_2017_local_authority_rapids_raw.csv",
+          "dft_2017_local_authority_rapids_incomplete_anomalies.csv",
+          "dft_2017_public_sector_fasts_raw.csv",
+          "dft_2017_public_sector_fasts_incomplete_anomalies.csv"
+        ],
+        "na_tokens": [
+          "NA"
+        ],
+        "natural_key": [
+          "CPID",
+          "Connector",
+          "_start_min",
+          "_end_min",
+          "_energy"
+        ],
+        "port_id": "Connector",
+        "port_type": null,
+        "rated_kw_ceiling": 60.0,
+        "read": {},
+        "session_id": "ChargingEvent",
+        "site_key": "Name",
+        "start": "StartDate",
+        "start_format": "DATE_PLUS_TIME",
+        "start_time": "StartTime",
+        "station_id": "CPID",
+        "station_name": null,
+        "timezone": "Europe/London",
+        "tz_label": null,
+        "user_level_columns": []
+      }
+    }
+  }
+}
