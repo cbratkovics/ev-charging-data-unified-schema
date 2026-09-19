@@ -1,6 +1,7 @@
-# ev_charging_data_unified_schema_dbt — medallion warehouse over the repository's own files.
-# bronze: typed one-to-one copies of source files; silver: cleaned, grain-enforced, contracts as
-# tests; gold: contracted marts read by the API and the site. See docs/ARCHITECTURE.md.
+# ev_charging_data_unified_schema_dbt — medallion warehouse over the landed session files.
+# bronze: string-typed one-to-one copies of the landed parquet per source; silver: typed,
+# conformed, deduplicated sessions with a quarantine; gold: contracted facts and dimensions.
+# See docs/ARCHITECTURE.md.
 name: ev_charging_data_unified_schema_dbt
 version: "1.0.0"
 config-version: 2
@@ -19,42 +20,18 @@ target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
 vars:
-  # Project vocabulary, mirrored from ev_charging_data_unified_schema/config.py (PROJECT);
-  # tests/test_project_config.py fails when these defaults drift from config.dbt_vars().
-  entity_key: station_id
-  season_column: day
-  period_column: day
-  cohort_column: channel
-  cohorts: [ A,B ]
-  candidates: [rf, gbm]
-  target_column: utilization
-  within_k: [ 2,4 ]
-  min_season: 2019
-  periods_per_season: 12
-  # period_key = season * period_key_base + period (next power of ten above periods_per_season)
-  period_key_base: 100
-  # Every path is relative to the repository root; run dbt from there (Makefile, CI, scheduled job).
-  # The contracts wrapper passes the exact cache file it loaded; CI points this at the same file.
-  rows_path: "data/cache/period_rows_*.parquet"
-  # Rows of the period being scored (and anything later) are incomplete; the scheduled job drops
-  # them before the contracts. Null = keep everything.
-  target_season: null
-  target_period: null
-  # Freshness contract: the newest complete (season, period) the rows must reach. Null = not checked.
-  expected_season: null
-  expected_period: null
-  # Row-count contract versus the previous run (manifest.last_run.rows). Null = not checked.
-  prior_row_count: null
-  row_count_tolerance_pct: 0.35
-  # slv_period_rows is incremental: an incremental run reprocesses this many of the newest distinct
-  # periods already in the table so source restatements to recent periods are picked up without a
-  # full refresh. Chosen conservatively; calibrate by diffing consecutive source pulls
-  # (docs/ARCHITECTURE.md).
-  rows_lookback_periods: 4
-  # Decision marts: floor threshold, the sweep grid the API serves, replacement rank per cohort.
-  min_floor: 6.0
-  min_floor_grid: [0, 2, 4, 6, 8, 10, 12]
-  replacement_rank: { A: 10, B: 10 }
+  # Mirrored from ev_charging_data_unified_schema/config.py; tests/test_project_config.py fails
+  # when these defaults drift from config.dbt_vars(). Every path is relative to the repository
+  # root; run dbt from there (Makefile, CI).
+  # Directory of landed parquet, one sub-directory per source (the loaders write it; the
+  # fixture under tests/fixtures/landed has the same layout for offline runs).
+  landed_dir: "data/landed"
+  # The session sources in scope, by short name.
+  sources: [palo_alto, boulder, cary, dundee]
+  # fct_charging_session is incremental: an incremental run reprocesses sessions whose
+  # start falls within this many days of the newest start already loaded, so late or
+  # re-delivered rows are picked up without a full refresh. Not calibrated until Phase 4.
+  sessions_lookback_days: 45
 
 models:
   ev_charging_data_unified_schema_dbt:

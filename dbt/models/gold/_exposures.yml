@@ -1,21 +1,4 @@
 version: 2
 
-exposures:
-  - name: api
-    label: Ev Charging Data Unified Schema API (Hugging Face Space)
-    type: application
-    maturity: medium
-    url: https://-ev-charging-data-unified-schema.hf.space
-    description: >
-      The API serves the committed artifacts and, for /marts/{mart}, the parquet copies of these
-      gold tables exported by the scheduled build; it never connects to MotherDuck. /performance
-      returns the evaluation artifacts verbatim.
-    depends_on:
-      - ref('fct_period_eval')
-      - ref('fct_entity_period')
-      - ref('fct_decision_policy', v=1)
-      - ref('dim_model_version')
-    owner:
-      name: cbratkovics
-      email: 
-
+# The exports/ read contract (Phase 7) is declared here as an exposure once gold exists.
+exposures: []

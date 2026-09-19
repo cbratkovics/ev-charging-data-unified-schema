@@ -1,99 +1,41 @@
-"""The seams are satisfied by this project's implementations, and every committed artifact
-validates against its JSON Schema under artifacts/schemas/."""
+"""The SourceLoader seam is a runtime-checkable protocol; a minimal implementation satisfies
+it and the registry of sources in config agrees with what dbt declares."""
 
 from __future__ import annotations
 
-import json
+from pathlib import Path
 
-import jsonschema
-import numpy as np
 import pandas as pd
-import pytest
+import yaml
 
-from ev_charging_data_unified_schema import interfaces, target
-from ev_charging_data_unified_schema.config import ARTIFACTS_DIR, PROJECT, SCHEMAS_DIR
-from ev_charging_data_unified_schema.data import loader
-from ev_charging_data_unified_schema.eval import drift
-from ev_charging_data_unified_schema.features import asof
-
-SCHEMAS = {p.stem.removesuffix(".schema"): p for p in SCHEMAS_DIR.glob("*.schema.json")}
+from ev_charging_data_unified_schema import interfaces
+from ev_charging_data_unified_schema.config import PROJECT, REPO_ROOT
 
 
-def _schema(name: str) -> dict:
-    return json.loads(SCHEMAS[name].read_text(encoding="utf-8"))
+class _Minimal:
+    SOURCE = "palo_alto"
+    URLS = ("https://example.invalid/sessions.csv",)
+
+    def download(self, raw_dir: Path, *, refresh: bool = False) -> list[Path]:
+        return []
+
+    def read_raw(self, path: Path) -> pd.DataFrame:
+        return pd.DataFrame()
 
 
-def test_every_schema_is_itself_valid() -> None:
-    assert set(SCHEMAS) == {
-        "eval_artifact",
-        "manifest",
-        "model_metadata",
-        "predictions_file",
-        "drift_report",
-    }
-    for name in SCHEMAS:
-        jsonschema.Draft202012Validator.check_schema(_schema(name))
+def test_minimal_loader_satisfies_the_protocol() -> None:
+    assert isinstance(_Minimal(), interfaces.SourceLoader)
+    assert _Minimal.SOURCE in PROJECT.source_names
 
 
-def test_loader_satisfies_source_loader() -> None:
-    assert isinstance(loader.LOADER, interfaces.SourceLoader)
-    assert PROJECT.entity_key in loader.ID_COLUMNS and PROJECT.target_column in loader.STAT_COLUMNS
-
-
-def test_target_spec_derives_and_reconciles(rows: pd.DataFrame) -> None:
-    spec = target.TARGET_SPEC
-    assert isinstance(spec, interfaces.TargetSpec)
-    np.testing.assert_allclose(
-        spec.derive(rows).to_numpy(), rows[spec.column].to_numpy(), atol=0.01
+def test_every_configured_source_is_a_declared_dbt_source_table() -> None:
+    src = yaml.safe_load(
+        (REPO_ROOT / "dbt" / "models" / "bronze" / "_sources.yml").read_text(encoding="utf-8")
     )
-    assert spec.reconcile(rows).empty
+    landed = next(s for s in src["sources"] if s["name"] == "landed")
+    assert {t["name"] for t in landed["tables"]} == set(PROJECT.source_names)
 
 
-def test_asof_satisfies_feature_module() -> None:
-    assert isinstance(asof, interfaces.FeatureModule)
-    assert tuple(asof.KEY_COLUMNS) == PROJECT.grain
-
-
-@pytest.mark.parametrize("path", sorted((ARTIFACTS_DIR / "eval").glob("eval-*.json")))
-def test_committed_eval_artifacts_validate(path) -> None:
-    jsonschema.validate(json.loads(path.read_text(encoding="utf-8")), _schema("eval_artifact"))
-
-
-def test_committed_manifest_validates() -> None:
-    p = ARTIFACTS_DIR / "manifest.json"
-    if not p.exists():
-        pytest.skip("no manifest yet")
-    jsonschema.validate(json.loads(p.read_text()), _schema("manifest"))
-
-
-@pytest.mark.parametrize("path", sorted((ARTIFACTS_DIR / "models").glob("*/metadata.json")))
-def test_committed_model_metadata_validates(path) -> None:
-    jsonschema.validate(json.loads(path.read_text(encoding="utf-8")), _schema("model_metadata"))
-
-
-@pytest.mark.parametrize("path", sorted((ARTIFACTS_DIR / "predictions").glob("*/period_*.json")))
-def test_committed_prediction_files_validate(path) -> None:
-    jsonschema.validate(json.loads(path.read_text(encoding="utf-8")), _schema("predictions_file"))
-
-
-def test_drift_run_report_matches_its_schema() -> None:
-    rng = np.random.default_rng(0)
-    ref = {"f1": [float(x) for x in np.quantile(rng.normal(size=500), np.linspace(0, 1, 11))]}
-    report = drift.drift_report(pd.DataFrame({"f1": rng.normal(size=200)}), ref, ["f1"])
-    schema = _schema("drift_report")
-    jsonschema.validate(report, {"$ref": "#/$defs/cohort_report", "$defs": schema["$defs"]})
-    run = drift.run_report(
-        run_id="run-20260101T000000Z",
-        at_utc="2026-01-01T00:00:00+00:00",
-        season=2026,
-        period=2,
-        model_version="m",
-        status=report["status"],
-        positions={PROJECT.cohorts[0]: report},
-    )
-    jsonschema.validate(run, schema)
-
-
-@pytest.mark.parametrize("path", sorted((ARTIFACTS_DIR / "drift").glob("run-*.json")))
-def test_committed_drift_reports_validate(path) -> None:
-    jsonschema.validate(json.loads(path.read_text(encoding="utf-8")), _schema("drift_report"))
+def test_registry_coverage_flags_are_by_country() -> None:
+    for s in PROJECT.sources:
+        assert s.registry_coverage == (s.country in {"US", "CA"}), s.name

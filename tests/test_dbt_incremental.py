@@ -1,6 +1,9 @@
-"""Incremental equivalence for slv_period_rows: a full refresh and an incremental run over the
-same input produce identical rows; a restated period inside the lookback is picked up; one
-outside it is not until --full-refresh. Runs dbt against a scratch DuckDB file."""
+"""Scaffold for the Phase 4 idempotency and incremental-equivalence tests on
+fct_charging_session: build twice and assert identical key-sorted content; land fixture files
+out of order and with a re-delivered overlapping file and assert the same result. The dbt
+helpers below (console script next to the interpreter, `dbt deps` owned by the session fixture,
+scratch DuckDB via the profile's env var) are kept from the template because the tests reuse
+them unchanged; the tests themselves are skipped until the model exists."""
 
 from __future__ import annotations
 
@@ -15,16 +18,15 @@ import duckdb
 import pandas as pd
 import pytest
 
-from ev_charging_data_unified_schema.config import ENV_PREFIX, PROJECT, REPO_ROOT
+from ev_charging_data_unified_schema.config import ENV_PREFIX, REPO_ROOT
 
 pytest.importorskip("dbt.cli.main")
 
-MODEL = "slv_period_rows"
-KEYS = list(PROJECT.grain)
-LOOKBACK = 2
-_S, _P = PROJECT.season_name, PROJECT.period_name
+MODEL = "fct_charging_session"
+KEYS = ["session_sk"]
 DBT_DIR = REPO_ROOT / "dbt"
 PACKAGES_DIR = DBT_DIR / "dbt_packages"
+MODEL_EXISTS = any(DBT_DIR.glob(f"models/**/{MODEL}.sql"))
 
 
 def _dbt_bin() -> list[str]:
@@ -57,7 +59,7 @@ def _packages_installed() -> bool:
     )
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def dbt_packages() -> None:
     """Install the dbt packages once per session, exactly like ``make dbt-deps``.
 
@@ -81,10 +83,10 @@ def dbt_packages() -> None:
         )
 
 
-def _dbt_run(db_path: Path, rows_path: Path, *, full_refresh: bool) -> None:
+def _dbt_run(db_path: Path, landed_dir: Path, *, full_refresh: bool) -> None:
     cmd = [
         *_dbt_bin(),
-        "run",
+        "build",
         "--select",
         f"+{MODEL}",
         "--project-dir",
@@ -98,11 +100,15 @@ def _dbt_run(db_path: Path, rows_path: Path, *, full_refresh: bool) -> None:
         "--log-path",
         str(db_path.parent / "logs"),
         "--vars",
-        json.dumps({"rows_path": str(rows_path), "rows_lookback_periods": LOOKBACK}),
+        json.dumps({"landed_dir": str(landed_dir)}),
     ]
     if full_refresh:
         cmd.append("--full-refresh")
-    env = {**os.environ, ENV_PREFIX + "DUCKDB_PATH": str(db_path)}
+    env = {
+        **os.environ,
+        ENV_PREFIX + "DUCKDB_PATH": str(db_path),
+        ENV_PREFIX + "DUCKDB_THREADS": "1",
+    }
     proc = subprocess.run(cmd, cwd=REPO_ROOT, env=env, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stdout[-3000:] + proc.stderr[-3000:]
 
@@ -111,10 +117,7 @@ def _table(db_path: Path) -> pd.DataFrame:
     con = duckdb.connect(str(db_path), read_only=True)
     try:
         return (
-            con.execute(f"select * from silver.{MODEL}")
-            .df()
-            .sort_values(KEYS)
-            .reset_index(drop=True)
+            con.execute(f"select * from gold.{MODEL}").df().sort_values(KEYS).reset_index(drop=True)
         )
     finally:
         con.close()
@@ -127,63 +130,12 @@ def _checksum(df: pd.DataFrame) -> str:
     ).hexdigest()
 
 
-@pytest.fixture(scope="module")
-def periods(rows: pd.DataFrame) -> list[int]:
-    return sorted({PROJECT.period_key(s, p) for s, p in zip(rows[_S], rows[_P], strict=True)})
-
-
-def _write(frame: pd.DataFrame, path: Path) -> Path:
-    frame.to_csv(path, index=False)
-    return path
-
-
-def _restate(frame: pd.DataFrame, period_key: int) -> tuple[pd.DataFrame, pd.Series]:
-    out = frame.copy()
-    idx = out[(out[_S] * PROJECT.period_key_base + out[_P]) == period_key].index[0]
-    out.loc[idx, "stat_b"] = float(out.loc[idx, "stat_b"]) + 10.0
-    out.loc[idx, PROJECT.target_column] = float(out.loc[idx, PROJECT.target_column]) + 5.0
-    return out, out.loc[idx, KEYS]
-
-
-def test_incremental_run_equals_full_refresh_after_append(tmp_path, rows, periods) -> None:
-    full = _write(rows, tmp_path / "full.csv")
-    trunc = _write(
-        rows[rows[_S] * PROJECT.period_key_base + rows[_P] < periods[-2]],
-        tmp_path / "truncated.csv",
-    )
-    ref_db = tmp_path / "ref" / "w.duckdb"
-    ref_db.parent.mkdir()
-    _dbt_run(ref_db, full, full_refresh=True)
-    reference = _table(ref_db)
-    inc_db = tmp_path / "inc" / "w.duckdb"
-    inc_db.parent.mkdir()
-    _dbt_run(inc_db, trunc, full_refresh=True)
-    assert len(_table(inc_db)) < len(reference)
-    _dbt_run(inc_db, full, full_refresh=False)
-    after = _table(inc_db)
-    assert len(after) == len(reference) and _checksum(after) == _checksum(reference)
-
-
-def test_restated_period_inside_lookback_is_picked_up(tmp_path, rows, periods) -> None:
-    full = _write(rows, tmp_path / "full.csv")
-    restated_frame, key = _restate(rows, periods[-LOOKBACK])
-    restated = _write(restated_frame, tmp_path / "restated.csv")
-    db = tmp_path / "w.duckdb"
-    _dbt_run(db, full, full_refresh=True)
-    _dbt_run(db, restated, full_refresh=False)
-    ref_db = tmp_path / "ref.duckdb"
-    _dbt_run(ref_db, restated, full_refresh=True)
-    assert _checksum(_table(db)) == _checksum(_table(ref_db))
-
-
-def test_restated_period_outside_lookback_needs_full_refresh(tmp_path, rows, periods) -> None:
-    full = _write(rows, tmp_path / "full.csv")
-    restated_frame, key = _restate(rows, periods[-(LOOKBACK + 3)])
-    restated = _write(restated_frame, tmp_path / "restated.csv")
-    db = tmp_path / "w.duckdb"
-    _dbt_run(db, full, full_refresh=True)
-    original = _table(db)
-    _dbt_run(db, restated, full_refresh=False)
-    assert _checksum(_table(db)) == _checksum(original)
-    _dbt_run(db, restated, full_refresh=True)
-    assert _checksum(_table(db)) != _checksum(original)
+@pytest.mark.skipif(not MODEL_EXISTS, reason=f"Phase 4: {MODEL} does not exist yet")
+def test_two_full_builds_are_content_identical(tmp_path, dbt_packages, fixtures_dir) -> None:
+    landed = fixtures_dir / "landed"
+    a, b = tmp_path / "a" / "w.duckdb", tmp_path / "b" / "w.duckdb"
+    a.parent.mkdir()
+    b.parent.mkdir()
+    _dbt_run(a, landed, full_refresh=True)
+    _dbt_run(b, landed, full_refresh=True)
+    assert _checksum(_table(a)) == _checksum(_table(b))

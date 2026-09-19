@@ -1,168 +1,98 @@
-"""STUB SourceLoader: a deterministic synthetic source so the generated project builds end to
-end before any real data exists. Replace this module (docs/TEMPLATE_GUIDE.md § replacing the
-loader) and keep the contract:
-
-* ``load_period_rows(seasons)`` returns one row per ``(entity_key, season, period)`` with
-  ``ID_COLUMNS + STAT_COLUMNS``, sorted by grain, stat columns float64, cached as dated parquet
-  under ``CACHE_DIR/<name>_<first>-<last>_<YYYY-MM-DD>.parquet``;
-* ``current_period()`` comes from the source's own calendar;
-* ``LIBRARY`` names the client and version for provenance.
-
-The synthetic world: ``N_ENTITIES`` entities split evenly over the cohorts, each with a latent
-skill; every period each entity produces three stats around its skill (with season-level drift
-and a few missing periods), and the published target is the rules of ``target.py`` applied to
-those stats. Deterministic (fixed seed), so tests and dbt builds are reproducible.
+"""Shared landing machinery every source loader uses: string-typed frames, row hashes, and the
+landing manifest. Source-specific download and parsing live in ``sources/<name>.py`` (Phase 2).
+This module has no network access and is fully unit-tested on the fixture.
 """
 
 from __future__ import annotations
 
-import datetime as dt
-from collections.abc import Iterable
+import hashlib
+import json
+from dataclasses import asdict
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
-from ev_charging_data_unified_schema.config import CACHE_DIR, PROJECT
-
-LIBRARY = "synthetic-stub==0.1"
-N_ENTITIES = 60
-SEED = 7
-CACHE_NAME = "period_rows"
-
-ID_COLUMNS: tuple[str, ...] = (
-    PROJECT.entity_key,
-    PROJECT.entity_display_column,
-    PROJECT.cohort_name,
-    PROJECT.season_name,
-    PROJECT.period_name,
-    "team",
+from ev_charging_data_unified_schema.config import (
+    LANDED_MANIFEST_NAME,
+    META_COLUMNS,
+    REPO_ROOT,
 )
-STAT_COLUMNS: tuple[str, ...] = ("stat_a", "stat_b", "stat_c", PROJECT.target_column)
+from ev_charging_data_unified_schema.interfaces import ManifestEntry
 
 
-def _seasons_list(seasons: int | Iterable[int]) -> list[int]:
-    if isinstance(seasons, int):
-        return [seasons]
-    out = sorted({int(s) for s in seasons})
-    if not out:
-        raise ValueError("seasons must not be empty")
+def sha256_of(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def as_strings(frame: pd.DataFrame) -> pd.DataFrame:
+    """Every column as a nullable string; nulls stay null, whitespace is not trimmed."""
+    out = pd.DataFrame(index=frame.index)
+    for col in frame.columns:
+        s = frame[col]
+        out[str(col)] = s.where(s.notna(), None).astype("string")
     return out
 
 
-def _cache_path(name: str, seasons: list[int], load_date: dt.date | None = None) -> Path:
-    load_date = load_date or dt.date.today()
-    return CACHE_DIR / f"{name}_{seasons[0]}-{seasons[-1]}_{load_date.isoformat()}.parquet"
+def row_hashes(frame: pd.DataFrame) -> pd.Series:
+    """sha256 over the source columns of each row, in column order, nulls as the empty token.
+    Stable across runs and machines; used for exact-duplicate detection downstream."""
+    cols = [c for c in frame.columns if c not in META_COLUMNS]
+    joined = frame[cols].fillna("\x00").astype(str).agg("\x1f".join, axis=1)
+    return joined.map(lambda s: hashlib.sha256(s.encode("utf-8")).hexdigest()).astype("string")
 
 
-def cache_path_for(name: str, seasons: int | Iterable[int]) -> Path:
-    return _cache_path(name, _seasons_list(seasons))
-
-
-def synthesize(
-    seasons: Iterable[int], *, n_entities: int = N_ENTITIES, seed: int = SEED
+def land_frame(
+    raw: pd.DataFrame, *, source: str, file_name: str, retrieved_at: str
 ) -> pd.DataFrame:
-    """The synthetic source, generated fresh (no cache). Deterministic for a given seed."""
-    from ev_charging_data_unified_schema.target import derive
-
-    rng = np.random.default_rng(seed)
-    cohorts = list(PROJECT.cohorts)
-    ids = [f"E{i:04d}" for i in range(n_entities)]
-    skill = rng.normal(10.0, 3.0, size=n_entities).clip(2.0, None)
-    teams = [f"T{i % 8:02d}" for i in range(n_entities)]
-    rows = []
-    for season in _seasons_list(seasons):
-        season_shift = rng.normal(0.0, 0.5)
-        for i, eid in enumerate(ids):
-            active = rng.random(PROJECT.periods_per_season) > 0.08  # a few missing periods
-            for period in range(1, PROJECT.periods_per_season + 1):
-                if not active[period - 1]:
-                    continue
-                base = skill[i] + season_shift + 0.15 * period
-                stat_a = max(0.0, rng.normal(4 * base, 6.0))
-                stat_b = max(0.0, rng.normal(base, 2.5))
-                stat_c = float(rng.poisson(max(base / 8, 0.1)))
-                rows.append(
-                    {
-                        PROJECT.entity_key: eid,
-                        PROJECT.entity_display_column: f"Entity {i:04d}",
-                        PROJECT.cohort_name: cohorts[i % len(cohorts)],
-                        PROJECT.season_name: season,
-                        PROJECT.period_name: period,
-                        "team": teams[i],
-                        "stat_a": round(stat_a, 1),
-                        "stat_b": round(stat_b, 1),
-                        "stat_c": stat_c,
-                    }
-                )
-    df = pd.DataFrame(rows)
-    df[PROJECT.target_column] = derive(df).round(2)
-    for c in STAT_COLUMNS:
-        df[c] = df[c].astype("float64")
-    return df.sort_values(list(PROJECT.grain)).reset_index(drop=True)
+    """The landed shape: source columns as strings plus the four metadata columns."""
+    out = as_strings(raw)
+    out["_source"] = pd.Series(source, index=out.index, dtype="string")
+    out["_file_name"] = pd.Series(file_name, index=out.index, dtype="string")
+    out["_retrieved_at"] = pd.Series(retrieved_at, index=out.index, dtype="string")
+    out["_row_hash"] = row_hashes(out)
+    return out.reset_index(drop=True)
 
 
-def load_period_rows(seasons: int | Iterable[int], *, refresh: bool = False) -> pd.DataFrame:
-    seasons_l = _seasons_list(seasons)
-    path = _cache_path(CACHE_NAME, seasons_l)
-    if path.exists() and not refresh:
-        raw = pd.read_parquet(path)
-    else:
-        raw = synthesize(seasons_l)
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        raw.to_parquet(path, index=False)
-    missing = [c for c in ID_COLUMNS + STAT_COLUMNS if c not in raw.columns]
-    if missing:
-        raise KeyError(f"source missing expected columns: {missing}")
-    df = raw[list(ID_COLUMNS + STAT_COLUMNS)].copy()
-    for c in STAT_COLUMNS:
-        df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
-    return df.sort_values(list(PROJECT.grain)).reset_index(drop=True)
+def write_landed(frame: pd.DataFrame, path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    frame.to_parquet(path, index=False, compression="zstd")
+    return path
 
 
-class SyntheticLoader:
-    """``interfaces.SourceLoader`` over the synthetic world."""
-
-    LIBRARY = LIBRARY
-    ID_COLUMNS = ID_COLUMNS
-    STAT_COLUMNS = STAT_COLUMNS
-    LAST_SEASON = PROJECT.test_season + 1  # the world has one complete season past the test
-
-    def load_period_rows(
-        self, seasons: int | Iterable[int], *, refresh: bool = False
-    ) -> pd.DataFrame:
-        return load_period_rows(seasons, refresh=refresh)
-
-    def cache_path_for(self, name: str, seasons: int | Iterable[int]) -> Path:
-        return cache_path_for(name, seasons)
-
-    def current_period(self, today: dt.date | None = None) -> tuple[int, int]:
-        # A real loader reads the schedule; the stub's world ends after LAST_SEASON, so the
-        # next period to play is period 1 of the following season.
-        return self.LAST_SEASON + 1, 1
-
-    def periods_in_season(self, season: int) -> int:
-        return PROJECT.periods_per_season
+def repo_relative(path: Path) -> str:
+    p = path.resolve()
+    return p.relative_to(REPO_ROOT).as_posix() if p.is_relative_to(REPO_ROOT) else p.as_posix()
 
 
-LOADER = SyntheticLoader()
+def read_manifest(landed_dir: Path) -> dict[str, ManifestEntry]:
+    """Manifest keyed by ``<source>/<file_name>``; empty when none exists yet."""
+    path = landed_dir / LANDED_MANIFEST_NAME
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {k: ManifestEntry(**v) for k, v in data.get("files", {}).items()}
 
 
-def _main() -> None:  # pragma: no cover - CLI: python -m <pkg>.data.loader [--csv PATH]
-    import argparse
-
-    p = argparse.ArgumentParser(description="materialise the synthetic source cache")
-    p.add_argument("--csv", type=Path, help="also write the rows as CSV (for dbt fixtures)")
-    a = p.parse_args()
-    df = load_period_rows(range(PROJECT.min_season, LOADER.LAST_SEASON + 1), refresh=True)
-    print(
-        f"{len(df)} rows -> {cache_path_for(CACHE_NAME, range(PROJECT.min_season, LOADER.LAST_SEASON + 1))}"
-    )
-    if a.csv:
-        a.csv.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(a.csv, index=False)
-        print(f"csv -> {a.csv}")
+def write_manifest(landed_dir: Path, entries: dict[str, ManifestEntry]) -> Path:
+    landed_dir.mkdir(parents=True, exist_ok=True)
+    path = landed_dir / LANDED_MANIFEST_NAME
+    payload = {"files": {k: asdict(v) for k, v in sorted(entries.items())}}
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
 
 
-if __name__ == "__main__":  # pragma: no cover
-    _main()
+def manifest_key(source: str, file_name: str) -> str:
+    return f"{source}/{file_name}"
+
+
+def is_unchanged(entry: ManifestEntry | None, raw_path: Path) -> bool:
+    """True when the manifest already records this file with the same sha256 and its landed
+    parquet exists: re-landing would be a no-op."""
+    if entry is None:
+        return False
+    landed = REPO_ROOT / entry.landed_path
+    return landed.exists() and entry.sha256 == sha256_of(raw_path)

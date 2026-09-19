@@ -1,80 +1,53 @@
-"""The seams a domain plugs into. Each is implemented once in this project.
+"""The one seam a source plugs into: :class:`SourceLoader`, implemented once per session
+source under ``ev_charging_data_unified_schema.sources`` (Phase 2).
 
-* :class:`SourceLoader` — ``<package>.data.loader.LOADER``. One row per
-  ``(entity_key, season, period)`` with the raw columns every feature and the target derive
-  from, cached as dated parquet, and the current period from the source's own calendar.
-* :class:`TargetSpec` — ``<package>.target.TARGET_SPEC``. Names the target and its units,
-  derives it from raw columns by explicit rules, and reconciles those rules against the value
-  the source publishes (a non-empty disagreement frame is a stop, never a fudge).
-* :class:`FeatureModule` — ``<package>.features.asof``. The one feature builder training,
-  evaluation and serving all call. Every feature of a row uses only rows strictly earlier
-  within the entity.
+A loader owns download and landing for one source and nothing else: no cleaning, no typing.
+Everything downstream is dbt. The landed shape is the contract:
 
-The artifact shapes that flow between layers are JSON Schemas under ``artifacts/schemas/``.
-``tests/test_interfaces.py`` asserts the implementations satisfy these protocols and that every
-committed artifact validates against its schema.
+* one parquet file per downloaded source file under ``LANDED_DIR/<source>/``;
+* every source column kept as a string (dbt silver does the typing, so a retyped column is a
+  drift event, not a crash);
+* the landing metadata columns ``_source``, ``_file_name``, ``_retrieved_at``, ``_row_hash``;
+* a manifest entry per file: URL, retrieved_at, bytes, sha256, row count;
+* re-running with unchanged files is a no-op (the sha256 in the manifest decides).
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import pandas as pd
 
 
+@dataclass(frozen=True)
+class ManifestEntry:
+    """What the landing manifest records for one downloaded file."""
+
+    source: str
+    file_name: str
+    url: str
+    retrieved_at: str
+    """ISO-8601 UTC timestamp of the download."""
+    bytes: int
+    sha256: str
+    row_count: int
+    landed_path: str
+    """Repo-relative path of the landed parquet."""
+
+
 @runtime_checkable
 class SourceLoader(Protocol):
-    LIBRARY: str
-    """``<client>==<version>`` recorded in training metadata for provenance."""
-    ID_COLUMNS: tuple[str, ...]
-    """Identifier / context columns: entity key, display name, cohort, season, period, ..."""
-    STAT_COLUMNS: tuple[str, ...]
-    """Raw numeric columns. Every feature and the target derive from these."""
+    SOURCE: str
+    """Short name; matches ``config.PROJECT.source_names``."""
+    URLS: tuple[str, ...]
+    """The file or API endpoints downloaded, exactly as recorded in docs/DATA_SOURCES.md."""
 
-    def load_period_rows(
-        self, seasons: int | Iterable[int], *, refresh: bool = False
-    ) -> pd.DataFrame:
-        """One row per grain, ``ID_COLUMNS + STAT_COLUMNS``, sorted by grain, numeric columns
-        float64. Raises ``KeyError`` when the source lacks an expected column."""
+    def download(self, raw_dir: Path, *, refresh: bool = False) -> list[Path]:
+        """Fetch every file into ``raw_dir/<SOURCE>/`` and return the local paths. A file
+        already present is re-used unless ``refresh``."""
 
-    def cache_path_for(self, name: str, seasons: int | Iterable[int]) -> Path:
-        """The dated cache file a same-day load reads or writes (dbt's source)."""
-
-    def current_period(self, today: Any = None) -> tuple[int, int]:
-        """``(season, next_period_to_play)`` from the source's calendar, not the clock."""
-
-    def periods_in_season(self, season: int) -> int:
-        """Number of periods in ``season`` (the freshness contract's ceiling)."""
-
-
-@dataclass(frozen=True)
-class TargetSpec:
-    column: str
-    units: str
-    required_columns: tuple[str, ...]
-    derive: Callable[[pd.DataFrame], pd.Series]
-    """``derive(df) -> Series`` of the target from raw columns, by explicit rules."""
-    reconcile: Callable[[pd.DataFrame], pd.DataFrame]
-    """Rows where the rules disagree with the source's own published value; empty = ok."""
-
-
-@runtime_checkable
-class FeatureModule(Protocol):
-    FEATURE_VERSION: str
-    KEY_COLUMNS: tuple[str, ...]
-    CONTEXT_COLUMNS: tuple[str, ...]
-    HISTORY_FLAG: str
-    TARGET_FLAG: str
-
-    def all_feature_names(self) -> list[str]: ...
-
-    def features_for_cohort(self, cohort: str) -> list[str]: ...
-
-    def build_features(
-        self, rows: pd.DataFrame, targets: pd.DataFrame | None = None
-    ) -> pd.DataFrame: ...
-
-    def training_frame(self, features: pd.DataFrame) -> pd.DataFrame: ...
+    def read_raw(self, path: Path) -> pd.DataFrame:
+        """Parse one raw file into a frame with every column as a string, exactly the source's
+        column names. No cleaning."""

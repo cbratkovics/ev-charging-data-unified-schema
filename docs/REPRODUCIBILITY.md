@@ -1,3 +1,5 @@
+> **Template text.** This file still describes the prediction-pipeline template this repository was rendered from (docs/adr/0001-origin.md). It is rewritten in Phase 8; nothing in it describes the current project.
+
 # Reproducibility of the warehouse exports
 
 Three facts, learned the hard way on the source project, that decide how you prove "our numbers

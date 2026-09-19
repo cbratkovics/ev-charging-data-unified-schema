@@ -1,50 +1,31 @@
-.PHONY: help install bootstrap train evaluate score scheduled test lint format api build dbt-deps dbt-dev dbt-state dbt-slim dbt-prod dbt-export dbt-docs dbt-lint check-docs frontend
+.PHONY: help install test lint format dbt-deps dbt-parse dbt-dev dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
 DBT ?= .venv/bin/dbt
 DBT_FLAGS = --project-dir dbt --profiles-dir dbt
-DBT_TARGET ?= dev
 # Reproducible warehouse builds: DuckDB's parallel aggregation order is not deterministic, so
 # exports differ at the 1e-15 level between builds; set EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_THREADS=1 when
 # comparing exports (docs/REPRODUCIBILITY.md).
 
 help:
-	@echo "install    - create .venv and install training + dev dependencies (pinned toolchain)"
-	@echo "bootstrap  - train + evaluate + score one period on the stub loader (creates artifacts/)"
-	@echo "test       - pytest (offline; the stub loader is the fixture)"
-	@echo "lint       - ruff + black --check"
-	@echo "scheduled  - dry-run the scheduled scoring job"
-	@echo "api        - run the API locally on :7860"
-	@echo "dbt-dev    - dbt deps + build the medallion warehouse locally (.duckdb/dev.duckdb)"
-	@echo "dbt-state  - save the last dev build as slim-build state in .dbt-state/"
-	@echo "dbt-slim   - build only state:modified+ against .dbt-state, deferring the rest"
-	@echo "dbt-prod   - dbt build against MotherDuck (needs MOTHERDUCK_TOKEN)"
-	@echo "dbt-export - export gold marts to artifacts/marts/*.parquet (DBT_TARGET=dev|prod)"
-	@echo "dbt-docs   - generate the static dbt docs site into dbt/target"
-	@echo "check-docs - description coverage + model-card placeholder lint"
+	@echo "install       - create .venv and install the package + dev dependencies (pinned toolchain)"
+	@echo "test          - pytest (offline; runs on the fixture under tests/fixtures/)"
+	@echo "lint          - ruff + black --check"
+	@echo "ingest        - download the real sources into data/raw/ and land them as parquet (network)"
+	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
+	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
+	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
+	@echo "dbt-slim      - build only state:modified+ against .dbt-state, deferring the rest"
+	@echo "dbt-export    - export gold models to exports/ (parquet + json)"
+	@echo "dbt-docs      - generate the static dbt docs site into dbt/target"
+	@echo "dbt-lint      - sqlfluff over the dbt project"
+	@echo "check-docs    - every dbt model, column, source and exposure has a description"
+	@echo "check-numbers - every number in README / docs resolves to an artifact key"
 
 install:
 	uv venv --python 3.12 .venv
-	uv pip install --python $(PY) -c constraints.txt -r requirements-train.txt
-	uv pip install --python $(PY) -e .
-
-bootstrap: train evaluate score
-
-train:
-	$(PY) scripts/train.py
-
-evaluate:
-	$(PY) scripts/evaluate.py
-
-# scoring runs the silver contracts through dbt, so the packages must be installed first
-score: dbt-deps
-	mkdir -p .duckdb
-	$(PY) scripts/run_scheduled.py
-
-scheduled: dbt-deps
-	mkdir -p .duckdb
-	$(PY) scripts/run_scheduled.py --dry-run
+	uv pip install --python $(PY) -c constraints.txt -e ".[dev]"
 
 test:
 	$(PY) -m pytest tests
@@ -55,19 +36,17 @@ lint:
 
 format:
 	$(PY) -m black $(PKG) tests scripts
+	$(PY) -m ruff check --fix $(PKG) tests scripts
 
-api:
-	$(PY) -m uvicorn $(PKG).serve.app:app --host 127.0.0.1 --port 7860
-
-build:
-	docker build -t $(PKG)-api .
-
-frontend:
-	cd frontend && npm run dev
+ingest:
+	$(PY) -m $(PKG).ingest
 
 dbt-deps:
 	$(DBT) deps $(DBT_FLAGS)
 	@find dbt/dbt_packages -maxdepth 1 -type d -empty -delete
+
+dbt-parse: dbt-deps
+	$(DBT) parse $(DBT_FLAGS)
 
 dbt-dev: dbt-deps
 	mkdir -p .duckdb
@@ -83,12 +62,9 @@ dbt-slim: dbt-deps
 	@test -f .dbt-state/manifest.json || (echo "no .dbt-state; run make dbt-dev && make dbt-state first" && exit 1)
 	$(DBT) build $(DBT_FLAGS) --target dev --select state:modified+ --defer --state $(CURDIR)/.dbt-state
 
-dbt-prod: dbt-deps
-	$(DBT) build $(DBT_FLAGS) --target prod
-
 dbt-export:
-	mkdir -p artifacts/marts
-	GITHUB_SHA=$${GITHUB_SHA:-$$(git rev-parse HEAD 2>/dev/null || echo '')} $(DBT) run-operation export_gold $(DBT_FLAGS) --target $(DBT_TARGET)
+	mkdir -p exports
+	GITHUB_SHA=$${GITHUB_SHA:-$$(git rev-parse HEAD 2>/dev/null || echo '')} $(DBT) run-operation export_gold $(DBT_FLAGS) --target dev
 
 dbt-docs: dbt-deps
 	$(DBT) docs generate $(DBT_FLAGS) --target dev --static
@@ -98,4 +74,6 @@ dbt-lint:
 
 check-docs:
 	$(PY) scripts/check_dbt_descriptions.py
-	$(PY) scripts/check_model_card.py
+
+check-numbers:
+	$(PY) scripts/check_doc_numbers.py

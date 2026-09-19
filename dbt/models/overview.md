@@ -1,42 +1,38 @@
 {% docs __overview__ %}
 
-# ev_charging_data_unified_schema_dbt — analytics warehouse for Ev Charging Data Unified Schema
+# ev_charging_data_unified_schema_dbt
 
-Consolidates five messy partner feeds into one tested dbt schema on DuckDB. This is the analytics layer: a bronze / silver / gold medallion built with dbt
-Core and dbt-duckdb, DuckDB locally and in CI, MotherDuck in production, built by the scheduled
-job after every scoring run. Every source is a file the repository already owns.
+Consolidates public EV-charging session data from four operators, each published in a different
+shape, into one tested, documented schema on DuckDB. Every source is a file the repository's own
+loaders landed; there is no managed database and no paid service.
 
 ## Layers
 
-**Bronze** (`brz_*`) — typed one-to-one copies of the source files; every row carries `source_file`.
+**Bronze** (`brz_*`) — one model per source, reading the landed parquet as-is: every column a
+string plus `_source`, `_file_name`, `_retrieved_at`, `_row_hash`. No cleaning beyond
+column-name normalisation.
 
-**Silver** (`slv_*`) — conformed, deduplicated, grain-enforced; the data contracts are its tests.
-`slv_period_rows` is incremental (delete+insert with a restatement lookback).
+**Silver** (`slv_*`) — per-source conforming (types, timestamps in UTC and station-local time,
+kWh and minutes), a documented natural-key dedup, row-level quality flags, then one unified
+session contract (`slv_sessions_unioned`) and the rejected rows with reason codes
+(`slv_sessions_quarantined`). Accepted + quarantined = bronze, enforced by a test.
 
-**Snapshot** (`snp_entity`) — SCD2 history of the entity dimension.
+**Snapshot** (`snp_station`) — SCD2 history of station attributes.
 
-**Gold** — contracted marts the API and the site read: `dim_entity`, `dim_model_version`,
-`fct_entity_period` (prediction, actual, error, causal baseline), `fct_period_eval` (metrics per
-window / period / cohort), `fct_decision_policy` (versioned floor-policy sweep), plus the
-snapshot-backed views `dim_entity_current` / `dim_entity_asof`.
+**Gold** — contracted facts and dimensions: `fct_charging_session` (one row per session,
+incremental with a lookback), `fct_station_day` (station × station-local date, sessions crossing
+midnight split across days), `dim_station`, `dim_operator`, `dim_date`. Utilisation is a ratio of
+summed numerator and denominator at the requested rollup, never an average of daily percentages.
 
 ## How trust is established
 
-- **Artifact reconciliation.** `assert_marts_reconcile_to_eval_artifacts` recomputes n, MAE and
-  the tolerance bands from `fct_period_eval` for every committed evaluation artifact and fails the
-  build on any disagreement above 1e-4. The warehouse cannot publish a number the artifacts do
-  not already carry.
-- **Contracts** on every gold model; **unit tests** on the target rules, the prediction dedup rule
-  and the metric aggregation; **versions** on the public decisions mart; **slim CI** on pull requests.
-
-## From model to mart to API
-
-scored-period file → `brz_predictions_periodic` → `slv_predictions` → `fct_entity_period` →
-`fct_period_eval` / `fct_decision_policy` → `export_gold` → `artifacts/marts/<alias>.parquet` →
-FastAPI `/marts/{mart}`. Evaluation numbers on the site come from `artifacts/eval/*.json` through
-`/performance`; the reconciliation test is what lets the two paths coexist.
+- **Row conservation**: bronze rows = silver accepted + quarantined, per source.
+- **Reconciliation artifact**: `artifacts/reconciliation/<run_id>.json` records row counts per
+  layer and kWh / session totals raw versus gold, with each variance classified
+  release-blocking or non-blocking. A blocking variance fails the build.
+- **Contracts** on every gold model; **unit tests** on duration parsing, timezone / DST
+  conversion, day-first dates, the midnight split, dedup and the utilisation rollup.
 
 - Repository: https://github.com/cbratkovics/ev-charging-data-unified-schema
-- API docs: https://-ev-charging-data-unified-schema.hf.space/docs
 
 {% enddocs %}

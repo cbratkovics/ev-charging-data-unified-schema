@@ -1,7 +1,10 @@
-# Pins for the analytics toolchain, applied by CI, the scheduled job and `make install`
-# (pip install -c constraints.txt). The dev build, the slim-CI state it is compared against, and
-# the prod build must run the same dbt-core / dbt-duckdb / DuckDB, or state:modified+, the
-# incremental model and the snapshot can behave differently between them. Bump deliberately.
+# Pins for the toolchain, applied by CI and `make install` (pip install -c constraints.txt).
+# The dev build and the slim-CI state it is compared against must run the same dbt-core /
+# dbt-duckdb / DuckDB, or state:modified+, the incremental model and the snapshot can behave
+# differently between them. pandas / pyarrow are pinned so the landed parquet is byte-stable
+# across machines. Bump deliberately.
 dbt-core==1.12.4
 dbt-duckdb==1.11.0
 duckdb==1.5.5
+pandas==3.0.6
+pyarrow==25.0.1

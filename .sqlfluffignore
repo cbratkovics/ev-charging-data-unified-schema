@@ -2,4 +2,3 @@ dbt/target/
 dbt/dbt_packages/
 dbt/logs/
 .venv/
-frontend/
