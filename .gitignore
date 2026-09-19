@@ -1,0 +1,45 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# secrets: only the placeholder example is tracked
+.env
+.env.*
+!.env.example
+
+# source cache written by the loader (regenerated; never committed)
+data/cache/
+
+# dbt local warehouse, build outputs, slim-build state
+.duckdb/
+.dbt-state/
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+node_modules/
+
+# Committed on purpose: versioned model artifacts, evaluation artifacts, exported marts, schemas.
+!artifacts/**
+# A global ~/.gitignore that ignores `lib/` (common) silently hides frontend/src/lib and
+# `*.sql` hides the dbt project; these re-includes make the repository self-contained.
+!lib/
+!**/lib/
+!frontend/src/lib/**
+!dbt/**/*.sql
+!*.parquet
+
+# copier keeps the template answers here; commit it so `copier update` can replay them
+!.copier-answers.yml

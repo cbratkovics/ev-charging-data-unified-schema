@@ -1,0 +1,22 @@
+# Committed on purpose: no secret lives here. prod reads MOTHERDUCK_TOKEN from the environment
+# (GitHub Actions secret for the scheduled job; exported locally by the owner). The API never
+# uses this file: it reads the parquet marts the scheduled job exports.
+ev_charging_data_unified_schema_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # <PREFIX>_DUCKDB_PATH lets tests build into a scratch file.
+      path: "{{ env_var('EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH', '.duckdb/dev.duckdb') }}"
+      schema: main
+      threads: 4
+      # DuckDB's own parallelism (dbt `threads` only bounds model concurrency). Parallel
+      # aggregation order is not deterministic, so exports differ at the 1e-15 level between
+      # builds; <PREFIX>_DUCKDB_THREADS=1 makes a build reproducible (docs/REPRODUCIBILITY.md).
+      settings:
+        threads: "{{ env_var('EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_THREADS', '4') | int }}"
+    prod:
+      type: duckdb
+      path: "md:{{ env_var('EV_CHARGING_DATA_UNIFIED_SCHEMA_MOTHERDUCK_DATABASE', 'ev_charging_data_unified_schema') }}?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
+      schema: main
+      threads: 4

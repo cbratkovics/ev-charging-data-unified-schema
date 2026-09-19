@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scored period file (predictions_version 1.0)",
+  "description": "artifacts/predictions/<season>/period_<pp>.json, written by pipeline.score.score_period and updated in place by attach_actuals once the period has been played. Also the shape of the dbt source predictions_periodic.",
+  "type": "object",
+  "required": [
+    "predictions_version",
+    "season",
+    "period",
+    "model_version",
+    "feature_version",
+    "candidate",
+    "generated_at_utc",
+    "data_through",
+    "interval_method",
+    "n",
+    "predictions"
+  ],
+  "properties": {
+    "predictions_version": {
+      "const": "1.0"
+    },
+    "season": {
+      "type": "integer"
+    },
+    "period": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "feature_version": {
+      "type": "string"
+    },
+    "candidate": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "generated_at_utc": {
+      "type": "string"
+    },
+    "actuals_attached_at_utc": {
+      "type": "string"
+    },
+    "data_through": {
+      "type": "object",
+      "required": [
+        "season",
+        "period"
+      ],
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "period": {
+          "type": "integer"
+        }
+      }
+    },
+    "interval_method": {
+      "type": "string"
+    },
+    "n": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "prediction",
+          "floor",
+          "ceiling",
+          "candidate"
+        ],
+        "properties": {
+          "prediction": {
+            "type": "number"
+          },
+          "floor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ceiling": {
+            "type": "number"
+          },
+          "candidate": {
+            "type": "string"
+          },
+          "actual": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

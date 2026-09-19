@@ -1,0 +1,7 @@
+# Pins for the analytics toolchain, applied by CI, the scheduled job and `make install`
+# (pip install -c constraints.txt). The dev build, the slim-CI state it is compared against, and
+# the prod build must run the same dbt-core / dbt-duckdb / DuckDB, or state:modified+, the
+# incremental model and the snapshot can behave differently between them. Bump deliberately.
+dbt-core==1.12.4
+dbt-duckdb==1.11.0
+duckdb==1.5.5

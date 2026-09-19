@@ -1,0 +1,13 @@
+version: 2
+
+snapshots:
+  - name: snp_entity
+    description: SCD Type 2 history of dim_entity's slowly changing attributes, captured on every build; as_of_period_key is the data-through period when the version was first captured.
+    columns:
+      - { name: station_id, description: entity identifier }
+      - { name: station_name, description: display name at capture (check column) }
+      - { name: channel, description: cohort at capture (check column) }
+      - { name: team, description: team at capture (check column) }
+      - { name: as_of_period_key, description: max period_key in slv_period_rows when this version was first captured }
+      - { name: dbt_valid_from, description: capture timestamp of this version }
+      - { name: dbt_valid_to, description: timestamp the version was superseded; null for the current version }

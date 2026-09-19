@@ -1,0 +1,146 @@
+version: 2
+
+models:
+  - name: brz_period_rows
+    description: Typed copy of the newest source snapshot, every column the loader keeps; nothing filtered.
+    columns:
+      - { name: source_file, description: repo-relative path of the snapshot file }
+      - { name: station_id, description: entity identifier }
+      - { name: station_name, description: display name }
+      - { name: channel, description: cohort (one model per value) }
+      - { name: day, description: outer period }
+      - { name: day, description: scoring period inside the season }
+      - { name: team, description: team / group attribute (slowly changing) }
+      - { name: stat_a, description: raw stat a }
+      - { name: stat_b, description: raw stat b }
+      - { name: stat_c, description: raw stat c }
+      - { name: utilization, description: the source's published target (reconciliation only) }
+  - name: brz_predictions_test
+    description: The frozen test season scored at training time (models/<version>/test_predictions.csv), typed.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: model_version, description: model version, from the path }
+      - { name: station_id, description: entity identifier }
+      - { name: day, description: season }
+      - { name: day, description: period }
+      - { name: channel, description: cohort }
+      - { name: station_name, description: display name }
+      - { name: team, description: team }
+      - { name: candidate, description: candidate model name }
+      - { name: prediction, description: point prediction }
+      - { name: prediction_floor, description: 10th residual-quantile bound, clipped at 0 }
+      - { name: prediction_ceiling, description: 90th residual-quantile bound }
+      - { name: actual, description: realised target }
+  - name: brz_predictions_oos
+    description: A complete later season scored with the frozen artifact (models/<version>/oos_predictions_<season>.csv), typed.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: model_version, description: model version, from the path }
+      - { name: station_id, description: entity identifier }
+      - { name: day, description: season }
+      - { name: day, description: period }
+      - { name: channel, description: cohort }
+      - { name: station_name, description: display name }
+      - { name: team, description: team }
+      - { name: candidate, description: candidate model name }
+      - { name: prediction, description: point prediction }
+      - { name: prediction_floor, description: 10th residual-quantile bound, clipped at 0 }
+      - { name: prediction_ceiling, description: 90th residual-quantile bound }
+      - { name: actual, description: realised target }
+  - name: brz_predictions_periodic
+    description: One row per prediction record in every scored-period file written by the scheduled job.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: day, description: season }
+      - { name: day, description: period }
+      - { name: model_version, description: model version }
+      - { name: feature_version, description: feature module version }
+      - { name: generated_at_utc, description: when the file was written }
+      - { name: actuals_attached_at_utc, description: when actuals were attached (null until played) }
+      - { name: station_id, description: entity identifier }
+      - { name: station_name, description: display name }
+      - { name: team, description: team }
+      - { name: channel, description: cohort }
+      - { name: candidate, description: candidate model name }
+      - { name: prediction, description: point prediction }
+      - { name: prediction_floor, description: floor }
+      - { name: prediction_ceiling, description: ceiling }
+      - { name: actual, description: realised target once attached }
+  - name: brz_eval_artifacts
+    description: One row per evaluation artifact with the nested blocks kept as structs.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: artifact_version, description: artifact schema version }
+      - { name: eval_id, description: evaluation id, data_tests: [unique, not_null] }
+      - { name: kind, description: frozen_test or out_of_sample_season }
+      - { name: season, description: evaluated season }
+      - { name: generated_at_utc, description: when the artifact was written }
+      - { name: code_commit, description: git commit that produced it }
+      - { name: input, description: struct of the scored input (path, sha256, n_rows) }
+      - { name: model, description: struct of the evaluated model }
+      - { name: split, description: struct of the split }
+      - { name: metric_definitions, description: struct of metric definitions }
+      - { name: metrics, description: struct of headline metrics }
+      - { name: baseline, description: struct of baseline metrics }
+      - { name: cohorts, description: struct of per-cohort metrics }
+      - { name: rolling_origin, description: struct of the rolling-origin folds }
+  - name: brz_eval_rolling
+    description: One row per scored in-season period from the rolling files.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: season, description: season }
+      - { name: period, description: scored period }
+      - { name: n, description: rows with an actual }
+      - { name: champion_mae, description: champion MAE }
+      - { name: champion_within_band1_rate, description: champion within-band-1 rate }
+      - { name: champion_baseline_mae, description: baseline MAE on the champion rows }
+      - { name: challenger_mae, description: challenger MAE }
+      - { name: challenger_within_band1_rate, description: challenger within-band-1 rate }
+      - { name: challenger_baseline_mae, description: baseline MAE on the challenger rows }
+      - { name: scored_at_utc, description: when the period was scored }
+  - name: brz_manifest
+    description: The artifact manifest as one row.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: manifest_version, description: manifest schema version }
+      - { name: feature_version, description: feature module version }
+      - { name: champion_model_version, description: champion slot, data_tests: [not_null] }
+      - { name: challenger_model_version, description: challenger slot }
+      - { name: eval_id, description: the frozen-test evaluation id }
+      - { name: evaluations, description: list of registered evaluations }
+      - { name: data_through_season, description: data-through season }
+      - { name: data_through_period, description: data-through period }
+      - { name: predictions_latest, description: latest predictions file }
+      - { name: last_run_id, description: last run id }
+      - { name: last_run_at_utc, description: last run time }
+      - { name: last_run_action, description: PUBLISH / HOLD / PROMOTE }
+      - { name: last_run_rows, description: rows the last run saw }
+      - { name: updated_at_utc, description: manifest write time }
+  - name: brz_model_metadata
+    description: One row per trained model version with training provenance and per-cohort sample sizes.
+    columns:
+      - { name: source_file, description: repo-relative path }
+      - { name: model_version, description: model version, data_tests: [unique, not_null] }
+      - { name: feature_version, description: feature module version }
+      - { name: sklearn_version, description: scikit-learn version }
+      - { name: data_library, description: source client and version }
+      - { name: trained_at_utc, description: training time }
+      - { name: data_through_season, description: last season in the training pull }
+      - { name: data_through_period, description: last period in the training pull }
+      - { name: train_seasons, description: training seasons }
+      - { name: val_season, description: validation season }
+      - { name: test_season, description: frozen test season }
+      - { name: target, description: target as recorded }
+      - { name: input_sha256, description: input hash }
+      - { name: input_rows, description: input rows }
+      - { name: code_commit, description: training commit }
+      - { name: interval_method, description: interval derivation }
+
+      - { name: champion_a, description: champion candidate for A }
+      - { name: n_features_a, description: features used by the A models }
+      - { name: n_train_a, description: training rows for A }
+      - { name: n_test_a, description: test rows for A }
+      - { name: champion_b, description: champion candidate for B }
+      - { name: n_features_b, description: features used by the B models }
+      - { name: n_train_b, description: training rows for B }
+      - { name: n_test_b, description: test rows for B }

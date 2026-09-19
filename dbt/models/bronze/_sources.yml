@@ -1,0 +1,91 @@
+version: 2
+
+# Every source is a file committed to (or cached by) this repository. dbt-duckdb reads them in
+# place through `external_location`; bronze models copy them into warehouse tables so the prod
+# warehouse holds a typed copy and silver/gold never touch files. Paths are relative to the repo
+# root. `formatter: template` keeps DuckDB `columns = {...}` specs intact.
+sources:
+  - name: repo_files
+    description: >
+      Files produced by the ev_charging_data_unified_schema package: the source cache (data/cache/, git-ignored,
+      refreshed by the scheduled job) and the committed evaluation, prediction, manifest and
+      model-metadata artifacts under artifacts/.
+    loader: ev_charging_data_unified_schema (source loader cache + committed artifacts)
+    meta:
+      owner: "cbratkovics"
+    tables:
+      - name: period_rows
+        description: >
+          One row per (station_id, day, day) from the source loader,
+          one parquet snapshot per (season range, load date); the bronze model keeps the newest.
+        meta:
+          formatter: template
+          external_location: >-
+            {% if var('rows_path').endswith('.csv') %}read_csv('{{ var('rows_path') }}', filename = true, header = true)
+            {%- else %}read_parquet('{{ var('rows_path') }}', filename = true, union_by_name = true){% endif %}
+        columns:
+          - name: station_id
+            description: entity identifier
+          - name: day
+            description: outer period
+          - name: day
+            description: scoring period inside the season
+          - name: utilization
+            description: the source's published target; used only to reconcile the rules macro
+
+      - name: predictions_periodic
+        description: >
+          artifacts/predictions/<season>/period_<pp>.json — one file per scored period, written by
+          the scheduled job; `actual` is attached once the period has been played.
+        meta:
+          formatter: template
+          external_location: >-
+            read_json('artifacts/predictions/*/period_*.json', filename = true, columns = {
+              'predictions_version': 'VARCHAR', 'season': 'INTEGER', 'period': 'INTEGER',
+              'model_version': 'VARCHAR', 'feature_version': 'VARCHAR',
+              'generated_at_utc': 'VARCHAR', 'actuals_attached_at_utc': 'VARCHAR',
+              'data_through': 'STRUCT(season INTEGER, period INTEGER)', 'n': 'INTEGER',
+              'predictions': 'STRUCT(station_id VARCHAR, name VARCHAR, team VARCHAR, channel VARCHAR,
+                prediction DOUBLE, floor DOUBLE, ceiling DOUBLE, candidate VARCHAR, actual DOUBLE)[]'})
+
+      - name: predictions_test
+        description: artifacts/models/<version>/test_predictions.csv — the frozen test season scored at training time, both candidates, with realised targets.
+        meta:
+          formatter: template
+          external_location: "read_csv('artifacts/models/*/test_predictions.csv', filename = true, header = true)"
+
+      - name: predictions_oos
+        description: artifacts/models/<version>/oos_predictions_<season>.csv — a complete later season scored with the frozen artifact.
+        meta:
+          formatter: template
+          external_location: "read_csv('artifacts/models/*/oos_predictions_*.csv', filename = true, header = true, union_by_name = true)"
+
+      - name: eval_artifacts
+        description: artifacts/eval/eval-*.json — evaluation artifacts (artifact_version 2.1). The published numbers come from these files; the gold marts must reconcile to them.
+        meta:
+          formatter: template
+          external_location: "read_json_auto('artifacts/eval/eval-*.json', filename = true)"
+
+      - name: eval_rolling
+        description: artifacts/eval/rolling_<season>.json — in-season champion vs challenger MAE per scored period, appended by the scheduled job.
+        meta:
+          formatter: template
+          external_location: >-
+            read_json('artifacts/eval/rolling_*.json', filename = true, columns = {
+              'season': 'INTEGER',
+              'periods': 'STRUCT(period INTEGER, n INTEGER,
+                champion STRUCT(n INTEGER, mae DOUBLE, within_band1_rate DOUBLE, baseline_mae DOUBLE),
+                challenger STRUCT(n INTEGER, mae DOUBLE, within_band1_rate DOUBLE, baseline_mae DOUBLE),
+                scored_at_utc VARCHAR)[]'})
+
+      - name: manifest
+        description: artifacts/manifest.json — champion/challenger slots, registered evaluations, data_through and the last run.
+        meta:
+          formatter: template
+          external_location: "read_json_auto('artifacts/manifest.json', filename = true)"
+
+      - name: model_metadata
+        description: artifacts/models/<version>/metadata.json — training provenance per model version.
+        meta:
+          formatter: template
+          external_location: "read_json_auto('artifacts/models/*/metadata.json', filename = true, maximum_object_size = 50000000)"

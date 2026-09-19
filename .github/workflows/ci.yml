@@ -1,0 +1,191 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy_space:
+        description: "Mirror the working tree to the Hugging Face Space"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  PKG: ev_charging_data_unified_schema
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-train.txt
+            constraints.txt
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -c constraints.txt -r requirements-train.txt
+          pip install -e .
+      - name: Cache dbt packages (shared with the dbt job)
+        uses: actions/cache@v5
+        with:
+          path: dbt/dbt_packages
+          key: dbt-packages-${{ hashFiles('dbt/packages.yml', 'dbt/package-lock.yml') }}
+      - name: dbt deps
+        # tests/test_dbt_incremental.py shells out to dbt and installs the packages itself if they
+        # are missing; this step keeps the job fast by hitting the shared cache.
+        run: make dbt-deps DBT=dbt
+      - name: Lint
+        run: |
+          ruff check $PKG tests scripts
+          black --check $PKG tests scripts
+      - name: Bootstrap artifacts when none are committed (stub loader)
+        # A fresh project has no artifacts; the stub loader makes train + evaluate + score
+        # deterministic, so CI can exercise the full path. Once real artifacts are committed
+        # this step is skipped and the tests run against them.
+        run: test -f artifacts/manifest.json || make PY=python bootstrap
+      - name: Tests
+        run: python -m pytest tests
+      - name: Import check for the server
+        run: python -c "import $PKG.serve.app; print('server importable')"
+      - name: Model card carries no placeholder numbers
+        run: python scripts/check_model_card.py
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: python
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build API image
+        run: docker build -t api:ci .
+      - name: Smoke test /health
+        # Needs committed artifacts; a fresh project skips the run and only builds the image.
+        run: |
+          test -f artifacts/manifest.json || { echo "no committed artifacts; image built only"; exit 0; }
+          docker run -d --rm -p 7860:7860 --name api api:ci
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:7860/health && break; sleep 2; done
+          curl -sf http://127.0.0.1:7860/health
+          docker stop api
+
+  dbt:
+    # The warehouse on the dev target only (a DuckDB file). Never a prod / MotherDuck build here.
+    # Slim CI: pushes to main do a full dev build and save its manifest + DuckDB file to the Actions
+    # cache; every other run restores that state and builds only `state:modified+`, deferring
+    # unmodified upstream models to the restored file. No cached state (first run, or the cache
+    # evicted after seven days without access) falls back to a full dev build.
+    runs-on: ubuntu-latest
+    env:
+      DBT_PROJECT_DIR: dbt
+      DBT_PROFILES_DIR: dbt
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-train.txt
+            constraints.txt
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -c constraints.txt -r requirements-train.txt
+          pip install -e .
+      - name: Source rows and artifacts for the warehouse
+        # dbt reads the loader's cache file and the committed artifacts; a fresh project
+        # bootstraps both from the stub loader.
+        run: |
+          python -m $PKG.data.loader
+          test -f artifacts/manifest.json || make PY=python bootstrap
+      - name: Cache dbt packages (shared with the python job)
+        uses: actions/cache@v5
+        with:
+          path: dbt/dbt_packages
+          key: dbt-packages-${{ hashFiles('dbt/packages.yml', 'dbt/package-lock.yml') }}
+      - name: dbt deps
+        run: make dbt-deps DBT=dbt
+      - name: Restore the last main dev build (slim-CI state)
+        if: ${{ github.ref != 'refs/heads/main' }}
+        uses: actions/cache/restore@v5
+        with:
+          path: .dbt-state
+          key: dbt-dev-state-${{ github.sha }}
+          restore-keys: dbt-dev-state-
+      - name: dbt build (dev)
+        run: |
+          mkdir -p .duckdb
+          if [ "$GITHUB_REF" != "refs/heads/main" ] && [ -f .dbt-state/manifest.json ] && [ -f .dbt-state/dev.duckdb ]; then
+            echo "slim build: state:modified+ against main@$(cat .dbt-state/commit)"
+            cp .dbt-state/dev.duckdb .duckdb/dev.duckdb
+            dbt build --target dev --select state:modified+ --defer --state "$PWD/.dbt-state" --full-refresh
+          else
+            echo "full dev build (main, or no cached slim-CI state)"
+            dbt build --target dev --full-refresh
+          fi
+      - name: sqlfluff
+        run: sqlfluff lint dbt/models dbt/tests dbt/macros dbt/snapshots
+      - name: dbt docs generate
+        run: |
+          dbt docs generate --target dev --static
+          mkdir -p site && cp dbt/target/static_index.html site/index.html
+      - name: Every model, column, source and exposure is described
+        run: python scripts/check_dbt_descriptions.py
+      - name: Save this build as the slim-CI state (main only)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          mkdir -p .dbt-state
+          cp dbt/target/manifest.json .dbt-state/manifest.json
+          cp .duckdb/dev.duckdb .dbt-state/dev.duckdb
+          git rev-parse HEAD > .dbt-state/commit
+      - uses: actions/cache/save@v5
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          path: .dbt-state
+          key: dbt-dev-state-${{ github.sha }}
+      - name: Upload docs site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  pages:
+    # Publishes the dbt docs to GitHub Pages (Settings -> Pages -> Source: GitHub Actions).
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: dbt
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  deploy-space:
+    # Manual only: "Run workflow" with deploy_space=true. Needs the HF_TOKEN repository secret.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_space }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Upload to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install -q "huggingface_hub[cli]"
+          pip install -q -e . --no-deps
+          hf upload "$(python -m ev_charging_data_unified_schema.config hf_space)" . . --repo-type space \
+            --exclude ".git/*" --exclude ".venv/*" --exclude "data/*" --exclude "*.egg-info/*" \
+            --exclude ".duckdb/*" --exclude ".dbt-state/*" --exclude "dbt/target/*" --exclude "dbt/dbt_packages/*" \
+            --exclude ".pytest_cache/*" --exclude ".ruff_cache/*" --exclude "*.env*" \
+            --exclude "frontend/node_modules/*" --exclude "frontend/.next/*"

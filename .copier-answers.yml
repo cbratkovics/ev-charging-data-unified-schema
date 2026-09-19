@@ -1,0 +1,28 @@
+_commit: v0.2.3
+_src_path: ../ds-dbt-stack-template
+cohort_name: channel
+cohorts: A,B
+domain_summary: Consolidates five messy partner feeds into one tested dbt schema on
+    DuckDB.
+entity_key: station_id
+entity_name: station
+github_owner: cbratkovics
+grain_keys: station_id,activity_date
+hf_space_name: /ev-charging-data-unified-schema
+include_frontend: false
+include_tiers: false
+motherduck_database: ev_charging_data_unified_schema
+owner_email: ''
+owner_name: cbratkovics
+package_name: ev_charging_data_unified_schema
+period_name: day
+periods_per_season: 12
+project_name: Ev Charging Data Unified Schema
+project_slug: ev-charging-data-unified-schema
+python_version: '3.12'
+schedule_cron: 0 10 * * 2
+season_name: day
+target_column: utilization
+target_units: ''
+vercel_project_name: ev-charging-data-unified-schema
+within_k: 2,4
