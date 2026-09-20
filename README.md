@@ -1,7 +1,7 @@
 # EV charging data, unified schema
 
 [![ci](https://github.com/cbratkovics/ev-charging-data-unified-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/cbratkovics/ev-charging-data-unified-schema/actions/workflows/ci.yml)
-· [dbt docs](https://cbratkovics.github.io/ev-charging-data-unified-schema/) (live once Pages is enabled)
+· [dbt docs](https://cbratkovics.github.io/ev-charging-data-unified-schema/)
 · [Findings](docs/FINDINGS.md)
 · [Portfolio card](docs/CARD.md)
 
