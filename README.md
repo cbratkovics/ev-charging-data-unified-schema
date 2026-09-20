@@ -30,15 +30,15 @@ SHA-256 per source once downloaded.
 ## Results
 
 <!-- generated:results start -->
-_Rendered by `scripts/render_docs.py` from `artifacts/silver/silver-20260920T021439Z.json` and `artifacts/sensitivity/sensitivity-20260920T021440Z.json` and `artifacts/findings/findings-20260920T021459Z.json`._
+_Rendered by `scripts/render_docs.py` from `artifacts/silver/silver-20260920T022854Z.json` and `artifacts/sensitivity/sensitivity-20260920T022855Z.json` and `artifacts/findings/findings-20260920T022915Z.json`._
 
 | Source | Raw rows | Sessions in the fact | Quarantined | Non-trivial sessions | Stations with capacity | Utilization (production port count) |
 |---|---|---|---|---|---|---|
 | boulder | 148,136 | 77,826 | 70,310 | 68,297 | see below | charging 6.2%, connected 11.4% |
-| cary | 20,142 | 20,097 | 45 | 17,733 | see below | charging 6.2% |
+| cary | 20,142 | 20,097 | 45 | 17,733 | see below | charging 7.1% |
 | dft_2017 | 272,297 | 259,683 | 12,614 | 228,439 | see below | connected 8.7% |
 
-Stations with inferred capacity: 908 (1 ports: 408, 2 ports: 395, 3 ports: 105); binding bound: connector_ids 262, floor 46, observed_concurrency 600. Excluded days: 28,861 of 306,091 station-window days.
+Stations with inferred capacity: 908 (1 ports: 409, 2 ports: 394, 3 ports: 105); binding bound: connector_ids 262, floor 46, observed_concurrency 600. Excluded days: 28,861 of 306,091 station-window days.
 
 Reconciliation status: **non_blocking** (both identities per source and month; ADR-0013).
 <!-- generated:results end -->

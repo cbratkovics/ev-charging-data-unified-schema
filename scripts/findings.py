@@ -48,11 +48,12 @@ def population_table(pop: dict[str, Any]) -> list[str]:
         ("Accepted, meets the stated rule", pop["accepted_meets_rule"]),
         ("Accepted, does not meet the stated rule", pop["accepted_not_meeting_rule"]),
     ]
-    for reason, cnt in pop["quarantined_by_primary_reason"].items():
+    for reason, cnt in sorted(pop["quarantined_by_primary_reason"].items()):
         if reason == "natural_key_duplicate":
             for twin, k in sorted(pop["natural_key_duplicate_by_twin"].items()):
                 fam, status = twin.split("/")
-                rows.append((f"Quarantined, duplicate of a {status} row in `{fam}`", k))
+                article = "an" if status[0] in "aeiou" else "a"
+                rows.append((f"Quarantined, duplicate of {article} {status} row in `{fam}`", k))
         else:
             rows.append((f"Quarantined, {reason}", cnt))
     acc = pop["accepted_meets_rule"] + pop["accepted_not_meeting_rule"]

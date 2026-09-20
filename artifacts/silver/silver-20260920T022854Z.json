@@ -198,7 +198,7 @@
       "quarantined": 12614
     }
   },
-  "code_commit": "e83ba46fb9cc73f3c2875a41258a07cbc41be6f1",
+  "code_commit": "ed72194adf253eb22ee409cd2f3e31a53ec9b072",
   "definitions": {
     "accepted": "rows of slv_sessions_unioned (primary_reason null)",
     "all_reasons": "every failing reason on quarantined rows; a row counts once per reason",
@@ -209,7 +209,7 @@
     "quarantined": "rows of slv_sessions_quarantined; by_primary_reason sums to it (ADR-0009 item 4)",
     "unknown_station": "DfT sessions whose CPID is null, keyed unknown/<Name> (ADR-0007 item 1)"
   },
-  "generated_at_utc": "2026-09-20T02:14:39+00:00",
+  "generated_at_utc": "2026-09-20T02:28:54+00:00",
   "inputs": {
     "boulder/Electric_Vehicle_Charging_Station_Data.csv": {
       "retrieved_at": "2026-09-19T23:10:30+00:00",
@@ -288,8 +288,8 @@
               "fact_rows": 209,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.6088050955238087e-15,
-                "residual": 4.092726157978177e-12,
+                "relative": 1.0725367303492053e-15,
+                "residual": 2.7284841053187847e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -317,8 +317,8 @@
               "fact_sessions": 209,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.0063017515485534e-17,
-                "residual": -5.0959236830294685e-14,
+                "relative": 1.3878038747194321e-16,
+                "residual": 1.765254609153999e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -341,8 +341,8 @@
               "fact_rows": 308,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.325140772877357e-15,
-                "residual": 1.0913936421275139e-11,
+                "relative": 1.3563321175117932e-15,
+                "residual": 6.366462912410498e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -370,7 +370,7 @@
               "fact_sessions": 308,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.758038060544584e-18,
+                "relative": 7.758038060544586e-18,
                 "residual": 1.8207657603852567e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -393,10 +393,10 @@
               "fact_kwh": 2575.447,
               "fact_rows": 392,
               "kwh": {
-                "interpretation": "identity holds exactly",
-                "relative": 0.0,
-                "residual": 0.0,
-                "status": "ok",
+                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
+                "relative": 1.9422728791355818e-15,
+                "residual": 1.000444171950221e-11,
+                "status": "non_blocking",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -423,12 +423,12 @@
               "fact_sessions": 392,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.237513849854134e-17,
+                "relative": 4.2375138498541383e-17,
                 "residual": 1.0913492332065289e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -447,8 +447,8 @@
               "fact_rows": 460,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.9246952227986916e-15,
-                "residual": 1.9099388737231493e-11,
+                "relative": 1.3927120108565237e-16,
+                "residual": -9.094947017729282e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -476,7 +476,7 @@
               "fact_sessions": 460,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.100960336672729e-17,
+                "relative": 3.100960336672728e-17,
                 "residual": 1.0125233984581428e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -499,10 +499,10 @@
               "fact_kwh": 4260.431,
               "fact_rows": 621,
               "kwh": {
-                "interpretation": "identity holds exactly",
-                "relative": 0.0,
-                "residual": 0.0,
-                "status": "ok",
+                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
+                "relative": 1.280848864971073e-15,
+                "residual": -1.0913936421275139e-11,
+                "status": "non_blocking",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -529,8 +529,8 @@
               "fact_sessions": 621,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.0006631757586501e-16,
-                "residual": -4.263256414560601e-13,
+                "relative": 1.1340849325264694e-16,
+                "residual": 4.831690603168681e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -553,8 +553,8 @@
               "fact_rows": 616,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.862967992044558e-16,
-                "residual": 5.4569682106375694e-12,
+                "relative": 1.143827998674093e-16,
+                "residual": 9.094947017729282e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -582,8 +582,8 @@
               "fact_sessions": 616,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.1106318702350245e-17,
-                "residual": -1.6342482922482304e-13,
+                "relative": 1.5548911856975956e-16,
+                "residual": -6.181721801112872e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -606,8 +606,8 @@
               "fact_rows": 531,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3673168997638873e-15,
-                "residual": 1.000444171950221e-11,
+                "relative": 1.7402215087904011e-15,
+                "residual": 1.2732925824820995e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -635,8 +635,8 @@
               "fact_sessions": 531,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.107538408554294e-17,
-                "residual": 1.1368683772161603e-13,
+                "relative": 9.32261522566288e-17,
+                "residual": -3.410605131648481e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -659,8 +659,8 @@
               "fact_rows": 637,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.092534842462058e-16,
-                "residual": 7.275957614183426e-12,
+                "relative": 6.069401131846546e-16,
+                "residual": 5.4569682106375694e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -688,8 +688,8 @@
               "fact_sessions": 637,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.5015445508474533e-16,
-                "residual": -6.750155989720952e-13,
+                "relative": 5.2158915976806287e-17,
+                "residual": 2.3447910280083306e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -712,8 +712,8 @@
               "fact_rows": 631,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.7320434218348798e-15,
-                "residual": -1.4551915228366852e-11,
+                "relative": 2.598065132752321e-15,
+                "residual": -2.1827872842550278e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -741,8 +741,8 @@
               "fact_sessions": 631,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.6006023057335188e-17,
-                "residual": -1.092459456231154e-13,
+                "relative": 1.9049940467202435e-16,
+                "residual": 8.002487561498128e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -765,8 +765,8 @@
               "fact_rows": 766,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.5984050334022496e-15,
-                "residual": 1.8189894035458565e-11,
+                "relative": 9.590430200413497e-16,
+                "residual": 1.0913936421275139e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -794,8 +794,8 @@
               "fact_sessions": 766,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.173828696404779e-16,
-                "residual": -6.679101716144942e-13,
+                "relative": 4.245763369974729e-17,
+                "residual": 2.4158453015843406e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -818,8 +818,8 @@
               "fact_rows": 719,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.3632086927448867e-16,
-                "residual": 3.637978807091713e-12,
+                "relative": 1.0089626078234666e-15,
+                "residual": -1.0913936421275139e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -847,7 +847,7 @@
               "fact_sessions": 719,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.036317763185381e-17,
+                "relative": 2.0363177631853796e-17,
                 "residual": 1.1013412404281553e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -871,8 +871,8 @@
               "fact_rows": 963,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.118193199993153e-16,
-                "residual": -1.2732925824820995e-11,
+                "relative": 5.210396114281803e-16,
+                "residual": -7.275957614183426e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -900,8 +900,8 @@
               "fact_sessions": 963,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.8445005775655774e-16,
-                "residual": 1.2878587085651816e-12,
+                "relative": 5.419015489951286e-17,
+                "residual": 3.7836400679225335e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -923,10 +923,10 @@
               "fact_kwh": 7095.503,
               "fact_rows": 906,
               "kwh": {
-                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.972532197379796e-16,
-                "residual": 1.2732925824820995e-11,
-                "status": "non_blocking",
+                "interpretation": "identity holds exactly",
+                "relative": 0.0,
+                "residual": 0.0,
+                "status": "ok",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -953,8 +953,8 @@
               "fact_sessions": 906,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.719091292427715e-17,
-                "residual": -3.348432642269472e-13,
+                "relative": 8.098811846686298e-17,
+                "residual": 5.74651437545981e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -977,7 +977,7 @@
               "fact_rows": 843,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3013115376182507e-16,
+                "relative": 1.3013115376182497e-16,
                 "residual": -1.8189894035458565e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -1006,8 +1006,8 @@
               "fact_sessions": 843,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.252395278400188e-17,
-                "residual": -4.369837824924616e-13,
+                "relative": 6.760720097782312e-17,
+                "residual": 4.725109192804666e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1030,8 +1030,8 @@
               "fact_rows": 764,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.5716010138668203e-15,
-                "residual": 3.2741809263825417e-11,
+                "relative": 1.1429337839408106e-15,
+                "residual": 1.4551915228366852e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1059,8 +1059,8 @@
               "fact_sessions": 764,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.181016879132143e-17,
-                "residual": -2.0250467969162855e-13,
+                "relative": 1.1105655420128006e-16,
+                "residual": 7.069900220812997e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1083,8 +1083,8 @@
               "fact_rows": 867,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.6526791944247664e-15,
-                "residual": -2.1827872842550278e-11,
+                "relative": 6.886163310103186e-16,
+                "residual": -9.094947017729282e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1112,8 +1112,8 @@
               "fact_sessions": 867,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.594254599913933e-17,
-                "residual": 5.6754601018838e-13,
+                "relative": 5.178072020292431e-17,
+                "residual": -3.419486915845482e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1136,8 +1136,8 @@
               "fact_rows": 921,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4699032949480528e-15,
-                "residual": 2.1827872842550278e-11,
+                "relative": 9.799355299653701e-16,
+                "residual": -1.4551915228366852e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1165,8 +1165,8 @@
               "fact_sessions": 921,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.038374323867236e-17,
-                "residual": -2.255973186038318e-13,
+                "relative": 1.5287568448434349e-16,
+                "residual": -1.13509202037676e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1189,7 +1189,7 @@
               "fact_rows": 838,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.396919496873672e-16,
+                "relative": 8.396919496873667e-16,
                 "residual": -1.0913936421275139e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -1218,8 +1218,8 @@
               "fact_sessions": 838,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.60341307571322e-18,
-                "residual": 3.6415315207705135e-14,
+                "relative": 1.3434524520551446e-16,
+                "residual": -8.730793865652231e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1242,8 +1242,8 @@
               "fact_rows": 935,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.384007220406821e-16,
-                "residual": 3.637978807091713e-12,
+                "relative": 1.5496046932644367e-15,
+                "residual": -2.3646862246096134e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1271,8 +1271,8 @@
               "fact_sessions": 935,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.4801991159866966e-17,
-                "residual": 3.418376692820857e-13,
+                "relative": 7.43692682098344e-17,
+                "residual": -5.674349878859175e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1295,7 +1295,7 @@
               "fact_rows": 999,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.5761265415315433e-15,
+                "relative": 1.5761265415315414e-15,
                 "residual": -2.546585164964199e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -1324,12 +1324,12 @@
               "fact_sessions": 999,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.512642508505352e-17,
-                "residual": 2.8377300509419e-13,
+                "relative": 1.4770689233730624e-16,
+                "residual": 1.1932677068671182e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -1348,8 +1348,8 @@
               "fact_rows": 946,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.941169266272806e-15,
-                "residual": 2.9103830456733704e-11,
+                "relative": 2.4264615828410127e-16,
+                "residual": -3.637978807091713e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1377,8 +1377,8 @@
               "fact_sessions": 946,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.107126709472927e-17,
-                "residual": -2.3292479056635784e-13,
+                "relative": 2.7370261543264614e-16,
+                "residual": -2.051803171809752e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1401,8 +1401,8 @@
               "fact_rows": 989,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1416468829506092e-16,
-                "residual": -1.8189894035458565e-12,
+                "relative": 1.655387980278383e-15,
+                "residual": 2.637534635141492e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1430,8 +1430,8 @@
               "fact_sessions": 989,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3883161923771933e-16,
-                "residual": -1.106004177131581e-12,
+                "relative": 8.948382123322599e-17,
+                "residual": 7.12874204111813e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1454,8 +1454,8 @@
               "fact_rows": 895,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.819680636789391e-16,
-                "residual": 7.275957614183426e-12,
+                "relative": 1.807380238796023e-15,
+                "residual": -2.7284841053187847e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1483,12 +1483,12 @@
               "fact_sessions": 895,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.0858428881787556e-17,
-                "residual": -2.3292479056635784e-13,
+                "relative": 8.964094128696567e-17,
+                "residual": 6.766254223578017e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -1507,8 +1507,8 @@
               "fact_rows": 896,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.666716576032484e-16,
-                "residual": -5.4569682106375694e-12,
+                "relative": 1.7111344021484933e-15,
+                "residual": -2.546585164964199e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1536,8 +1536,8 @@
               "fact_sessions": 896,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.2123917194352194e-16,
-                "residual": 9.021672298104022e-13,
+                "relative": 9.69794016284632e-19,
+                "residual": -7.216449660063518e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1560,8 +1560,8 @@
               "fact_rows": 943,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.535169243235367e-15,
-                "residual": 5.638867150992155e-11,
+                "relative": 1.5965280453321046e-15,
+                "residual": 2.546585164964199e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1589,8 +1589,8 @@
               "fact_sessions": 943,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.565963299289647e-18,
-                "residual": -3.6415315207705135e-14,
+                "relative": 1.094717542244323e-16,
+                "residual": 8.730793865652231e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1613,8 +1613,8 @@
               "fact_rows": 701,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.1167134665523755e-16,
-                "residual": 3.637978807091713e-12,
+                "relative": 7.791783666380942e-16,
+                "residual": 9.094947017729282e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1642,8 +1642,8 @@
               "fact_sessions": 701,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.2463810200714826e-16,
-                "residual": 7.274181257344026e-13,
+                "relative": 3.115952550178709e-17,
+                "residual": -1.8185453143360064e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1666,8 +1666,8 @@
               "fact_rows": 400,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.593483369454215e-16,
-                "residual": 2.7284841053187847e-12,
+                "relative": 9.186966738908441e-16,
+                "residual": -5.4569682106375694e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1695,8 +1695,8 @@
               "fact_sessions": 400,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.3288900872151508e-17,
-                "residual": -6.916689443414725e-14,
+                "relative": 1.2982721144298904e-16,
+                "residual": 3.8558045645231687e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1719,8 +1719,8 @@
               "fact_rows": 119,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.357803668954176e-16,
-                "residual": 6.821210263296962e-13,
+                "relative": 5.596339448256964e-16,
+                "residual": -1.1368683772161603e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1748,8 +1748,8 @@
               "fact_sessions": 119,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1998792244773593e-16,
-                "residual": -1.2187473252822656e-13,
+                "relative": 1.0386565548254251e-16,
+                "residual": 1.054989429150055e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1772,8 +1772,8 @@
               "fact_rows": 182,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.90728356874808e-16,
-                "residual": 2.7284841053187847e-12,
+                "relative": 7.907283568748084e-16,
+                "residual": -2.7284841053187847e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1801,12 +1801,12 @@
               "fact_sessions": 182,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.296966962305645e-16,
-                "residual": -2.237654506132003e-13,
+                "relative": 2.1235380677790247e-18,
+                "residual": 3.6637359812630166e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -1824,10 +1824,10 @@
               "fact_kwh": 2258.098,
               "fact_rows": 257,
               "kwh": {
-                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.055405051268176e-16,
-                "residual": 3.637978807091713e-12,
-                "status": "non_blocking",
+                "interpretation": "identity holds exactly",
+                "relative": 0.0,
+                "residual": 0.0,
+                "status": "ok",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -1878,8 +1878,8 @@
               "fact_rows": 369,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.0572678161269104e-15,
-                "residual": 6.366462912410498e-12,
+                "relative": 4.531147783401046e-16,
+                "residual": 2.7284841053187847e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1907,8 +1907,8 @@
               "fact_sessions": 369,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.63742351084138e-17,
-                "residual": -1.9984014443252818e-13,
+                "relative": 8.466402433828781e-17,
+                "residual": 2.5490720645393594e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1931,8 +1931,8 @@
               "fact_rows": 423,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.669790022294813e-16,
-                "residual": 4.547473508864641e-12,
+                "relative": 1.0671664035671697e-15,
+                "residual": 7.275957614183426e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1960,8 +1960,8 @@
               "fact_sessions": 423,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.170961280655374e-17,
-                "residual": -3.126388037344441e-13,
+                "relative": 4.1686187639342605e-17,
+                "residual": 1.4210854715202004e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -1984,8 +1984,8 @@
               "fact_rows": 481,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3881276920499238e-15,
-                "residual": -1.000444171950221e-11,
+                "relative": 1.514321118599917e-15,
+                "residual": -1.0913936421275139e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2013,8 +2013,8 @@
               "fact_sessions": 481,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.54919012171855e-17,
-                "residual": 1.2789769243681803e-13,
+                "relative": 9.070152533280738e-17,
+                "residual": -3.268496584496461e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2037,8 +2037,8 @@
               "fact_rows": 489,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.2224834796060187e-16,
-                "residual": -9.094947017729282e-13,
+                "relative": 1.2224834796060199e-15,
+                "residual": -9.094947017729282e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2066,12 +2066,12 @@
               "fact_sessions": 489,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.727074532958941e-17,
-                "residual": 2.8743674107545303e-13,
+                "relative": 4.49925255250506e-17,
+                "residual": -1.6736612096224235e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -2090,8 +2090,8 @@
               "fact_rows": 390,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.96951878005905e-16,
-                "residual": 6.366462912410498e-12,
+                "relative": 1.424216968579865e-16,
+                "residual": -9.094947017729282e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2143,8 +2143,8 @@
               "fact_rows": 344,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.232781168428578e-15,
-                "residual": -1.2732925824820995e-11,
+                "relative": 7.974218458673476e-16,
+                "residual": -4.547473508864641e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2174,7 +2174,7 @@
               "fact_sessions": 344,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.9346038938337235e-17,
+                "relative": 2.9346038938337216e-17,
                 "residual": -8.367612158721727e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -2198,8 +2198,8 @@
               "fact_rows": 416,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.276189214315645e-16,
-                "residual": 2.7284841053187847e-12,
+                "relative": 5.701585619087523e-16,
+                "residual": 3.637978807091713e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2227,8 +2227,8 @@
               "fact_sessions": 416,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.2315619815643777e-16,
-                "residual": -3.929079284148429e-13,
+                "relative": 1.9383442320750443e-17,
+                "residual": 6.183942247162122e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2251,8 +2251,8 @@
               "fact_rows": 412,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1041164868167523e-15,
-                "residual": -7.275957614183426e-12,
+                "relative": 9.661019259646577e-16,
+                "residual": 6.366462912410498e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2280,12 +2280,12 @@
               "fact_sessions": 412,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.3189536728347776e-18,
-                "residual": 1.0935696792557792e-14,
+                "relative": 1.3469560717925931e-16,
+                "residual": -4.4381165409390633e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -2304,8 +2304,8 @@
               "fact_rows": 483,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.0249056599371463e-15,
-                "residual": 1.6370904631912708e-11,
+                "relative": 4.499790355415889e-16,
+                "residual": -3.637978807091713e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2333,7 +2333,7 @@
               "fact_sessions": 483,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.504184681934851e-18,
+                "relative": 4.504184681934848e-18,
                 "residual": 1.8207657603852567e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -2357,8 +2357,8 @@
               "fact_rows": 678,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.952112482230306e-16,
-                "residual": -9.094947017729282e-12,
+                "relative": 3.5808449928921233e-16,
+                "residual": -3.637978807091713e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2386,8 +2386,8 @@
               "fact_sessions": 678,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.448437338730678e-17,
-                "residual": 3.7836400679225335e-13,
+                "relative": 1.0455787625729926e-16,
+                "residual": -5.311306949806749e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2410,8 +2410,8 @@
               "fact_rows": 818,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1367953736382583e-15,
-                "residual": 1.4551915228366852e-11,
+                "relative": 8.525965302286945e-16,
+                "residual": -1.0913936421275139e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2439,7 +2439,7 @@
               "fact_sessions": 818,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.8430292013444636e-17,
+                "relative": 2.8430292013444605e-17,
                 "residual": -1.8196555373606316e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -2463,8 +2463,8 @@
               "fact_rows": 1093,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.6692233432633292e-15,
-                "residual": -4.3655745685100555e-11,
+                "relative": 1.5570469502369396e-15,
+                "residual": -2.546585164964199e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2492,8 +2492,8 @@
               "fact_sessions": 1093,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.875452982023826e-17,
-                "residual": 8.075762281123389e-13,
+                "relative": 2.0997216912287657e-16,
+                "residual": 1.7170709298852671e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2516,8 +2516,8 @@
               "fact_rows": 1290,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.38476834865114e-16,
-                "residual": 7.275957614183426e-12,
+                "relative": 2.0308610091906877e-15,
+                "residual": -4.3655745685100555e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2545,12 +2545,12 @@
               "fact_sessions": 1290,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.2783710515159096e-17,
-                "residual": 5.67323965583455e-13,
+                "relative": 5.2825028488165055e-17,
+                "residual": 5.677680547933051e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -2569,8 +2569,8 @@
               "fact_rows": 1259,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.309593439353945e-16,
-                "residual": 1.4551915228366852e-11,
+                "relative": 2.1928780318061888e-15,
+                "residual": -4.3655745685100555e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2598,8 +2598,8 @@
               "fact_sessions": 1259,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.020131780602703e-16,
-                "residual": 2.0108359422010835e-12,
+                "relative": 1.9273342076421537e-17,
+                "residual": 1.9184653865522705e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2621,10 +2621,10 @@
               "fact_kwh": 9676.387,
               "fact_rows": 1217,
               "kwh": {
-                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3158760418347257e-15,
-                "residual": -2.546585164964199e-11,
-                "status": "non_blocking",
+                "interpretation": "identity holds exactly",
+                "relative": 0.0,
+                "residual": 0.0,
+                "status": "ok",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -2651,8 +2651,8 @@
               "fact_sessions": 1217,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.1221438397892593e-16,
-                "residual": 2.0534685063466895e-12,
+                "relative": 2.4232092288251084e-17,
+                "residual": 2.3447910280083306e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2675,8 +2675,8 @@
               "fact_rows": 1210,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.106271107867447e-15,
-                "residual": 2.1827872842550278e-11,
+                "relative": 1.2906496258453535e-15,
+                "residual": 2.546585164964199e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2704,8 +2704,8 @@
               "fact_sessions": 1210,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.717497237325382e-17,
-                "residual": 4.654054919228656e-13,
+                "relative": 2.315534903511617e-16,
+                "residual": 2.284394895468722e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2728,8 +2728,8 @@
               "fact_rows": 991,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4142930764681277e-15,
-                "residual": -2.546585164964199e-11,
+                "relative": 1.6163349445350013e-15,
+                "residual": 2.9103830456733704e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2757,7 +2757,7 @@
               "fact_sessions": 991,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.011585399315066e-17,
+                "relative": 5.011585399315075e-17,
                 "residual": -4.511946372076636e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -2781,8 +2781,8 @@
               "fact_rows": 1055,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.6781811228504077e-15,
-                "residual": 3.092281986027956e-11,
+                "relative": 1.38203151293563e-15,
+                "residual": 2.546585164964199e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2810,7 +2810,7 @@
               "fact_sessions": 1055,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.996258377831776e-17,
+                "relative": 5.996258377831774e-17,
                 "residual": -5.524469770534779e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -2834,8 +2834,8 @@
               "fact_rows": 1015,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4812884089251426e-15,
-                "residual": 3.092281986027956e-11,
+                "relative": 1.7426922457942893e-16,
+                "residual": -3.637978807091713e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2863,12 +2863,12 @@
               "fact_sessions": 1015,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.1287109536706402e-20,
-                "residual": 2.220446049250313e-16,
+                "relative": 1.7440528843423561e-16,
+                "residual": 1.8192114481507815e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -2887,8 +2887,8 @@
               "fact_rows": 955,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.1693929002796037e-15,
-                "residual": -4.001776687800884e-11,
+                "relative": 9.860876819452732e-16,
+                "residual": -1.8189894035458565e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2940,8 +2940,8 @@
               "fact_rows": 1329,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.993742132803863e-16,
-                "residual": 1.4551915228366852e-11,
+                "relative": 2.996871066401938e-16,
+                "residual": 7.275957614183426e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2969,8 +2969,8 @@
               "fact_sessions": 1329,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.034009171044281e-17,
-                "residual": -2.469136006766348e-13,
+                "relative": 1.7018364503053978e-16,
+                "residual": -2.0659030042224913e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -2993,8 +2993,8 @@
               "fact_rows": 1508,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1395484527334323e-15,
-                "residual": 2.9103830456733704e-11,
+                "relative": 1.4956573442126326e-15,
+                "residual": -3.8198777474462986e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3022,12 +3022,12 @@
               "fact_sessions": 1508,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.92500511579769e-17,
-                "residual": 7.566169912820442e-13,
+                "relative": 8.319350543370222e-17,
+                "residual": -1.0623724122638123e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -3046,8 +3046,8 @@
               "fact_rows": 1540,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.61439050871197e-16,
-                "residual": 1.8189894035458565e-11,
+                "relative": 3.3071952543559967e-15,
+                "residual": -9.094947017729282e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3075,8 +3075,8 @@
               "fact_sessions": 1540,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.459365731164038e-17,
-                "residual": -8.881784197001252e-13,
+                "relative": 6.769415286259908e-17,
+                "residual": 9.308109838457312e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3099,8 +3099,8 @@
               "fact_rows": 1747,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.0730160836932612e-15,
-                "residual": -6.366462912410498e-11,
+                "relative": 1.3622677121412852e-15,
+                "residual": -4.18367562815547e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3130,8 +3130,8 @@
               "fact_sessions": 1747,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.632316611244773e-17,
-                "residual": 1.3251622021925868e-12,
+                "relative": 3.216868656737329e-17,
+                "residual": -4.938272013532696e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3154,8 +3154,8 @@
               "fact_rows": 1850,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.696151917516241e-16,
-                "residual": 1.4551915228366852e-11,
+                "relative": 1.0566341814411542e-15,
+                "residual": 3.2741809263825417e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3183,8 +3183,8 @@
               "fact_sessions": 1850,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.663136078238378e-17,
-                "residual": -5.6754601018838e-13,
+                "relative": 1.9823356116664037e-16,
+                "residual": 3.071320975323033e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3207,8 +3207,8 @@
               "fact_rows": 2028,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.103737368530326e-16,
-                "residual": 2.9103830456733704e-11,
+                "relative": 1.6207474737060652e-15,
+                "residual": 5.820766091346741e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3236,8 +3236,8 @@
               "fact_sessions": 2028,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.6695657646163413e-16,
-                "residual": -2.9980462556977727e-12,
+                "relative": 1.669318458178094e-16,
+                "residual": -2.9976021664879227e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3260,8 +3260,8 @@
               "fact_rows": 1828,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.253288442622855e-15,
-                "residual": -1.0550138540565968e-10,
+                "relative": 8.97458880723543e-16,
+                "residual": 2.9103830456733704e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3289,8 +3289,8 @@
               "fact_sessions": 1828,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.7051937839919375e-16,
-                "residual": 2.76489942052649e-12,
+                "relative": 5.839179485176377e-17,
+                "residual": 9.467981954003335e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3313,8 +3313,8 @@
               "fact_rows": 1881,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4112264169670224e-15,
-                "residual": -5.093170329928398e-11,
+                "relative": 3.830471703196216e-15,
+                "residual": -1.382431946694851e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3342,8 +3342,8 @@
               "fact_sessions": 1881,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.496996618291249e-18,
-                "residual": 1.1723955140041653e-13,
+                "relative": 2.081007704707229e-16,
+                "residual": 3.7552183584921295e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3366,8 +3366,8 @@
               "fact_rows": 1553,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.542302201807695e-15,
-                "residual": 1.0550138540565968e-10,
+                "relative": 1.9543736285835576e-15,
+                "residual": 5.820766091346741e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3395,7 +3395,7 @@
               "fact_sessions": 1553,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.994126684277382e-17,
+                "relative": 8.994126684277377e-17,
                 "residual": 1.3393730569077889e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -3419,8 +3419,8 @@
               "fact_rows": 1547,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.348618302418296e-16,
-                "residual": 2.1827872842550278e-11,
+                "relative": 2.204585490725488e-15,
+                "residual": 6.548361852765083e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3448,7 +3448,7 @@
               "fact_sessions": 1547,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.650116823151978e-17,
+                "relative": 6.650116823151986e-17,
                 "residual": -9.876544027065393e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -3472,8 +3472,8 @@
               "fact_rows": 1682,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.291425124250834e-16,
-                "residual": 7.275957614183426e-12,
+                "relative": 1.718568843188126e-15,
+                "residual": -5.4569682106375694e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3501,8 +3501,8 @@
               "fact_sessions": 1682,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.420672388436278e-16,
-                "residual": -2.255529096828468e-12,
+                "relative": 8.707527358145552e-17,
+                "residual": 1.382449710263245e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3525,8 +3525,8 @@
               "fact_rows": 1798,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.254037804009795e-15,
-                "residual": 1.0550138540565968e-10,
+                "relative": 5.273785406498627e-15,
+                "residual": 1.709850039333105e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3554,8 +3554,8 @@
               "fact_sessions": 1798,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.958614652083269e-17,
-                "residual": -4.796163466380676e-13,
+                "relative": 1.4179434665910195e-16,
+                "residual": -2.298605750183924e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3578,8 +3578,8 @@
               "fact_rows": 1881,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.172115933510121e-16,
-                "residual": -2.9103830456733704e-11,
+                "relative": 1.2258173900265153e-15,
+                "residual": 4.3655745685100555e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3607,7 +3607,7 @@
               "fact_sessions": 1881,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.180096515476434e-18,
+                "relative": 8.18009651547643e-18,
                 "residual": 1.4566126083082054e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -3630,10 +3630,10 @@
               "fact_kwh": 19295.031,
               "fact_rows": 2196,
               "kwh": {
-                "interpretation": "identity holds exactly",
-                "relative": 0.0,
-                "residual": 0.0,
-                "status": "ok",
+                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
+                "relative": 5.65634562664093e-16,
+                "residual": 2.1827872842550278e-11,
+                "status": "non_blocking",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -3660,8 +3660,8 @@
               "fact_sessions": 2196,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.0564219737256624e-17,
-                "residual": -2.0383694732117874e-13,
+                "relative": 1.0541204007981556e-17,
+                "residual": -2.0339285811132868e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3684,8 +3684,8 @@
               "fact_rows": 2227,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.572153306590611e-15,
-                "residual": 1.8189894035458565e-10,
+                "relative": 3.1090642484816168e-15,
+                "residual": 1.2369127944111824e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3713,8 +3713,8 @@
               "fact_sessions": 2227,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.072585251885101e-16,
-                "residual": -6.111999795166412e-12,
+                "relative": 1.2436123044122602e-16,
+                "residual": -2.473798943469774e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3736,10 +3736,10 @@
               "fact_kwh": 19744.557,
               "fact_rows": 2426,
               "kwh": {
-                "interpretation": "identity holds exactly",
-                "relative": 0.0,
-                "residual": 0.0,
-                "status": "ok",
+                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
+                "relative": 3.5007925138428008e-15,
+                "residual": 1.382431946694851e-10,
+                "status": "non_blocking",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -3766,8 +3766,8 @@
               "fact_sessions": 2426,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.0166261155022539e-16,
-                "residual": -2.007283228522283e-12,
+                "relative": 8.258962602044877e-17,
+                "residual": 1.63069557856943e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3790,8 +3790,8 @@
               "fact_rows": 2708,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.8302247412964393e-15,
-                "residual": -1.2732925824820995e-10,
+                "relative": 2.2641797930371438e-15,
+                "residual": 1.0186340659856796e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3819,7 +3819,7 @@
               "fact_sessions": 2708,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.919726601081687e-17,
+                "relative": 4.919726601081695e-17,
                 "residual": 1.106670310946356e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -3842,10 +3842,10 @@
               "fact_kwh": 25269.681,
               "fact_rows": 2728,
               "kwh": {
-                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.758646192790029e-16,
-                "residual": 2.9103830456733704e-11,
-                "status": "non_blocking",
+                "interpretation": "identity holds exactly",
+                "relative": 0.0,
+                "residual": 0.0,
+                "status": "ok",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -3872,7 +3872,7 @@
               "fact_sessions": 2728,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.836363013476004e-17,
+                "relative": 4.8363630134760016e-17,
                 "residual": 1.2221335055073723e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -3895,10 +3895,10 @@
               "fact_kwh": 22713.731,
               "fact_rows": 2777,
               "kwh": {
-                "interpretation": "identity holds exactly",
-                "relative": 0.0,
-                "residual": 0.0,
-                "status": "ok",
+                "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
+                "relative": 4.804995014370433e-16,
+                "residual": 1.0913936421275139e-11,
+                "status": "non_blocking",
                 "tolerance": 1e-06
               },
               "quarantined_by_primary_reason": {
@@ -3925,8 +3925,8 @@
               "fact_sessions": 2777,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.537012341571895e-16,
-                "residual": 5.7625015870144125e-12,
+                "relative": 9.353473367817448e-17,
+                "residual": 2.1245227799226996e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3949,8 +3949,8 @@
               "fact_rows": 2582,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.465397998674902e-16,
-                "residual": 1.2252865388973078e-11,
+                "relative": 1.0254925678351644e-16,
+                "residual": -2.299049839393774e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -3980,8 +3980,8 @@
               "fact_sessions": 2582,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.7721854511664715e-17,
-                "residual": 8.455458555545192e-13,
+                "relative": 2.8687628851308073e-16,
+                "residual": -6.430411758628907e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -4004,8 +4004,8 @@
               "fact_rows": 2368,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.1535226640089893e-17,
-                "residual": 6.679101716144942e-13,
+                "relative": 4.837637959043569e-16,
+                "residual": -1.0246026249660645e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -4035,8 +4035,8 @@
               "fact_sessions": 2368,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.78322207213481e-17,
-                "residual": -1.2221335055073723e-12,
+                "relative": 1.1431950607708319e-16,
+                "residual": 2.4158453015843406e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -4098,7 +4098,7 @@
               "status": "non_blocking",
               "tolerance": 1e-06
             },
-            "midnight_spill_kwh": 0.0,
+            "midnight_spill_kwh": -0.0,
             "sessions": {
               "interpretation": "identity holds exactly",
               "residual": 0,
@@ -4398,7 +4398,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -4496,7 +4496,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -4589,7 +4589,7 @@
               "fact_sessions": 19,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.326636947650256e-17,
+                "relative": 4.3266369476502565e-17,
                 "residual": 4.888450755302642e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -4643,7 +4643,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -4785,7 +4785,7 @@
               "fact_sessions": 17,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.8594624128380245e-17,
+                "relative": 1.859462412838025e-17,
                 "residual": -2.040034807748725e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -4986,7 +4986,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5035,7 +5035,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5084,7 +5084,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5133,7 +5133,7 @@
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5231,7 +5231,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5378,7 +5378,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5427,7 +5427,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5520,12 +5520,12 @@
               "fact_sessions": 17,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.987758379526537e-17,
+                "relative": 1.9877583795265365e-17,
                 "residual": 2.0469737016526324e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5574,7 +5574,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5623,7 +5623,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5770,7 +5770,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5819,7 +5819,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -5917,7 +5917,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6010,12 +6010,12 @@
               "fact_sessions": 23,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.2027749740875375e-16,
-                "residual": -2.0011770018868447e-14,
+                "relative": 5.054657658093257e-17,
+                "residual": 8.409939411535561e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6260,7 +6260,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6309,7 +6309,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6358,7 +6358,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6407,7 +6407,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6603,7 +6603,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6696,12 +6696,12 @@
               "fact_sessions": 13,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.771369693937307e-19,
-                "residual": 1.1102230246251565e-16,
+                "relative": 1.240963951130038e-16,
+                "residual": -1.4099832412739488e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6848,7 +6848,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -6995,7 +6995,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -7044,7 +7044,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -7088,8 +7088,8 @@
               "fact_sessions": 20,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.0361720140640985e-16,
-                "residual": -1.8872056695151684e-14,
+                "relative": 5.029133377875018e-17,
+                "residual": -4.661201979949681e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -7186,8 +7186,8 @@
               "fact_sessions": 21,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.32256885652299e-17,
-                "residual": -4.206704429243757e-15,
+                "relative": 1.454668599987818e-16,
+                "residual": -1.841755914444576e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -7382,8 +7382,8 @@
               "fact_sessions": 61,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.344985285537928e-17,
-                "residual": 4.551914400963142e-15,
+                "relative": 1.5450928524106443e-16,
+                "residual": -5.229150445984487e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -7484,12 +7484,12 @@
               "fact_sessions": 60,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.673439528843827e-17,
-                "residual": 2.1149748619109232e-14,
+                "relative": 2.0329085299888551e-16,
+                "residual": 4.957145804951324e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -7533,12 +7533,12 @@
               "fact_sessions": 48,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.0973837193662296e-17,
+                "relative": 5.0973837193662284e-17,
                 "residual": -1.3211653993039363e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -7582,12 +7582,12 @@
               "fact_sessions": 70,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.7802598752656265e-17,
+                "relative": 1.780259875265626e-17,
                 "residual": 5.457440055423035e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -7733,7 +7733,7 @@
               "fact_sessions": 121,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.559913335136834e-17,
+                "relative": 6.559913335136836e-17,
                 "residual": -4.0023540037736893e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -7831,7 +7831,7 @@
               "fact_sessions": 148,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.903127684296505e-17,
+                "relative": 5.903127684296507e-17,
                 "residual": 4.911349105185536e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -7929,12 +7929,12 @@
               "fact_sessions": 121,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.001049592568726e-16,
-                "residual": 6.366435156834882e-14,
+                "relative": 7.865467588913296e-17,
+                "residual": -5.002248615326721e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -7978,8 +7978,8 @@
               "fact_sessions": 133,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.828799743359913e-17,
-                "residual": -6.727951529228449e-14,
+                "relative": 6.075263189737759e-17,
+                "residual": 4.629630012686903e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -8027,7 +8027,7 @@
               "fact_sessions": 101,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.001837977639626e-18,
+                "relative": 9.001837977639628e-18,
                 "residual": -4.551914400963142e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -8081,7 +8081,7 @@
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8125,8 +8125,8 @@
               "fact_sessions": 117,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.200588189616699e-17,
-                "residual": -5.002248615326721e-14,
+                "relative": 9.164294165589291e-17,
+                "residual": 6.366435156834882e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -8223,12 +8223,12 @@
               "fact_sessions": 144,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.122727122595154e-17,
-                "residual": 1.7319479184152442e-14,
+                "relative": 2.1159235100227327e-17,
+                "residual": 1.7263968032921184e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8326,7 +8326,7 @@
                 "status": "ok",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8370,12 +8370,12 @@
               "fact_sessions": 200,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.883468750430794e-17,
+                "relative": 2.883468750430795e-17,
                 "residual": 3.272382365082649e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8419,12 +8419,12 @@
               "fact_sessions": 181,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.19586268266728e-17,
+                "relative": 4.1958626826672824e-17,
                 "residual": 7.274736368856338e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8517,12 +8517,12 @@
               "fact_sessions": 187,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4450594305928744e-16,
-                "residual": 2.2370993946196904e-13,
+                "relative": 2.3665985711942874e-18,
+                "residual": -3.6637359812630166e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8615,8 +8615,8 @@
               "fact_sessions": 305,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.534079338648598e-16,
-                "residual": 3.237757284502152e-13,
+                "relative": 6.205556571224852e-17,
+                "residual": -1.3097162243624894e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -8669,7 +8669,7 @@
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -8713,7 +8713,7 @@
               "fact_sessions": 441,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3032862153495895e-17,
+                "relative": 1.30328621534959e-17,
                 "residual": 4.729550084903167e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -8762,7 +8762,7 @@
               "fact_sessions": 433,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.3057793778092576e-16,
+                "relative": 1.3057793778092571e-16,
                 "residual": 4.584110868677271e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -8909,7 +8909,7 @@
               "fact_sessions": 231,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.898680590923556e-17,
+                "relative": 1.8986805909235558e-17,
                 "residual": -3.274117088558626e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -8958,12 +8958,12 @@
               "fact_sessions": 251,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.19453532299201e-18,
+                "relative": 5.1945353229920104e-18,
                 "residual": -1.0935696792557792e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -9056,8 +9056,8 @@
               "fact_sessions": 345,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.1175038770349326e-17,
-                "residual": -1.8118839761882555e-13,
+                "relative": 7.72642742219e-17,
+                "residual": 2.7355895326763857e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9105,8 +9105,8 @@
               "fact_sessions": 351,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1912285610186684e-16,
-                "residual": -3.979039320256561e-13,
+                "relative": 1.7017550871695255e-17,
+                "residual": 5.684341886080802e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9154,12 +9154,12 @@
               "fact_sessions": 435,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.72215534092115e-17,
+                "relative": 4.722155340921151e-17,
                 "residual": -1.4555023852835802e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -9203,12 +9203,12 @@
               "fact_sessions": 374,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.964830344168973e-17,
+                "relative": 9.964830344168981e-17,
                 "residual": -2.9831692671677956e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -9252,7 +9252,7 @@
               "fact_sessions": 357,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.394353126544207e-17,
+                "relative": 8.394353126544208e-17,
                 "residual": 2.402522625288839e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9301,7 +9301,7 @@
               "fact_sessions": 276,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.988834424803478e-17,
+                "relative": 3.9888344248034744e-17,
                 "residual": -9.814371537686384e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9350,8 +9350,8 @@
               "fact_sessions": 293,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.981869768118738e-17,
-                "residual": -2.398081733190338e-13,
+                "relative": 7.154120310684199e-17,
+                "residual": 2.149391775674303e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9399,7 +9399,7 @@
               "fact_sessions": 384,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.463692816544088e-17,
+                "relative": 5.463692816544086e-17,
                 "residual": 1.8829382497642655e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9448,7 +9448,7 @@
               "fact_sessions": 359,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.067670823184999e-17,
+                "relative": 8.067670823184996e-17,
                 "residual": 2.433608869978343e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9497,8 +9497,8 @@
               "fact_sessions": 413,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.5299577466481383e-16,
-                "residual": 4.511946372076636e-13,
+                "relative": 1.2046911390930222e-18,
+                "residual": -3.552713678800501e-15,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9546,8 +9546,8 @@
               "fact_sessions": 434,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.711051506995804e-17,
-                "residual": -2.984279490192421e-13,
+                "relative": 7.70818281223874e-17,
+                "residual": -2.9831692671677956e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9570,8 +9570,8 @@
               "fact_rows": 464,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.186203793707537e-17,
-                "residual": 2.913225216616411e-13,
+                "relative": 1.8403692642421738e-16,
+                "residual": 7.460698725481052e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9599,7 +9599,7 @@
               "fact_sessions": 464,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.419777715409684e-18,
+                "relative": 4.419777715409683e-18,
                 "residual": -1.7763568394002505e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9648,8 +9648,8 @@
               "fact_sessions": 388,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1058669311463769e-16,
-                "residual": -4.227729277772596e-13,
+                "relative": 8.363699479258307e-18,
+                "residual": 3.197442310920451e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9697,8 +9697,8 @@
               "fact_sessions": 462,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.0192749572546539e-16,
-                "residual": 3.8191672047105385e-13,
+                "relative": 1.9407706308191814e-17,
+                "residual": -7.271960811294775e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9746,7 +9746,7 @@
               "fact_sessions": 402,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.991925731762934e-17,
+                "relative": 8.991925731762937e-17,
                 "residual": 3.0558888752807434e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9795,8 +9795,8 @@
               "fact_sessions": 380,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.916492165544551e-17,
-                "residual": 2.1471713296250527e-13,
+                "relative": 6.613989690748355e-17,
+                "residual": -2.4003021792395884e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -9844,7 +9844,7 @@
               "fact_sessions": 385,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.120103651874859e-16,
+                "relative": 1.1201036518748594e-16,
                 "residual": 3.7125857943465235e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -9893,12 +9893,12 @@
               "fact_sessions": 288,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.2157943456221305e-17,
+                "relative": 1.21579434562213e-17,
                 "residual": -2.90878432451791e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": -0.0,
+              "midnight_spill_kwh": 0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -9991,8 +9991,8 @@
               "fact_sessions": 400,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.5035924888675794e-16,
-                "residual": -5.637712519046545e-13,
+                "relative": 2.9076955968254484e-17,
+                "residual": -1.0902390101819037e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10040,8 +10040,8 @@
               "fact_sessions": 427,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.40348339164807e-16,
-                "residual": -5.45785638905727e-13,
+                "relative": 2.341042272480508e-17,
+                "residual": -9.103828801926284e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10064,8 +10064,8 @@
               "fact_rows": 539,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.1253603677443697e-17,
-                "residual": -9.947598300641403e-14,
+                "relative": 1.7306505851632724e-16,
+                "residual": 8.100187187665142e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10093,8 +10093,8 @@
               "fact_sessions": 539,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.7403241637871936e-17,
-                "residual": 8.004708007547379e-14,
+                "relative": 1.737910399343661e-17,
+                "residual": 7.993605777301127e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10117,8 +10117,8 @@
               "fact_rows": 653,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.992914701038983e-16,
-                "residual": 1.0231815394945443e-12,
+                "relative": 2.0205940718867467e-16,
+                "residual": 1.0373923942097463e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10146,8 +10146,8 @@
               "fact_sessions": 653,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4236692338789088e-16,
-                "residual": 7.129852264142755e-13,
+                "relative": 3.9238470008808293e-17,
+                "residual": -1.965094753586527e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10170,8 +10170,8 @@
               "fact_rows": 634,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.875569596832086e-16,
-                "residual": -2.8137492336099967e-12,
+                "relative": 1.4774453323733587e-16,
+                "residual": 8.526512829121202e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10199,12 +10199,12 @@
               "fact_sessions": 634,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.0326826597671313e-16,
-                "residual": 5.747624598484435e-13,
+                "relative": 6.014174655587987e-17,
+                "residual": -3.347322419244847e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
-              "midnight_spill_kwh": 0.0,
+              "midnight_spill_kwh": -0.0,
               "sessions": {
                 "interpretation": "identity holds exactly",
                 "residual": 0,
@@ -10223,8 +10223,8 @@
               "fact_rows": 652,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.958524263063165e-16,
-                "residual": 5.229594535194337e-12,
+                "relative": 1.5154276052487436e-16,
+                "residual": 7.958078640513122e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10252,8 +10252,8 @@
               "fact_sessions": 652,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.6091588664887323e-16,
-                "residual": 1.1787237852445287e-12,
+                "relative": 5.959508572322854e-17,
+                "residual": 2.6922908347160046e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10301,8 +10301,8 @@
               "fact_sessions": 725,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.6864164998699618e-16,
-                "residual": 9.592326932761353e-13,
+                "relative": 8.744381851177587e-18,
+                "residual": 4.973799150320701e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10325,7 +10325,7 @@
               "fact_rows": 784,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.900196611301722e-17,
+                "relative": 1.9001966113017226e-17,
                 "residual": 1.2789769243681803e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -10354,7 +10354,7 @@
               "fact_sessions": 784,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.9455856292563125e-16,
+                "relative": 1.945585629256313e-16,
                 "residual": 1.3020695632803836e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -10378,8 +10378,8 @@
               "fact_rows": 684,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.6499902719361774e-16,
-                "residual": 9.947598300641403e-13,
+                "relative": 1.4142773759452954e-17,
+                "residual": 8.526512829121202e-14,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10407,7 +10407,7 @@
               "fact_sessions": 684,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.1932095008547413e-17,
+                "relative": 3.193209500854742e-17,
                 "residual": -1.8829382497642655e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -10431,7 +10431,7 @@
               "fact_rows": 521,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.329108029631554e-16,
+                "relative": 4.329108029631555e-16,
                 "residual": 2.6147972675971687e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -10460,7 +10460,7 @@
               "fact_sessions": 521,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.675205613711832e-17,
+                "relative": 7.675205613711834e-17,
                 "residual": -4.511946372076636e-13,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -10534,8 +10534,8 @@
             "fact_rows": 20097,
             "kwh": {
               "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-              "relative": 1.1145690070094032e-16,
-              "residual": -1.8189894035458565e-11,
+              "relative": 6.966056293808771e-17,
+              "residual": 1.1368683772161603e-11,
               "status": "non_blocking",
               "tolerance": 1e-06
             },
@@ -10565,8 +10565,8 @@
             "fact_sessions": 20097,
             "kwh": {
               "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-              "relative": 8.784645529118114e-17,
-              "residual": 1.4203749287844403e-11,
+              "relative": 9.215308491526107e-17,
+              "residual": -1.49000811688893e-11,
               "status": "non_blocking",
               "tolerance": 1e-06
             },
@@ -10595,8 +10595,8 @@
               "fact_rows": 21133,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4926542495157478e-15,
-                "residual": 2.837623469531536e-10,
+                "relative": 2.966171906088985e-16,
+                "residual": 5.638867150992155e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10630,8 +10630,8 @@
               "fact_sessions": 21133,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 7.430209304389127e-16,
-                "residual": -1.368789526168257e-10,
+                "relative": 5.89973429816943e-16,
+                "residual": -1.0868461686186492e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10654,8 +10654,8 @@
               "fact_rows": 19680,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.092489174599842e-16,
-                "residual": 1.673470251262188e-10,
+                "relative": 1.1464442872321562e-15,
+                "residual": -2.1100277081131935e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10691,8 +10691,8 @@
               "fact_sessions": 19680,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.216897574453675e-16,
-                "residual": 3.9108272176235914e-11,
+                "relative": 1.0568930296814031e-16,
+                "residual": -1.864464138634503e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10715,8 +10715,8 @@
               "fact_rows": 22863,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.447661675410572e-16,
-                "residual": 1.709850039333105e-10,
+                "relative": 5.3921244736663223e-17,
+                "residual": 1.0913936421275139e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10752,8 +10752,8 @@
               "fact_sessions": 22863,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1189761498591607e-15,
-                "residual": -2.2373569663614035e-10,
+                "relative": 4.548683536012845e-17,
+                "residual": 9.094947017729282e-12,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10776,8 +10776,8 @@
               "fact_rows": 20995,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 6.6611343873379244e-15,
-                "residual": -1.2605596566572785e-09,
+                "relative": 7.545440828369762e-16,
+                "residual": 1.4279066817834973e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10813,8 +10813,8 @@
               "fact_sessions": 20995,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.487371952451103e-16,
-                "residual": -8.185452315956354e-11,
+                "relative": 2.9915813016340766e-16,
+                "residual": -5.4569682106375694e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10837,8 +10837,8 @@
               "fact_rows": 21018,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.6813327821588287e-15,
-                "residual": -5.347828846424818e-10,
+                "relative": 1.8149157266993424e-15,
+                "residual": 3.6197889130562544e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10872,8 +10872,8 @@
               "fact_sessions": 21018,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.461647894607605e-16,
-                "residual": -1.0413714335300028e-10,
+                "relative": 1.0064696120193972e-15,
+                "residual": -1.9190338207408786e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10896,8 +10896,8 @@
               "fact_rows": 21406,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.5178097383000741e-15,
-                "residual": -3.001332515850663e-10,
+                "relative": 1.1774524030449074e-15,
+                "residual": -2.3283064365386963e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10931,8 +10931,8 @@
               "fact_sessions": 21406,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.1210592646319595e-16,
-                "residual": 4.0472514228895307e-11,
+                "relative": 3.6701474916103623e-16,
+                "residual": 7.003109203651547e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10955,8 +10955,8 @@
               "fact_rows": 19887,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.153773979530406e-15,
-                "residual": 4.029061528854072e-10,
+                "relative": 1.3856107994721599e-15,
+                "residual": 2.5920599000528455e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -10992,8 +10992,8 @@
               "fact_sessions": 19887,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 2.3826539522866486e-16,
-                "residual": -4.3655745685100555e-11,
+                "relative": 2.432292576292623e-16,
+                "residual": 4.4565240386873484e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11016,8 +11016,8 @@
               "fact_rows": 19465,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.276417885547894e-16,
-                "residual": 1.6552803572267294e-10,
+                "relative": 2.0693547590837577e-15,
+                "residual": 3.6925484891980886e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11053,8 +11053,8 @@
               "fact_sessions": 19465,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.2837333094267166e-16,
-                "residual": -7.73070496506989e-11,
+                "relative": 7.458735644648869e-16,
+                "residual": -1.3460521586239338e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11077,8 +11077,8 @@
               "fact_rows": 20024,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.7505325718305387e-15,
-                "residual": -3.310560714453459e-10,
+                "relative": 2.2603030460449152e-15,
+                "residual": 4.2746250983327627e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11112,8 +11112,8 @@
               "fact_sessions": 20024,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 3.91160924145616e-17,
-                "residual": -7.275957614183426e-12,
+                "relative": 1.1734827724368468e-16,
+                "residual": 2.1827872842550278e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11136,8 +11136,8 @@
               "fact_rows": 24364,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.4250756692154276e-15,
-                "residual": -3.142304194625467e-10,
+                "relative": 1.2394652347300625e-15,
+                "residual": 2.7330315788276494e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11171,7 +11171,7 @@
               "fact_sessions": 24364,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 8.556260034605191e-17,
+                "relative": 8.556260034605224e-17,
                 "residual": -1.9099388737231493e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
@@ -11195,8 +11195,8 @@
               "fact_rows": 25048,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 5.654252390896852e-16,
-                "residual": -1.3642420526593924e-10,
+                "relative": 5.880422486532732e-16,
+                "residual": -1.418811734765768e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11232,8 +11232,8 @@
               "fact_sessions": 25048,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 9.320985774349854e-16,
-                "residual": -2.1736923372372985e-10,
+                "relative": 4.348493363347321e-16,
+                "residual": 1.014086592476815e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11256,8 +11256,8 @@
               "fact_rows": 23800,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 1.1878023059445498e-15,
-                "residual": -2.6648194761946797e-10,
+                "relative": 3.8512361455540063e-16,
+                "residual": -8.640199666842818e-11,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11291,8 +11291,8 @@
               "fact_sessions": 23800,
               "kwh": {
                 "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-                "relative": 4.0977684040001155e-16,
-                "residual": -8.86757334228605e-11,
+                "relative": 8.090465823282297e-16,
+                "residual": -1.7507773009128869e-10,
                 "status": "non_blocking",
                 "tolerance": 1e-06
               },
@@ -11316,8 +11316,8 @@
             "fact_rows": 259683,
             "kwh": {
               "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-              "relative": 8.233244887210632e-16,
-              "residual": -1.979060471057892e-09,
+              "relative": 5.509009446589466e-16,
+              "residual": 1.3242242857813835e-09,
               "status": "non_blocking",
               "tolerance": 1e-06
             },
@@ -11353,8 +11353,8 @@
             "fact_sessions": 259683,
             "kwh": {
               "interpretation": "floating-point residual within tolerance (summation order); no row is missing",
-              "relative": 4.185158743227079e-16,
-              "residual": -9.822542779147625e-10,
+              "relative": 2.2010834871786885e-16,
+              "residual": -5.165929906070232e-10,
               "status": "non_blocking",
               "tolerance": 1e-06
             },
@@ -11391,7 +11391,7 @@
     },
     "status": "non_blocking"
   },
-  "run_id": "silver-20260920T021439Z",
+  "run_id": "silver-20260920T022854Z",
   "status": "non_blocking",
   "unknown_station": {
     "boulder": {

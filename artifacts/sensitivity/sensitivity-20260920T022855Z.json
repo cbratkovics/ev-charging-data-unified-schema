@@ -1,9 +1,9 @@
 {
   "artifact": "sensitivity",
-  "code_commit": "e83ba46fb9cc73f3c2875a41258a07cbc41be6f1",
+  "code_commit": "ed72194adf253eb22ee409cd2f3e31a53ec9b072",
   "definitions": {
     "connector_ids": "ports = distinct published connector ids where the unit has any, else robust_max_n5",
-    "production_definition": "dim_station.ports_inferred = max(connector_ids, robust_max_n5), floored at 1 (ADR-0012)",
+    "production": "ports = max(connector_ids, robust_max_n5), floored at 1: the rule dim_station applies (ADR-0012); included so every range contains the production value",
     "robust_max_nN": "ports = highest concurrency level reached on at least N distinct local dates over the station's life, floored at 1",
     "session_rule": "which sessions supply the concurrency evidence for the denominator: non_trivial_only (the production rule) or all_sessions",
     "station_days_over_100pct": "available station-days whose daily measure minutes exceed the day's available port minutes: undercounted ports or overlapping data errors",
@@ -13,8 +13,8 @@
   "dim_station": {
     "excluded_days_total": 28861,
     "ports_inferred_distribution": {
-      "1": 408,
-      "2": 395,
+      "1": 409,
+      "2": 394,
       "3": 105
     },
     "ports_source": {
@@ -25,13 +25,21 @@
     "stations": 908,
     "window_days_total": 306091
   },
-  "generated_at_utc": "2026-09-20T02:14:58+00:00",
+  "generated_at_utc": "2026-09-20T02:29:15+00:00",
   "ports_by_definition": {
     "connector_ids": {
       "distribution": {
         "1": 410,
         "2": 394,
         "3": 104
+      },
+      "stations": 908
+    },
+    "production": {
+      "distribution": {
+        "1": 409,
+        "2": 394,
+        "3": 105
       },
       "stations": 908
     },
@@ -116,7 +124,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.061474
     },
     {
@@ -176,7 +184,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.06184
     },
     {
@@ -236,7 +244,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.06184
     },
     {
@@ -296,7 +304,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.071208
     },
     {
@@ -356,7 +364,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.074442
     },
     {
@@ -416,7 +424,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.071208
     },
     {
@@ -431,6 +439,66 @@
     },
     {
       "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "production",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 1,
+      "station_days_with_measure": 29295,
+      "utilization": 0.113601
+    },
+    {
+      "definition": "production",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.062436
+    },
+    {
+      "definition": "production",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "production",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6844,
+      "utilization": 0.071208
+    },
+    {
+      "definition": "production",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 169,
+      "station_days_with_measure": 112062,
+      "utilization": 0.087327
+    },
+    {
+      "definition": "production",
       "flavour": "charging",
       "session_rule": "non_trivial_only",
       "source": "dft_2017",
@@ -476,7 +544,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.073498
     },
     {
@@ -536,7 +604,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.061474
     },
     {
@@ -596,7 +664,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.06184
     },
     {
@@ -656,7 +724,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.06184
     },
     {
@@ -716,7 +784,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.071208
     },
     {
@@ -776,7 +844,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.074442
     },
     {
@@ -836,7 +904,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.071208
     },
     {
@@ -851,6 +919,66 @@
     },
     {
       "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "production",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.109117
+    },
+    {
+      "definition": "production",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059971
+    },
+    {
+      "definition": "production",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "production",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6844,
+      "utilization": 0.071208
+    },
+    {
+      "definition": "production",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 163,
+      "station_days_with_measure": 112062,
+      "utilization": 0.086815
+    },
+    {
+      "definition": "production",
       "flavour": "charging",
       "session_rule": "all_sessions",
       "source": "dft_2017",
@@ -896,7 +1024,7 @@
       "source": "cary",
       "station_days": 10862,
       "station_days_over_100pct": 0,
-      "station_days_with_measure": 6845,
+      "station_days_with_measure": 6844,
       "utilization": 0.073498
     },
     {
@@ -920,5 +1048,5 @@
       "utilization": null
     }
   ],
-  "run_id": "sensitivity-20260920T021440Z"
+  "run_id": "sensitivity-20260920T022855Z"
 }
