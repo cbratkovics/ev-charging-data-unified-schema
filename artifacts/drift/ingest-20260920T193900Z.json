@@ -1,6 +1,6 @@
 {
   "artifact": "drift",
-  "code_commit": "5aa9fde4e7e653588a3c52e29ba2a7c3bd0f2df7",
+  "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
   "files": [
     {
       "columns_seen": [
@@ -153,7 +153,7 @@
       "source": "dft_2017"
     }
   ],
-  "generated_at_utc": "2026-09-20T18:55:22+00:00",
+  "generated_at_utc": "2026-09-20T19:39:03+00:00",
   "ingest": {
     "download": true,
     "landed_dir": "/Users/christopherbratkovics/Desktop/portfolio_projects/ev-charging-data-unified-schema/data/landed",
@@ -184,7 +184,7 @@
     "retyped_required": "quarantine: as missing_required",
     "unknown_column": "warn: landed, carried through bronze"
   },
-  "run_id": "ingest-20260920T185519Z",
+  "run_id": "ingest-20260920T193900Z",
   "summary": {
     "by_outcome": {
       "info": 2,

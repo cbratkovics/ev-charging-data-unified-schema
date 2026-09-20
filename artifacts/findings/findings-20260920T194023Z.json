@@ -1,0 +1,1186 @@
+{
+  "artifact": "findings",
+  "boulder_idle": {
+    "production": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 67092.283,
+          "idle_minutes": 260801.883
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 67896.35,
+          "idle_minutes": 269833.883
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 89797.533,
+          "idle_minutes": 278766.95
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 94346.683,
+          "idle_minutes": 289119.383
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 87546.8,
+          "idle_minutes": 284959.967
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 85351.15,
+          "idle_minutes": 282132.95
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 84745.517,
+          "idle_minutes": 284443.35
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 81963.883,
+          "idle_minutes": 287415.2
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 79341.183,
+          "idle_minutes": 279903.917
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 77713.767,
+          "idle_minutes": 265863.65
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 78018.3,
+          "idle_minutes": 263707.417
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 79449.317,
+          "idle_minutes": 270273.617
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 68327.6,
+          "idle_minutes": 279202.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 75878.05,
+          "idle_minutes": 269892.75
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 70153.3,
+          "idle_minutes": 264258.6
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 66713.133,
+          "idle_minutes": 254842.233
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 66266.917,
+          "idle_minutes": 254781.233
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 69033.3,
+          "idle_minutes": 288463.367
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 69855.967,
+          "idle_minutes": 296003.667
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 70831.033,
+          "idle_minutes": 299662.483
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 72860.167,
+          "idle_minutes": 297481.633
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 74474.25,
+          "idle_minutes": 284333.217
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 74741.417,
+          "idle_minutes": 269317.367
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 81973.9,
+          "idle_minutes": 267767.217
+        }
+      },
+      "charging_minutes": 8101944.25,
+      "connected_minutes": 14742434.0,
+      "full_occupancy_idle_minutes": 1834371.8,
+      "full_occupancy_idle_share_of_connected": 0.124428,
+      "full_occupancy_share_of_idle": 0.276127,
+      "idle_minutes": 6643228.883,
+      "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.622,
+      "stations": 50,
+      "stations_with_full_occupancy_idle": 50
+    },
+    "robust_max_n1": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 65642.283,
+          "idle_minutes": 260801.883
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 66272.883,
+          "idle_minutes": 269833.883
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 76977.1,
+          "idle_minutes": 278766.95
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 78629.767,
+          "idle_minutes": 289119.383
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 75077.917,
+          "idle_minutes": 284959.967
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 75795.85,
+          "idle_minutes": 282132.95
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 75631.783,
+          "idle_minutes": 284443.35
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 74847.783,
+          "idle_minutes": 287415.2
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 73360.6,
+          "idle_minutes": 279903.917
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 72868.367,
+          "idle_minutes": 265863.65
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 73290.733,
+          "idle_minutes": 263707.417
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 75244.233,
+          "idle_minutes": 270273.617
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 66766.583,
+          "idle_minutes": 279202.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 72942.883,
+          "idle_minutes": 269892.75
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 67797.683,
+          "idle_minutes": 264258.6
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 65358.783,
+          "idle_minutes": 254842.233
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 64903.75,
+          "idle_minutes": 254781.233
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 67425.533,
+          "idle_minutes": 288463.367
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 68204.367,
+          "idle_minutes": 296003.667
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 68928.617,
+          "idle_minutes": 299662.483
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 70835.3,
+          "idle_minutes": 297481.633
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 71243.5,
+          "idle_minutes": 284333.217
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 70555.8,
+          "idle_minutes": 269317.367
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 75208.5,
+          "idle_minutes": 267767.217
+        }
+      },
+      "charging_minutes": 8101944.25,
+      "connected_minutes": 14742434.0,
+      "full_occupancy_idle_minutes": 1713810.6,
+      "full_occupancy_idle_share_of_connected": 0.11625,
+      "full_occupancy_share_of_idle": 0.257979,
+      "idle_minutes": 6643228.883,
+      "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.876,
+      "stations": 50,
+      "stations_with_full_occupancy_idle": 50
+    },
+    "robust_max_n10": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 67092.5,
+          "idle_minutes": 260801.883
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 67896.35,
+          "idle_minutes": 269833.883
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 90421.417,
+          "idle_minutes": 278766.95
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 95033.967,
+          "idle_minutes": 289119.383
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 88192.2,
+          "idle_minutes": 284959.967
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 86067.483,
+          "idle_minutes": 282132.95
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 85745.683,
+          "idle_minutes": 284443.35
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 82850.333,
+          "idle_minutes": 287415.2
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 79885.85,
+          "idle_minutes": 279903.917
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 78069.217,
+          "idle_minutes": 265863.65
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 78316.7,
+          "idle_minutes": 263707.417
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 79582.933,
+          "idle_minutes": 270273.617
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 68327.6,
+          "idle_minutes": 279202.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 75890.017,
+          "idle_minutes": 269892.75
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 70212.25,
+          "idle_minutes": 264258.6
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 66737.133,
+          "idle_minutes": 254842.233
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 66267.2,
+          "idle_minutes": 254781.233
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 69033.3,
+          "idle_minutes": 288463.367
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 69855.967,
+          "idle_minutes": 296003.667
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 70831.033,
+          "idle_minutes": 299662.483
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 72860.367,
+          "idle_minutes": 297481.633
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 74513.183,
+          "idle_minutes": 284333.217
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 74770.75,
+          "idle_minutes": 269317.367
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 82259.667,
+          "idle_minutes": 267767.217
+        }
+      },
+      "charging_minutes": 8101944.25,
+      "connected_minutes": 14742434.0,
+      "full_occupancy_idle_minutes": 1840713.1,
+      "full_occupancy_idle_share_of_connected": 0.124858,
+      "full_occupancy_share_of_idle": 0.277081,
+      "idle_minutes": 6643228.883,
+      "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.609,
+      "stations": 50,
+      "stations_with_full_occupancy_idle": 50
+    },
+    "robust_max_n2": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 66132.283,
+          "idle_minutes": 260801.883
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 66901.75,
+          "idle_minutes": 269833.883
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 87148.35,
+          "idle_minutes": 278766.95
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 91120.4,
+          "idle_minutes": 289119.383
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 83957.633,
+          "idle_minutes": 284959.967
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 82442.833,
+          "idle_minutes": 282132.95
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 81917.75,
+          "idle_minutes": 284443.35
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 79816.083,
+          "idle_minutes": 287415.2
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 78014.783,
+          "idle_minutes": 279903.917
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 76484.567,
+          "idle_minutes": 265863.65
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 76240.433,
+          "idle_minutes": 263707.417
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 78115.033,
+          "idle_minutes": 270273.617
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 67307.6,
+          "idle_minutes": 279202.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 74910.167,
+          "idle_minutes": 269892.75
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 69314.033,
+          "idle_minutes": 264258.6
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 65761.85,
+          "idle_minutes": 254842.233
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 65275.917,
+          "idle_minutes": 254781.233
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 67965.533,
+          "idle_minutes": 288463.367
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 68775.967,
+          "idle_minutes": 296003.667
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 69751.033,
+          "idle_minutes": 299662.483
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 71716.817,
+          "idle_minutes": 297481.633
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 72963.5,
+          "idle_minutes": 284333.217
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 73070.95,
+          "idle_minutes": 269317.367
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 80159.183,
+          "idle_minutes": 267767.217
+        }
+      },
+      "charging_minutes": 8101944.25,
+      "connected_minutes": 14742434.0,
+      "full_occupancy_idle_minutes": 1795264.45,
+      "full_occupancy_idle_share_of_connected": 0.121775,
+      "full_occupancy_share_of_idle": 0.27024,
+      "idle_minutes": 6643228.883,
+      "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.7,
+      "stations": 50,
+      "stations_with_full_occupancy_idle": 50
+    },
+    "robust_max_n3": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 66132.283,
+          "idle_minutes": 260801.883
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 66901.75,
+          "idle_minutes": 269833.883
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 87153.1,
+          "idle_minutes": 278766.95
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 91122.6,
+          "idle_minutes": 289119.383
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 83961.0,
+          "idle_minutes": 284959.967
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 82498.283,
+          "idle_minutes": 282132.95
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 81965.883,
+          "idle_minutes": 284443.35
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 79860.917,
+          "idle_minutes": 287415.2
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 78014.783,
+          "idle_minutes": 279903.917
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 76484.567,
+          "idle_minutes": 265863.65
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 76240.433,
+          "idle_minutes": 263707.417
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 78115.733,
+          "idle_minutes": 270273.617
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 67307.6,
+          "idle_minutes": 279202.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 74916.2,
+          "idle_minutes": 269892.75
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 69323.1,
+          "idle_minutes": 264258.6
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 65762.367,
+          "idle_minutes": 254842.233
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 65275.917,
+          "idle_minutes": 254781.233
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 67965.533,
+          "idle_minutes": 288463.367
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 68775.967,
+          "idle_minutes": 296003.667
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 69751.033,
+          "idle_minutes": 299662.483
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 71716.817,
+          "idle_minutes": 297481.633
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 72963.5,
+          "idle_minutes": 284333.217
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 73070.95,
+          "idle_minutes": 269317.367
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 80159.183,
+          "idle_minutes": 267767.217
+        }
+      },
+      "charging_minutes": 8101944.25,
+      "connected_minutes": 14742434.0,
+      "full_occupancy_idle_minutes": 1795439.5,
+      "full_occupancy_idle_share_of_connected": 0.121787,
+      "full_occupancy_share_of_idle": 0.270266,
+      "idle_minutes": 6643228.883,
+      "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.7,
+      "stations": 50,
+      "stations_with_full_occupancy_idle": 50
+    },
+    "robust_max_n5": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 67092.283,
+          "idle_minutes": 260801.883
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 67896.35,
+          "idle_minutes": 269833.883
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 89797.533,
+          "idle_minutes": 278766.95
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 94346.683,
+          "idle_minutes": 289119.383
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 87546.8,
+          "idle_minutes": 284959.967
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 85351.15,
+          "idle_minutes": 282132.95
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 84745.517,
+          "idle_minutes": 284443.35
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 81963.883,
+          "idle_minutes": 287415.2
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 79341.183,
+          "idle_minutes": 279903.917
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 77713.767,
+          "idle_minutes": 265863.65
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 78018.3,
+          "idle_minutes": 263707.417
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 79449.317,
+          "idle_minutes": 270273.617
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 68327.6,
+          "idle_minutes": 279202.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 75878.05,
+          "idle_minutes": 269892.75
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 70153.3,
+          "idle_minutes": 264258.6
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 66713.133,
+          "idle_minutes": 254842.233
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 66266.917,
+          "idle_minutes": 254781.233
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 69033.3,
+          "idle_minutes": 288463.367
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 69855.967,
+          "idle_minutes": 296003.667
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 70831.033,
+          "idle_minutes": 299662.483
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 72860.167,
+          "idle_minutes": 297481.633
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 74474.25,
+          "idle_minutes": 284333.217
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 74741.417,
+          "idle_minutes": 269317.367
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 81973.9,
+          "idle_minutes": 267767.217
+        }
+      },
+      "charging_minutes": 8101944.25,
+      "connected_minutes": 14742434.0,
+      "full_occupancy_idle_minutes": 1834371.8,
+      "full_occupancy_idle_share_of_connected": 0.124428,
+      "full_occupancy_share_of_idle": 0.276127,
+      "idle_minutes": 6643228.883,
+      "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.622,
+      "stations": 50,
+      "stations_with_full_occupancy_idle": 50
+    }
+  },
+  "boulder_idle_by_hour_production": [
+    {
+      "full_occupancy_idle_minutes": 67092.283,
+      "hour": 0,
+      "idle_minutes": 260801.883
+    },
+    {
+      "full_occupancy_idle_minutes": 67896.35,
+      "hour": 1,
+      "idle_minutes": 269833.883
+    },
+    {
+      "full_occupancy_idle_minutes": 68327.6,
+      "hour": 2,
+      "idle_minutes": 279202.95
+    },
+    {
+      "full_occupancy_idle_minutes": 69033.3,
+      "hour": 3,
+      "idle_minutes": 288463.367
+    },
+    {
+      "full_occupancy_idle_minutes": 69855.967,
+      "hour": 4,
+      "idle_minutes": 296003.667
+    },
+    {
+      "full_occupancy_idle_minutes": 70831.033,
+      "hour": 5,
+      "idle_minutes": 299662.483
+    },
+    {
+      "full_occupancy_idle_minutes": 72860.167,
+      "hour": 6,
+      "idle_minutes": 297481.633
+    },
+    {
+      "full_occupancy_idle_minutes": 74474.25,
+      "hour": 7,
+      "idle_minutes": 284333.217
+    },
+    {
+      "full_occupancy_idle_minutes": 74741.417,
+      "hour": 8,
+      "idle_minutes": 269317.367
+    },
+    {
+      "full_occupancy_idle_minutes": 81973.9,
+      "hour": 9,
+      "idle_minutes": 267767.217
+    },
+    {
+      "full_occupancy_idle_minutes": 89797.533,
+      "hour": 10,
+      "idle_minutes": 278766.95
+    },
+    {
+      "full_occupancy_idle_minutes": 94346.683,
+      "hour": 11,
+      "idle_minutes": 289119.383
+    },
+    {
+      "full_occupancy_idle_minutes": 87546.8,
+      "hour": 12,
+      "idle_minutes": 284959.967
+    },
+    {
+      "full_occupancy_idle_minutes": 85351.15,
+      "hour": 13,
+      "idle_minutes": 282132.95
+    },
+    {
+      "full_occupancy_idle_minutes": 84745.517,
+      "hour": 14,
+      "idle_minutes": 284443.35
+    },
+    {
+      "full_occupancy_idle_minutes": 81963.883,
+      "hour": 15,
+      "idle_minutes": 287415.2
+    },
+    {
+      "full_occupancy_idle_minutes": 79341.183,
+      "hour": 16,
+      "idle_minutes": 279903.917
+    },
+    {
+      "full_occupancy_idle_minutes": 77713.767,
+      "hour": 17,
+      "idle_minutes": 265863.65
+    },
+    {
+      "full_occupancy_idle_minutes": 78018.3,
+      "hour": 18,
+      "idle_minutes": 263707.417
+    },
+    {
+      "full_occupancy_idle_minutes": 79449.317,
+      "hour": 19,
+      "idle_minutes": 270273.617
+    },
+    {
+      "full_occupancy_idle_minutes": 75878.05,
+      "hour": 20,
+      "idle_minutes": 269892.75
+    },
+    {
+      "full_occupancy_idle_minutes": 70153.3,
+      "hour": 21,
+      "idle_minutes": 264258.6
+    },
+    {
+      "full_occupancy_idle_minutes": 66713.133,
+      "hour": 22,
+      "idle_minutes": 254842.233
+    },
+    {
+      "full_occupancy_idle_minutes": 66266.917,
+      "hour": 23,
+      "idle_minutes": 254781.233
+    }
+  ],
+  "boulder_idle_by_station_group": {
+    "multi_port": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 44307.35,
+          "idle_minutes": 238016.95
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 44909.8,
+          "idle_minutes": 246847.333
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 72111.483,
+          "idle_minutes": 261080.9
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 77751.75,
+          "idle_minutes": 272524.45
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 72038.05,
+          "idle_minutes": 269451.217
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 69849.95,
+          "idle_minutes": 266631.75
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 69436.933,
+          "idle_minutes": 269134.767
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 65960.417,
+          "idle_minutes": 271411.733
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 62568.6,
+          "idle_minutes": 263131.333
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 59877.633,
+          "idle_minutes": 248027.517
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 59197.967,
+          "idle_minutes": 244887.083
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 59429.233,
+          "idle_minutes": 250253.533
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 45167.6,
+          "idle_minutes": 256042.95
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 54862.85,
+          "idle_minutes": 248877.55
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 48428.533,
+          "idle_minutes": 242533.833
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 44562.233,
+          "idle_minutes": 232691.333
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 43870.867,
+          "idle_minutes": 232385.183
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 45757.617,
+          "idle_minutes": 265187.683
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 46356.933,
+          "idle_minutes": 272504.633
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 47098.733,
+          "idle_minutes": 275930.183
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 49085.583,
+          "idle_minutes": 273707.05
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 51286.667,
+          "idle_minutes": 261145.633
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 53150.083,
+          "idle_minutes": 247726.033
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 62472.15,
+          "idle_minutes": 248265.467
+        }
+      },
+      "charging_minutes": 8008377.667,
+      "connected_minutes": 14164046.0,
+      "full_occupancy_idle_minutes": 1349539.017,
+      "full_occupancy_idle_share_of_connected": 0.095279,
+      "full_occupancy_share_of_idle": 0.219138,
+      "idle_minutes": 6158396.1,
+      "idle_share_of_connected": 0.434791,
+      "idle_to_full_occupancy_ratio": 4.563,
+      "stations": 36,
+      "stations_with_full_occupancy_idle": 36
+    },
+    "single_port": {
+      "by_local_hour": {
+        "0": {
+          "full_occupancy_idle_minutes": 22784.933,
+          "idle_minutes": 22784.933
+        },
+        "1": {
+          "full_occupancy_idle_minutes": 22986.55,
+          "idle_minutes": 22986.55
+        },
+        "10": {
+          "full_occupancy_idle_minutes": 17686.05,
+          "idle_minutes": 17686.05
+        },
+        "11": {
+          "full_occupancy_idle_minutes": 16594.933,
+          "idle_minutes": 16594.933
+        },
+        "12": {
+          "full_occupancy_idle_minutes": 15508.75,
+          "idle_minutes": 15508.75
+        },
+        "13": {
+          "full_occupancy_idle_minutes": 15501.2,
+          "idle_minutes": 15501.2
+        },
+        "14": {
+          "full_occupancy_idle_minutes": 15308.583,
+          "idle_minutes": 15308.583
+        },
+        "15": {
+          "full_occupancy_idle_minutes": 16003.467,
+          "idle_minutes": 16003.467
+        },
+        "16": {
+          "full_occupancy_idle_minutes": 16772.583,
+          "idle_minutes": 16772.583
+        },
+        "17": {
+          "full_occupancy_idle_minutes": 17836.133,
+          "idle_minutes": 17836.133
+        },
+        "18": {
+          "full_occupancy_idle_minutes": 18820.333,
+          "idle_minutes": 18820.333
+        },
+        "19": {
+          "full_occupancy_idle_minutes": 20020.083,
+          "idle_minutes": 20020.083
+        },
+        "2": {
+          "full_occupancy_idle_minutes": 23160.0,
+          "idle_minutes": 23160.0
+        },
+        "20": {
+          "full_occupancy_idle_minutes": 21015.2,
+          "idle_minutes": 21015.2
+        },
+        "21": {
+          "full_occupancy_idle_minutes": 21724.767,
+          "idle_minutes": 21724.767
+        },
+        "22": {
+          "full_occupancy_idle_minutes": 22150.9,
+          "idle_minutes": 22150.9
+        },
+        "23": {
+          "full_occupancy_idle_minutes": 22396.05,
+          "idle_minutes": 22396.05
+        },
+        "3": {
+          "full_occupancy_idle_minutes": 23275.683,
+          "idle_minutes": 23275.683
+        },
+        "4": {
+          "full_occupancy_idle_minutes": 23499.033,
+          "idle_minutes": 23499.033
+        },
+        "5": {
+          "full_occupancy_idle_minutes": 23732.3,
+          "idle_minutes": 23732.3
+        },
+        "6": {
+          "full_occupancy_idle_minutes": 23774.583,
+          "idle_minutes": 23774.583
+        },
+        "7": {
+          "full_occupancy_idle_minutes": 23187.583,
+          "idle_minutes": 23187.583
+        },
+        "8": {
+          "full_occupancy_idle_minutes": 21591.333,
+          "idle_minutes": 21591.333
+        },
+        "9": {
+          "full_occupancy_idle_minutes": 19501.75,
+          "idle_minutes": 19501.75
+        }
+      },
+      "charging_minutes": 93566.583,
+      "connected_minutes": 578388.0,
+      "full_occupancy_idle_minutes": 484832.783,
+      "full_occupancy_idle_share_of_connected": 0.838248,
+      "full_occupancy_share_of_idle": 1.0,
+      "idle_minutes": 484832.783,
+      "idle_share_of_connected": 0.838248,
+      "idle_to_full_occupancy_ratio": 1.0,
+      "stations": 14,
+      "stations_with_full_occupancy_idle": 14
+    }
+  },
+  "cannot_show": [
+    "no queue, arrival or turned-away-driver data exists in any source, so idle time is a ceiling on recoverable capacity, not demand",
+    "port counts are inferred lower bounds (ADR-0012); a station with more ports than inferred has lower true utilization and less idle at full occupancy than reported",
+    "the DfT publication covers calendar 2017 only; Boulder 2018-2023 and Cary 2012-2023 are single operators; nothing here compares operators",
+    "charging time is assumed to begin at session start; the sources publish no charging profile"
+  ],
+  "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
+  "definitions": {
+    "by_local_hour": "idle and full-occupancy idle minutes attributed to the local hour in which they elapsed",
+    "full_occupancy_idle_share_of_connected": "idle minutes that elapsed while every inferred port at the station was occupied, over connected minutes; computed from the connected-interval sweep per station with the port count of the named definition",
+    "full_occupancy_share_of_idle": "full-occupancy idle minutes over all idle minutes",
+    "idle_share_of_connected": "1 - charging minutes / connected minutes over non-trivial Boulder sessions at known stations",
+    "idle_to_full_occupancy_ratio": "idle minutes over full-occupancy idle minutes: how many times the headline idle share overstates the full-occupancy figure",
+    "period": "first and last local session start per source in the fact",
+    "utilization_range": "min and max of the sensitivity artifact's non-trivial-rule utilization across denominator definitions; production is the value under dim_station.ports_inferred; relative_range is (max - min) / production"
+  },
+  "dft_anomalies_population": {
+    "accepted": 38775,
+    "accepted_meets_rule": 21098,
+    "accepted_not_meeting_rule": 17677,
+    "family": "rapids_anomalies",
+    "moved_to_fasts_raw": 9258,
+    "natural_key_duplicate_by_twin": {
+      "fasts/accepted": 8872,
+      "fasts/quarantined": 386,
+      "rapids_anomalies/accepted": 520
+    },
+    "quarantined": 9844,
+    "quarantined_by_primary_reason": {
+      "end_before_start": 7,
+      "implied_kw_over_ceiling": 49,
+      "natural_key_duplicate": 9778,
+      "negative_energy": 10
+    },
+    "total": 48619
+  },
+  "dft_publisher_rule": {
+    "by_family": {
+      "fasts": {
+        "accepted": 102038,
+        "meets_rule": 0
+      },
+      "fasts_anomalies": {
+        "accepted": 10130,
+        "meets_rule": 9371
+      },
+      "rapids": {
+        "accepted": 108740,
+        "meets_rule": 274
+      },
+      "rapids_anomalies": {
+        "accepted": 38775,
+        "meets_rule": 21098
+      }
+    }
+  },
+  "generated_at_utc": "2026-09-20T19:40:25+00:00",
+  "inputs": {
+    "sensitivity_run_id": "sensitivity-20260920T194004Z",
+    "silver_run_id": "silver-20260920T194003Z"
+  },
+  "periods": {
+    "boulder": {
+      "first_start_local": "2018-01-01 17:49:00",
+      "last_start_local": "2023-11-30 23:27:00",
+      "sessions": 77826
+    },
+    "cary": {
+      "first_start_local": "2012-04-11 13:51:19",
+      "last_start_local": "2023-01-03 12:58:04",
+      "sessions": 20097
+    },
+    "dft_2017": {
+      "first_start_local": "2017-01-01 00:00:00",
+      "last_start_local": "2017-12-31 23:59:00",
+      "sessions": 259683
+    }
+  },
+  "run_id": "findings-20260920T194023Z",
+  "station_days_over_100pct_production": {
+    "boulder": 1,
+    "dft_2017": 169
+  },
+  "unknown_station": {
+    "boulder": {
+      "kwh": 659453.723,
+      "sessions": 77826,
+      "unknown_station_kwh": 0.0,
+      "unknown_station_sessions": 0
+    },
+    "cary": {
+      "kwh": 161688.36,
+      "sessions": 20097,
+      "unknown_station_kwh": 0.0,
+      "unknown_station_sessions": 0
+    },
+    "dft_2017": {
+      "kwh": 2346994.076,
+      "sessions": 259683,
+      "unknown_station_kwh": 40368.75,
+      "unknown_station_sessions": 5463
+    }
+  },
+  "utilization_ranges": {
+    "boulder__charging": {
+      "max": 0.068363,
+      "max_definition": "trailing_90d_max",
+      "min": 0.057622,
+      "min_definition": "robust_max_n1",
+      "over_100": {
+        "connector_ids": 0,
+        "production": 0,
+        "robust_max_n1": 0,
+        "robust_max_n10": 0,
+        "robust_max_n2": 0,
+        "robust_max_n3": 0,
+        "robust_max_n5": 0,
+        "trailing_90d_max": 0
+      },
+      "production": 0.062436,
+      "relative_range": 0.172032
+    },
+    "boulder__connected": {
+      "max": 0.124385,
+      "max_definition": "trailing_90d_max",
+      "min": 0.104843,
+      "min_definition": "robust_max_n1",
+      "over_100": {
+        "connector_ids": 1,
+        "production": 1,
+        "robust_max_n1": 0,
+        "robust_max_n10": 1,
+        "robust_max_n2": 0,
+        "robust_max_n3": 0,
+        "robust_max_n5": 1,
+        "trailing_90d_max": 7
+      },
+      "production": 0.113601,
+      "relative_range": 0.172023
+    },
+    "cary__charging": {
+      "max": 0.074442,
+      "max_definition": "robust_max_n10",
+      "min": 0.061474,
+      "min_definition": "robust_max_n1",
+      "over_100": {
+        "connector_ids": 0,
+        "production": 0,
+        "robust_max_n1": 0,
+        "robust_max_n10": 0,
+        "robust_max_n2": 0,
+        "robust_max_n3": 0,
+        "robust_max_n5": 0,
+        "trailing_90d_max": 0
+      },
+      "production": 0.071208,
+      "relative_range": 0.182114
+    },
+    "dft_2017__connected": {
+      "max": 0.114069,
+      "max_definition": "robust_max_n10",
+      "min": 0.087327,
+      "min_definition": "production",
+      "over_100": {
+        "connector_ids": 224,
+        "production": 169,
+        "robust_max_n1": 0,
+        "robust_max_n10": 253,
+        "robust_max_n2": 12,
+        "robust_max_n3": 136,
+        "robust_max_n5": 175,
+        "trailing_90d_max": 31
+      },
+      "production": 0.087327,
+      "relative_range": 0.306228
+    }
+  }
+}

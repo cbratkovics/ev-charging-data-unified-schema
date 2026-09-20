@@ -47,7 +47,7 @@ flowchart LR
 ## Results
 
 <!-- generated:results start -->
-_Rendered by `scripts/render_docs.py` from `artifacts/findings/findings-20260920T185640Z.json` and `artifacts/silver/silver-20260920T185621Z.json`; a ratio of summed minutes over summed available port minutes, never an average of daily percentages; ports are inferred lower bounds, so these are upper bounds on utilization._
+_Rendered by `scripts/render_docs.py` from `artifacts/findings/findings-20260920T194023Z.json` and `artifacts/silver/silver-20260920T194003Z.json`; a ratio of summed minutes over summed available port minutes, never an average of daily percentages; ports are inferred lower bounds, so these are upper bounds on utilization._
 
 | Source | Period | Utilization (production port count) | Range across denominator definitions |
 |---|---|---|---|

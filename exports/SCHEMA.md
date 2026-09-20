@@ -36,7 +36,7 @@ Grain: date_key. Formats: parquet, json. Rows: 4,200.
 
 One row per operator: the three publishers and one row per DfT funding body with the publisher as parent. Full rebuild.
 
-Grain: operator_key. Formats: parquet, json. Rows: 67.
+Grain: operator_key. Formats: parquet, json. Rows: 61.
 
 | Column | Type | Description |
 |---|---|---|
@@ -57,10 +57,14 @@ Grain: station_key. Formats: parquet, json. Rows: 908.
 |---|---|---|
 | `station_key` | varchar | station identifier |
 | `source` | varchar | source short name |
-| `operator_key` | varchar | operator |
-| `site_key` | varchar | site grouping |
-| `station_name_raw` | varchar | the publisher's station identifier |
-| `station_tz` | varchar | IANA zone |
+| `operator_key` | varchar | operator derived from the station's majority site exactly as the session fact derives it; a session at this station may carry a different operator_key (multi_operator; ADR-0016) |
+| `site_key` | varchar | site grouping by the majority rule: the value carried by the most non-trivial sessions, ties broken by the value itself, nulls never competing (ADR-0016) |
+| `station_name_raw` | varchar | the publisher's station identifier (majority rule, ADR-0016) |
+| `station_tz` | varchar | IANA zone (majority rule, ADR-0016) |
+| `multi_site_key` | boolean | the station's sessions carried more than one non-null site_key (ADR-0016) |
+| `multi_operator` | boolean | the station's sessions carried more than one operator_key (for DfT, more than one funding-body name including the null name; ADR-0016) |
+| `site_key_candidates` | bigint | distinct non-null site_key values on the station's non-trivial sessions |
+| `operator_candidates` | bigint | distinct operator_key values on the station's non-trivial sessions |
 | `capacity_grain` | varchar | grain of the station key: unit throughout (port-level keys are not built; ADR-0005 d) |
 | `ports_inferred` | integer | ports in service: the larger of the distinct published connector ids and the robust max of observed concurrency at N = 5 over non-trivial sessions, floored at 1; both are lower bounds on the true count (ADR-0012) |
 | `ports_source` | varchar | which lower bound was binding: connector_ids, observed_concurrency, or floor when neither reached 1 |
@@ -108,7 +112,7 @@ Grain: station_key, local_date. Formats: parquet. Rows: 306,091.
 
 Monthly rollup at source x operator x calendar month (station-local dates): sums of the station-day measures and the counts needed to recompute any ratio; no ratio is stored (utilization is sum over sum at any rollup). Null measures stay null where the source lacks that duration type. Exported as Parquet and JSON.
 
-Grain: source, operator_key, year_month. Formats: parquet, json. Rows: 881.
+Grain: source, operator_key, year_month. Formats: parquet, json. Rows: 859.
 
 | Column | Type | Description |
 |---|---|---|

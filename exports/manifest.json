@@ -1,7 +1,7 @@
 {
   "artifact": "exports",
   "attribution": "Contains public sector information licensed under the Open Government Licence v3.0 (UK Department for Transport, Electric Chargepoint Analysis 2017). Boulder, CO and Cary, NC data are published under CC0; see docs/DATA_SOURCES.md for the verbatim licences and URLs.",
-  "code_commit": "5aa9fde4e7e653588a3c52e29ba2a7c3bd0f2df7",
+  "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
   "files": {
     "dim_date.json": {
       "bytes": 695839,
@@ -24,47 +24,47 @@
       "sha256": "39ee12f231f522b2f6db6ece04b480e42b5286d54ac17a7f713773b6f67c9dba"
     },
     "dim_operator.json": {
-      "bytes": 14643,
+      "bytes": 13341,
       "format": "json",
       "grain": [
         "operator_key"
       ],
       "relation": "dim_operator",
-      "rows": 67,
-      "sha256": "9c42b79e6926f55003023d346cdc38fdd524fc53a5bb02b70d51bc3cced81053"
+      "rows": 61,
+      "sha256": "aa760f0e6221a47d195e02afdabae0833c026bba4bad650c87a3ec7e58be80df"
     },
     "dim_operator.parquet": {
-      "bytes": 6169,
+      "bytes": 6045,
       "format": "parquet",
       "grain": [
         "operator_key"
       ],
       "relation": "dim_operator",
-      "rows": 67,
-      "sha256": "ff4d56847f18cec0baea2cf0699ebc36a4fd345030d0938181e03ca844895524"
+      "rows": 61,
+      "sha256": "4f0fef104e7f569d391b1e182200dd2d8aa4aa1ea9df72473cb0199b267767f0"
     },
     "dim_station.json": {
-      "bytes": 614513,
+      "bytes": 710786,
       "format": "json",
       "grain": [
         "station_key"
       ],
       "relation": "dim_station",
       "rows": 908,
-      "sha256": "878d69871848e166065bfc6533f9c4f746c8028cb17b3d78cab7b281714118c7"
+      "sha256": "6dfbcf3106768c820cacb69882fc7dda8e1446d2563a8057caff71b5939f4cba"
     },
     "dim_station.parquet": {
-      "bytes": 35808,
+      "bytes": 38213,
       "format": "parquet",
       "grain": [
         "station_key"
       ],
       "relation": "dim_station",
       "rows": 908,
-      "sha256": "857f8111ee95c099614ef22dedd7c5775439e270de7f7cb581448645c38e1462"
+      "sha256": "3774400e60c809f02e862121306668731e9c92d1a5b3d2e4c7a8813ed8b2c2a4"
     },
     "fct_station_day.parquet": {
-      "bytes": 1825811,
+      "bytes": 1825815,
       "format": "parquet",
       "grain": [
         "station_key",
@@ -72,10 +72,10 @@
       ],
       "relation": "fct_station_day",
       "rows": 306091,
-      "sha256": "5fc582831a5d70f19535a4987195521a8f6ca08e0f78b14b201a479e16fb29db"
+      "sha256": "86ba7eb76bc8e04994e3f8932c852bce0a4c4f33e857dd9684d4289e99b01be7"
     },
     "mart_monthly.json": {
-      "bytes": 370009,
+      "bytes": 361049,
       "format": "json",
       "grain": [
         "source",
@@ -83,11 +83,11 @@
         "year_month"
       ],
       "relation": "mart_monthly",
-      "rows": 881,
-      "sha256": "629d822a7b7714959c5291d4bce9d32d8933c1428555a5e590e40c703a50ec40"
+      "rows": 859,
+      "sha256": "747627a124558f06343cb10b58d887981ae91dadff35581886fe1366cd739ca2"
     },
     "mart_monthly.parquet": {
-      "bytes": 34895,
+      "bytes": 34451,
       "format": "parquet",
       "grain": [
         "source",
@@ -95,11 +95,11 @@
         "year_month"
       ],
       "relation": "mart_monthly",
-      "rows": 881,
-      "sha256": "c8ddd2ccb0129a7236b2039892805918675cf9c152bebe2d9aec0cd01a444309"
+      "rows": 859,
+      "sha256": "274cfc86c0b3c27578354ac725f55d48049960edd2ee2882866942c717b185b8"
     }
   },
-  "generated_at_utc": "2026-09-20T18:56:55+00:00",
-  "run_id": "export-20260920T185654Z",
+  "generated_at_utc": "2026-09-20T19:40:39+00:00",
+  "run_id": "export-20260920T194038Z",
   "size_ceiling_bytes": 5242880
 }

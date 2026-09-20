@@ -1,6 +1,6 @@
 {
   "artifact": "profile",
-  "code_commit": "5aa9fde4e7e653588a3c52e29ba2a7c3bd0f2df7",
+  "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
   "definitions": {
     "charging_over_24h": "rows whose hh:mm:ss charging duration exceeds 1440 minutes",
     "delivery_blocks": "segments of one file delimited by the per-delivery row id restarting at 0; each compared with the last block on the natural key",
@@ -16,10 +16,10 @@
     "one_hour_gap_rows": "rows where (end - start) differs from the recorded duration by 55..65 minutes",
     "span_over_24h": "rows whose parsed end minus start exceeds 1440 minutes"
   },
-  "generated_at_utc": "2026-09-20T18:55:22+00:00",
+  "generated_at_utc": "2026-09-20T19:39:03+00:00",
   "package_version": "0.1.0",
   "pandas_version": "3.0.6",
-  "run_id": "profile-20260920T185522Z",
+  "run_id": "profile-20260920T193903Z",
   "sources": {
     "boulder": {
       "answers": {
@@ -240,9 +240,9 @@
             }
           },
           "inter_session_gaps": {
-            "gaps": 60423,
+            "gaps": 60434,
             "gaps_over_days": {
-              "1": 8079,
+              "1": 8078,
               "14": 210,
               "3": 2074,
               "30": 66,
@@ -254,9 +254,9 @@
             "keys_with_a_gap_over_30d": 25,
             "quantiles_days": {
               "0.5": 0.165,
-              "0.9": 1.401,
-              "0.99": 6.951,
-              "0.999": 31.988,
+              "0.9": 1.4,
+              "0.99": 6.95,
+              "0.999": 31.987,
               "1.0": 415.96
             }
           },
@@ -1617,23 +1617,23 @@
             }
           },
           "inter_session_gaps": {
-            "gaps": 230757,
+            "gaps": 232076,
             "gaps_over_days": {
-              "1": 39889,
+              "1": 39855,
               "14": 1597,
-              "3": 13156,
-              "30": 634,
+              "3": 13154,
+              "30": 632,
               "60": 305,
-              "7": 4011,
+              "7": 4010,
               "90": 237
             },
             "key": "CPID",
             "keys_with_a_gap_over_30d": 366,
             "quantiles_days": {
-              "0.5": 0.174,
-              "0.9": 1.931,
-              "0.99": 10.893,
-              "0.999": 91.837,
+              "0.5": 0.17,
+              "0.9": 1.923,
+              "0.99": 10.866,
+              "0.999": 90.848,
               "1.0": 17495.378
             }
           },

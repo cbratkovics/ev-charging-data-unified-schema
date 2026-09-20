@@ -64,14 +64,6 @@
   "timezone":"Europe\/London"
  },
  {
-  "operator_key":"dft_2017\/Cheshire East Borough Council ",
-  "operator_name":"Cheshire East Borough Council ",
-  "source":"dft_2017",
-  "parent_operator_key":"dft_2017",
-  "country":"GB",
-  "timezone":"Europe\/London"
- },
- {
   "operator_key":"dft_2017\/City of Bradford Metropolitan District Council",
   "operator_name":"City of Bradford Metropolitan District Council",
   "source":"dft_2017",
@@ -224,14 +216,6 @@
   "timezone":"Europe\/London"
  },
  {
-  "operator_key":"dft_2017\/Hackney Borough Council ",
-  "operator_name":"Hackney Borough Council ",
-  "source":"dft_2017",
-  "parent_operator_key":"dft_2017",
-  "country":"GB",
-  "timezone":"Europe\/London"
- },
- {
   "operator_key":"dft_2017\/Hampshire County Council",
   "operator_name":"Hampshire County Council",
   "source":"dft_2017",
@@ -240,24 +224,8 @@
   "timezone":"Europe\/London"
  },
  {
-  "operator_key":"dft_2017\/Hampshire County Council ",
-  "operator_name":"Hampshire County Council ",
-  "source":"dft_2017",
-  "parent_operator_key":"dft_2017",
-  "country":"GB",
-  "timezone":"Europe\/London"
- },
- {
   "operator_key":"dft_2017\/Hyndburn Borough Council",
   "operator_name":"Hyndburn Borough Council",
-  "source":"dft_2017",
-  "parent_operator_key":"dft_2017",
-  "country":"GB",
-  "timezone":"Europe\/London"
- },
- {
-  "operator_key":"dft_2017\/Hyndburn Borough Council ",
-  "operator_name":"Hyndburn Borough Council ",
   "source":"dft_2017",
   "parent_operator_key":"dft_2017",
   "country":"GB",
@@ -296,8 +264,8 @@
   "timezone":"Europe\/London"
  },
  {
-  "operator_key":"dft_2017\/Lewes District Council ",
-  "operator_name":"Lewes District Council ",
+  "operator_key":"dft_2017\/Lewes District Council",
+  "operator_name":"Lewes District Council",
   "source":"dft_2017",
   "parent_operator_key":"dft_2017",
   "country":"GB",
@@ -376,14 +344,6 @@
   "timezone":"Europe\/London"
  },
  {
-  "operator_key":"dft_2017\/Poole Borough Council ",
-  "operator_name":"Poole Borough Council ",
-  "source":"dft_2017",
-  "parent_operator_key":"dft_2017",
-  "country":"GB",
-  "timezone":"Europe\/London"
- },
- {
   "operator_key":"dft_2017\/Royal Borough of Greenwich",
   "operator_name":"Royal Borough of Greenwich",
   "source":"dft_2017",
@@ -402,14 +362,6 @@
  {
   "operator_key":"dft_2017\/Slough Borough Council",
   "operator_name":"Slough Borough Council",
-  "source":"dft_2017",
-  "parent_operator_key":"dft_2017",
-  "country":"GB",
-  "timezone":"Europe\/London"
- },
- {
-  "operator_key":"dft_2017\/Slough Borough Council ",
-  "operator_name":"Slough Borough Council ",
   "source":"dft_2017",
   "parent_operator_key":"dft_2017",
   "country":"GB",
