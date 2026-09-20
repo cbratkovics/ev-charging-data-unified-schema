@@ -1,0 +1,302 @@
+{
+  "artifact": "silver_summary",
+  "by_file": [
+    {
+      "accepted": 77826,
+      "accepted_kwh": 659453.723,
+      "bronze": 148136,
+      "by_primary_reason": {
+        "charging_exceeds_connected": 3,
+        "natural_key_duplicate": 70303,
+        "unparseable_timestamp": 4
+      },
+      "flags": {
+        "charging_exceeds_connected_within_precision": 11139,
+        "duration_disagrees": 211,
+        "over_24h": 910,
+        "zero_energy": 8692
+      },
+      "non_trivial": 68297,
+      "quarantined": 70310,
+      "source": "boulder",
+      "source_file": "Electric_Vehicle_Charging_Station_Data.csv"
+    },
+    {
+      "accepted": 20097,
+      "accepted_kwh": 161688.36,
+      "bronze": 20142,
+      "by_primary_reason": {
+        "implied_kw_over_ceiling": 43,
+        "natural_key_duplicate": 2
+      },
+      "flags": {
+        "over_24h": 1,
+        "zero_energy": 2130
+      },
+      "non_trivial": 17733,
+      "quarantined": 45,
+      "source": "cary",
+      "source_file": "electric-vehicle-charging-stations.csv"
+    },
+    {
+      "accepted": 38376,
+      "accepted_kwh": 255778.917,
+      "bronze": 48619,
+      "by_primary_reason": {
+        "end_before_start": 7,
+        "implied_kw_over_ceiling": 45,
+        "natural_key_duplicate": 10183,
+        "negative_energy": 8
+      },
+      "flags": {
+        "dst_ambiguous": 1,
+        "over_24h": 6,
+        "publisher_excluded_rule": 20699,
+        "zero_energy": 15275
+      },
+      "non_trivial": 16903,
+      "quarantined": 10243,
+      "source": "dft_2017",
+      "source_file": "dft_2017_local_authority_rapids_incomplete_anomalies.csv"
+    },
+    {
+      "accepted": 108740,
+      "accepted_kwh": 1198304.436,
+      "bronze": 108746,
+      "by_primary_reason": {
+        "implied_kw_over_ceiling": 5,
+        "natural_key_duplicate": 1
+      },
+      "flags": {
+        "dst_ambiguous": 4,
+        "over_24h": 23,
+        "publisher_excluded_rule": 274
+      },
+      "non_trivial": 108739,
+      "quarantined": 6,
+      "source": "dft_2017",
+      "source_file": "dft_2017_local_authority_rapids_raw.csv"
+    },
+    {
+      "accepted": 10529,
+      "accepted_kwh": 13803.123,
+      "bronze": 11606,
+      "by_primary_reason": {
+        "end_before_start": 116,
+        "end_sentinel_1970": 9,
+        "implied_kw_over_ceiling": 44,
+        "natural_key_duplicate": 861,
+        "negative_energy": 47
+      },
+      "flags": {
+        "duration_disagrees": 5,
+        "over_24h": 253,
+        "publisher_excluded_rule": 9770,
+        "unknown_station": 88,
+        "zero_energy": 8533
+      },
+      "non_trivial": 759,
+      "quarantined": 1077,
+      "source": "dft_2017",
+      "source_file": "dft_2017_public_sector_fasts_incomplete_anomalies.csv"
+    },
+    {
+      "accepted": 102038,
+      "accepted_kwh": 879107.6,
+      "bronze": 103326,
+      "by_primary_reason": {
+        "end_before_start": 132,
+        "implied_kw_over_ceiling": 402,
+        "natural_key_duplicate": 754
+      },
+      "flags": {
+        "dst_ambiguous": 1,
+        "duration_disagrees": 163,
+        "over_24h": 3968,
+        "unknown_station": 5375
+      },
+      "non_trivial": 102038,
+      "quarantined": 1288,
+      "source": "dft_2017",
+      "source_file": "dft_2017_public_sector_fasts_raw.csv"
+    }
+  ],
+  "by_source": {
+    "boulder": {
+      "accepted": 77826,
+      "accepted_kwh": 659453.723,
+      "all_reasons": {
+        "charging_exceeds_connected": 3,
+        "natural_key_duplicate": 70305,
+        "unparseable_timestamp": 4
+      },
+      "bronze": 148136,
+      "by_primary_reason": {
+        "charging_exceeds_connected": 3,
+        "natural_key_duplicate": 70303,
+        "unparseable_timestamp": 4
+      },
+      "dst_ambiguous_starts": 0,
+      "flags": {
+        "charging_exceeds_connected_within_precision": 11139,
+        "duration_disagrees": 211,
+        "over_24h": 910,
+        "zero_energy": 8692
+      },
+      "non_trivial": 68297,
+      "quarantined": 70310
+    },
+    "cary": {
+      "accepted": 20097,
+      "accepted_kwh": 161688.36,
+      "all_reasons": {
+        "implied_kw_over_ceiling": 43,
+        "natural_key_duplicate": 2
+      },
+      "bronze": 20142,
+      "by_primary_reason": {
+        "implied_kw_over_ceiling": 43,
+        "natural_key_duplicate": 2
+      },
+      "dst_ambiguous_starts": 0,
+      "flags": {
+        "over_24h": 1,
+        "zero_energy": 2130
+      },
+      "non_trivial": 17733,
+      "quarantined": 45
+    },
+    "dft_2017": {
+      "accepted": 259683,
+      "accepted_kwh": 2346994.076,
+      "all_reasons": {
+        "end_before_start": 269,
+        "end_sentinel_1970": 9,
+        "energy_sentinel": 9,
+        "implied_kw_over_ceiling": 532,
+        "natural_key_duplicate": 11799,
+        "negative_energy": 57
+      },
+      "bronze": 272297,
+      "by_primary_reason": {
+        "end_before_start": 255,
+        "end_sentinel_1970": 9,
+        "implied_kw_over_ceiling": 496,
+        "natural_key_duplicate": 11799,
+        "negative_energy": 55
+      },
+      "dst_ambiguous_starts": 6,
+      "flags": {
+        "dst_ambiguous": 6,
+        "duration_disagrees": 168,
+        "over_24h": 4250,
+        "publisher_excluded_rule": 30743,
+        "unknown_station": 5463,
+        "zero_energy": 23808
+      },
+      "non_trivial": 228439,
+      "quarantined": 12614
+    }
+  },
+  "code_commit": "32903e9d5b76790a5811806ae04c9553e45c3712",
+  "definitions": {
+    "accepted": "rows of slv_sessions_unioned (primary_reason null)",
+    "all_reasons": "every failing reason on quarantined rows; a row counts once per reason",
+    "flags": "quality flags on accepted rows; a row counts once per flag",
+    "non_trivial": "accepted rows with energy_kwh > 0 and the available duration (connected, else charging) > 3 minutes (ADR-0007 item 3)",
+    "publisher_rule.anomalies_not_meeting_rule": "rows of the publisher's anomalies files that do not meet the rule, decomposed: quarantined here for a reason other than duplication (quarantined_<reason>); the same natural key present in a raw file (same_event_in_<family>: for rapids_anomalies these are the fast-charger events the revision moved to the fasts publication); accepted with no explanation (accepted_unexplained); other = a duplicate whose surviving twin is in the other anomalies family",
+    "publisher_rule.meets_rule": "DfT accepted rows with energy 0 or plug-in of 3 minutes or less, the publisher's stated exclusion rule (ADR-0007 item 2)",
+    "quarantined": "rows of slv_sessions_quarantined; by_primary_reason sums to it (ADR-0009 item 4)",
+    "unknown_station": "DfT sessions whose CPID is null, keyed unknown/<Name> (ADR-0007 item 1)"
+  },
+  "generated_at_utc": "2026-09-20T00:59:35+00:00",
+  "inputs": {
+    "boulder/Electric_Vehicle_Charging_Station_Data.csv": {
+      "retrieved_at": "2026-09-19T23:10:30+00:00",
+      "rows": 148136,
+      "sha256": "f1f620bb616fa6c0f9382c214c90d491fd1ac085373ffd37643008ae6fe6869a"
+    },
+    "cary/electric-vehicle-charging-stations.csv": {
+      "retrieved_at": "2026-09-19T23:08:39+00:00",
+      "rows": 20142,
+      "sha256": "9f8037bfd9246ccefb0d6f24d35c0e747eca640f2835ec76db22ffb1f8412a2e"
+    },
+    "dft_2017/dft_2017_local_authority_rapids_incomplete_anomalies.csv": {
+      "retrieved_at": "2026-09-19T23:38:58+00:00",
+      "rows": 48619,
+      "sha256": "169c0c359544fb43a1910854c37b99680067f10e6e6d0297c9a3e0753070bf09"
+    },
+    "dft_2017/dft_2017_local_authority_rapids_raw.csv": {
+      "retrieved_at": "2026-09-19T23:38:54+00:00",
+      "rows": 108746,
+      "sha256": "466c9b55bbdf6fcef08636400ca654e5e64fb72b6375e053d54a7991e1a93568"
+    },
+    "dft_2017/dft_2017_public_sector_fasts_incomplete_anomalies.csv": {
+      "retrieved_at": "2026-09-19T23:39:05+00:00",
+      "rows": 11606,
+      "sha256": "e0dd59631bc42799ab270635d94922720a4addf9cd15ea56cc5c91bf472a3c38"
+    },
+    "dft_2017/dft_2017_public_sector_fasts_raw.csv": {
+      "retrieved_at": "2026-09-19T23:39:02+00:00",
+      "rows": 103326,
+      "sha256": "c96a8c06b54c659107e77ecf2801250f5fedd6649045766160495fb61e413c35"
+    }
+  },
+  "publisher_rule": {
+    "anomalies_not_meeting_rule": {
+      "fasts_anomalies": {
+        "accepted_unexplained": 768,
+        "quarantined_end_before_start": 5,
+        "quarantined_implied_kw_over_ceiling": 10,
+        "quarantined_negative_energy": 46,
+        "same_event_in_fasts": 22
+      },
+      "rapids_anomalies": {
+        "accepted_unexplained": 17679,
+        "other": 2,
+        "quarantined_implied_kw_over_ceiling": 8,
+        "quarantined_negative_energy": 7,
+        "same_event_in_fasts_raw": 9258
+      }
+    },
+    "by_family": {
+      "fasts": {
+        "accepted": 102038,
+        "meets_rule": 0
+      },
+      "fasts_anomalies": {
+        "accepted": 10529,
+        "meets_rule": 9770
+      },
+      "rapids": {
+        "accepted": 108740,
+        "meets_rule": 274
+      },
+      "rapids_anomalies": {
+        "accepted": 38376,
+        "meets_rule": 20699
+      }
+    }
+  },
+  "run_id": "silver-20260920T005935Z",
+  "unknown_station": {
+    "boulder": {
+      "kwh": 659453.723,
+      "sessions": 77826,
+      "unknown_station_kwh": 0.0,
+      "unknown_station_sessions": 0
+    },
+    "cary": {
+      "kwh": 161688.36,
+      "sessions": 20097,
+      "unknown_station_kwh": 0.0,
+      "unknown_station_sessions": 0
+    },
+    "dft_2017": {
+      "kwh": 2346994.076,
+      "sessions": 259683,
+      "unknown_station_kwh": 40368.75,
+      "unknown_station_sessions": 5463
+    }
+  }
+}

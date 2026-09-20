@@ -41,8 +41,10 @@ pins them so a version bump that changes them fails loudly).**
 3. **Nonexistent local times** are a quarantine reason (`nonexistent_local_time`): the
    published wall-clock time cannot have happened, so no UTC instant is faithful to it.
    Ambiguous times are kept, converted to the second occurrence, and flagged
-   `is_dst_ambiguous`. Both have dbt unit tests and the profile shows the expected counts
-   are small (Boulder and DfT DST windows carry tens of sessions, docs/PROFILE.md).
+   `is_dst_ambiguous`. Both have dbt unit tests; the committed silver summary
+   `artifacts/silver/silver-20260920T005935Z.json` carries the real counts under
+   `by_source.<source>.dst_ambiguous_starts` and
+   `by_source.<source>.by_primary_reason.nonexistent_local_time`.
 4. **Quarantine reasons.** Every failing reason is kept in `quarantine_reasons[]`;
    `primary_reason` is the first present in this precedence, so counts by primary reason sum
    to the quarantined total: `blank_row`, `unparseable_timestamp`, `nonexistent_local_time`,
@@ -58,12 +60,15 @@ pins them so a version bump that changes them fails loudly).**
 6. **Null-safe keys.** Natural-key comparisons use `is not distinct from` semantics: the key
    columns are coalesced to a sentinel token before hashing into `natural_key_hash`.
 7. **Tolerance on `charging_exceeds_connected`.** Connected time is computed from the
-   published timestamps, which Boulder gives at minute precision, while charging time has
-   seconds; so on a valid row charging can exceed the computed connected time by up to a
-   minute. The first real build with a one-second tolerance quarantined 10,627 Boulder rows;
-   the excess was under a minute on all but 3 of them (scratch query on the built silver
-   table: 3 rows over 1, 2 or 5 minutes; none exceeded the publisher's own Total_Duration).
-   The rule now allows 2 minutes, the same tolerance as the duration-disagreement flag.
+   published timestamps, which Boulder gives at minute precision on most rows, while charging
+   time has seconds; so on a valid row charging can exceed the computed connected time by up
+   to a minute. The first real build with a one-second tolerance quarantined 10,627 Boulder
+   rows (scratch query on that build); the excess was under a minute on all but 3. The rule
+   was first relaxed to a global 2 minutes and then, per ADR-0010 (a), to the row's own
+   timestamp precision with a within-tolerance flag. On the committed silver summary
+   `artifacts/silver/silver-20260920T005935Z.json`: `by_source.boulder.flags.charging_exceeds_connected_within_precision`
+   rows are flagged and `by_source.boulder.by_primary_reason.charging_exceeds_connected` rows
+   quarantined.
 8. **Session timezone.** The dbt profile sets DuckDB's `TimeZone` to UTC so timestamptz
    values render and export identically on every machine.
 

@@ -1,8 +1,7 @@
 # ADR-0010 — Pre-Phase-4 items and Phase 4 amendments (2026-09-20)
 
 **Context.** The owner approved Phase 3 with three items to close before Phase 4 (a–c) and
-four amendments to the gold design (d–g). Numbers cite `artifacts/silver/<run_id>.json`
-(the run id is in `artifacts/silver/latest.json`).
+four amendments to the gold design (d–g). Numbers cite `artifacts/silver/silver-20260920T005935Z.json`.
 
 **Decision.**
 
