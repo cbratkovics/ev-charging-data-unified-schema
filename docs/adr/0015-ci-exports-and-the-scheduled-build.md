@@ -96,3 +96,61 @@ lints there. Nothing git-ignored can reach the clone, so a step that depends on 
 exists only on one machine fails locally before it fails in CI. The rule for the owner's routine:
 a smoke run in the working tree proves nothing about CI; run `scripts/smoke.sh` before pushing
 workflow or Makefile changes.
+
+**Amendment (2026-09-20): the first `--refresh` against a restored cache crashed the full
+build, and the refresh path had never been exercised that way.** Run #3 of `full-build.yml`
+failed in "Refresh the sources with conditional requests" at `loader.py` line 56 with
+`Cannot set a DataFrame with multiple columns to the single column _row_hash`. Run #1 had
+succeeded with no cache, so this was the first execution of `ingest --refresh` with
+`data/raw` and `data/landed` restored by `actions/cache`. Locally the refresh path had only
+ever run against files the owner had just downloaded, never against a restored cache plus a
+publisher that answers a conditional request with something other than the file.
+
+Root cause, reproduced offline. The error is raised only when a frame with zero data rows
+and at least two columns reaches `land_frame`: pandas' row-wise `agg` over an empty frame
+returns an empty DataFrame, not a Series, and assigning it to `_row_hash` raises. The
+hypothesised paths were checked and two of three refuted: a 304 leaves the cached file intact
+(`fetch` returned the prior record and never touched the file), and an empty body fails
+earlier, in `read_csv`, with `EmptyDataError`. What crashes is a 2xx response whose body is a
+single line with a delimiter: a header-only CSV, or a one-line JSON or HTML status page. The
+old `fetch` accepted any 2xx (`raise_for_status` passes a 202 "export pending" page) and
+wrote the body over the cached file without looking at it, so one such response replaced a
+good raw file, `read_csv` parsed the one line as a header, and the empty frame crashed the
+run. Which file it was the traceback could not say: nothing logged the source or file name.
+The live probe on 2026-09-20 shows the Boulder endpoint as a three-hop redirect (ArcGIS Hub,
+the feature server's replica cache, an Azure blob with a short-lived signed URL) that honoured
+the conditional request with a 304 that day, and the Cary export as sending no validators, so
+it is always a full re-download. Both are the kind of endpoint that can answer a cold request
+with a status page.
+
+Decision. (a) `acquire.fetch` never replaces a good cached file with anything it cannot land:
+a 304, any status other than 200, an empty body, a body that starts like JSON or HTML, or a
+body with no data row all leave the cached file and its record untouched, log a warning
+naming the file, and record the outcome for the landing step. A bad body is written only when
+there is no good cached file at all, and then its download record carries `body_problem`, so
+the landing step quarantines it and the next refresh sends no validators that could pin it
+with a 304. (b) The failure mode is a drift outcome, not a crash. A file with a header and no
+data rows is quarantined with `empty_file`; a file the loader cannot parse is quarantined with
+`unreadable_file`. For both, the ingest keeps the last good landed parquet and its manifest
+entry, so bronze keeps reading the previous delivery, and the run continues with the other
+files; when no good landed file exists an empty file lands its zero rows under
+`_quarantined/` and an unreadable one lands nothing. `row_hashes` returns an empty Series for
+an empty frame. A kept cached file is recorded in the drift artifact as an info finding
+`refresh_kept_cached` with the reason, and a kept landed file as `last_good_kept` with its
+path, retrieval time and row count. (c) `compare_artifacts.py` reads the fresh drift artifact:
+a quarantined file with inputs and outputs as committed is a new status `source_problem`
+(exit code 4); the workflow opens a "Source file quarantined" issue under the label
+`source-problem`, and every issue body carries a "Quarantined files" section when there is
+one. The run does not fail on a source problem: the landed data did not move. (d) Every
+landing step logs `<source>/<file>` (download, read, outcome, write), and a failure in the
+landing loop adds the file to the exception's notes, so a runner traceback names the file.
+(e) Tests exercise the refresh path offline with a stubbed HTTP session: a restored cache with
+a 304, an empty body, a header-only body, a 202 JSON page and a 503 (`tests/test_acquire.py`,
+`tests/test_ingest.py`), the empty-frame hash (`tests/test_loader.py`), the two new reason
+codes (`tests/test_contracts.py`) and the new compare status (`tests/test_compare.py`).
+
+Consequence for the routine. `scripts/smoke.sh` proves the offline path from a clean clone;
+it cannot reach the refresh path, which needs a cache and a publisher. The rule now: any
+change to `acquire.py` or to the landing loop ships with a stubbed-fetcher test of the
+restored-cache case, and the drift artifact of every full build is read, not just the compare
+status.

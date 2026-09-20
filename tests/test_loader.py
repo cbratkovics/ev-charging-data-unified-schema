@@ -73,3 +73,15 @@ def test_unchanged_file_is_a_noop_and_changed_file_is_not(tmp_path, raw_frame) -
     landed.unlink()
     raw.write_text("a,b\n1,2\n")
     assert not loader.is_unchanged(entry, raw), "missing landed parquet must re-land"
+
+
+def test_row_hashes_of_an_empty_frame_is_an_empty_series_and_it_lands(tmp_path) -> None:
+    """The full-build failure of 2026-09-20: a header-only file reached land_frame and the
+    row-wise hash returned a DataFrame (ADR-0015 amendment)."""
+    empty = pd.DataFrame({"x": pd.Series([], dtype="string"), "y": pd.Series([], dtype="string")})
+    hashes = loader.row_hashes(empty)
+    assert isinstance(hashes, pd.Series) and len(hashes) == 0 and hashes.dtype == "string"
+    landed = loader.land_frame(empty, source="s", file_name="f.csv", retrieved_at="t")
+    assert list(landed.columns) == ["x", "y", *META_COLUMNS] and len(landed) == 0
+    back = pd.read_parquet(loader.write_landed(landed, tmp_path / "f.parquet"))
+    assert list(back.columns) == list(landed.columns) and len(back) == 0

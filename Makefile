@@ -29,7 +29,7 @@ help:
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
 	@echo "dbt-slim      - build only state:modified+ against .dbt-state, deferring the rest"
 	@echo "export        - write exports/ (parquet, json for small relations, manifest with hashes, SCHEMA.md) from the built dev warehouse"
-	@echo "compare       - compare fresh artifacts in FRESH_DIR with the committed latest ones (exit 0 ok, 2 upstream changed, 3 regression)"
+	@echo "compare       - compare fresh artifacts in FRESH_DIR with the committed latest ones (exit 0 ok, 2 upstream changed, 3 regression, 4 source file quarantined)"
 	@echo "dbt-docs      - generate the static dbt docs site into dbt/target"
 	@echo "dbt-lint      - sqlfluff over the dbt project"
 	@echo "check-docs    - every dbt model, column, source and exposure has a description"

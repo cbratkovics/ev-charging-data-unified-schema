@@ -28,3 +28,54 @@ def raw_frame() -> pd.DataFrame:
             "Port": [1, 1, 2, 2],
         }
     )
+
+
+class StubResponse:
+    """The slice of ``requests.Response`` the fetcher uses, as a context manager."""
+
+    def __init__(self, status: int, body: bytes = b"", headers: dict | None = None) -> None:
+        self.status_code = status
+        self._body = body
+        self.headers = headers or {}
+
+    def __enter__(self) -> StubResponse:
+        return self
+
+    def __exit__(self, *exc) -> bool:
+        return False
+
+    def iter_content(self, chunk: int):
+        for i in range(0, len(self._body), chunk):
+            yield self._body[i : i + chunk]
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            import requests
+
+            raise requests.HTTPError(f"HTTP {self.status_code}")
+
+
+class StubSession:
+    """Answers every GET with the same response and records the calls."""
+
+    def __init__(self, response: StubResponse) -> None:
+        self.response = response
+        self.calls: list[dict] = []
+
+    def get(self, url: str, **kwargs) -> StubResponse:
+        self.calls.append({"url": url, **kwargs})
+        return self.response
+
+
+@pytest.fixture
+def stub_http(monkeypatch):
+    """``stub_http(status, body, headers)`` returns a stub session answering every request the
+    same way and installs it as ``requests.Session`` for code that builds its own."""
+    from ev_charging_data_unified_schema import acquire
+
+    def serve(status: int, body: bytes = b"", headers: dict | None = None) -> StubSession:
+        sess = StubSession(StubResponse(status, body, headers))
+        monkeypatch.setattr(acquire.requests, "Session", lambda: sess)
+        return sess
+
+    return serve

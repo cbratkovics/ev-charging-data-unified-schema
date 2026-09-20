@@ -13,7 +13,11 @@ On every ingest run each landed file is compared with its family's contract:
   type -> ``quarantine`` (the file is landed under ``_quarantined/`` with a reason code so
   bronze never reads it, and the run continues);
 * a renamed column named in the alias map -> ``aliased`` (renamed on landing, recorded);
-* an optional column missing -> ``info``.
+* an optional column missing -> ``info``;
+* a file with a header but no data rows -> ``quarantine`` with ``empty_file``; a file the
+  loader cannot read at all (empty body, not a CSV) -> ``quarantine`` with ``unreadable_file``.
+  In both cases the ingest keeps the last good landed file and its manifest entry, so bronze
+  keeps reading the previous delivery (ADR-0015, amendment of 2026-09-20).
 
 The outcome for every file is written to ``artifacts/drift/<run_id>.json``. Pure functions,
 unit-tested on the fixture: tests/test_contracts.py.
@@ -165,6 +169,16 @@ def check_file(
         )
     frame, findings = apply_aliases(frame, fam)
     seen = [str(c) for c in frame.columns]
+    empty = len(frame) == 0
+    if empty:
+        findings.append(
+            ColumnFinding(
+                "*",
+                "quarantine",
+                "empty_file",
+                "a header but no data rows; the previous delivery stays landed",
+            )
+        )
     for spec in fam.columns:
         if spec.name not in frame.columns:
             sev: Severity = "quarantine" if spec.required else "info"
@@ -177,6 +191,8 @@ def check_file(
                 )
             )
             continue
+        if empty:
+            continue  # nothing to judge a type on
         col = frame[spec.name]
         if fam.null_tokens:
             col = col.mask(col.isin(fam.null_tokens))
@@ -215,6 +231,28 @@ def check_file(
     )
 
 
+def unreadable_drift(source: str, file_name: str, error: BaseException) -> FileDrift:
+    """The drift record for a raw file the loader could not parse (an empty body, a body that
+    is not a CSV, an undecodable byte sequence): quarantined with ``unreadable_file``."""
+    return FileDrift(
+        source,
+        file_name,
+        None,
+        "quarantine",
+        ["unreadable_file"],
+        [
+            ColumnFinding(
+                "*",
+                "quarantine",
+                "unreadable_file",
+                f"the loader could not read the file: {type(error).__name__}: {error}",
+            )
+        ],
+        [],
+        0,
+    )
+
+
 def drift_artifact(run_id: str, code_commit: str, files: list[FileDrift]) -> dict[str, Any]:
     return {
         "artifact": "drift",
@@ -228,6 +266,9 @@ def drift_artifact(run_id: str, code_commit: str, files: list[FileDrift]) -> dic
             "renamed_column": "aliased on landing per the contract alias map, recorded as info",
             "missing_optional": "info",
             "retyped_optional": "warn",
+            "empty_file": "quarantine: a header but no data rows; the last good landed file and its manifest entry are kept, run continues",
+            "unreadable_file": "quarantine: the loader could not read the file (empty or not a CSV); the last good landed file and its manifest entry are kept, run continues",
+            "refresh_kept_cached": "info: the conditional refresh returned no usable file (304, an error status, an empty or non-CSV body); the cached raw file was kept and re-checked",
         },
         "summary": {
             "files": len(files),

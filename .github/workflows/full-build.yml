@@ -4,9 +4,10 @@ name: full-build
 # sources with conditional requests, builds the warehouse, regenerates every artifact into a
 # scratch directory, compares them with the committed latest ones, uploads everything as
 # workflow artifacts, publishes the dbt docs (with manifest.json for slim CI) to GitHub Pages,
-# and opens an issue when upstream data changed (informational) or when the outputs moved with
-# identical inputs or reconciliation is blocking (regression). Releases are owner-run
-# (`make release`, then commit).
+# and opens an issue when upstream data changed (informational), when the outputs moved with
+# identical inputs or reconciliation is blocking (regression), or when the ingest quarantined a
+# file (source problem: an empty or unreadable delivery, whose last good landed copy was kept).
+# Releases are owner-run (`make release`, then commit).
 
 on:
   workflow_dispatch:
@@ -81,6 +82,7 @@ jobs:
             0) echo "status=ok" >> "$GITHUB_OUTPUT" ;;
             2) echo "status=upstream_changed" >> "$GITHUB_OUTPUT" ;;
             3) echo "status=regression" >> "$GITHUB_OUTPUT" ;;
+            4) echo "status=source_problem" >> "$GITHUB_OUTPUT" ;;
             *) exit $code ;;
           esac
       - name: dbt docs (static site plus manifest.json as the production state)
@@ -104,8 +106,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           STATUS: ${{ steps.compare.outputs.status }}
         run: |
-          label=$([ "$STATUS" = "regression" ] && echo "full-build-regression" || echo "new-source-data")
-          gh label create "$label" --force --color "$([ "$STATUS" = "regression" ] && echo B60205 || echo 0E8A16)" --description "opened by full-build.yml" || true
+          case "$STATUS" in
+            regression) label=full-build-regression; color=B60205 ;;
+            source_problem) label=source-problem; color=D93F0B ;;
+            *) label=new-source-data; color=0E8A16 ;;
+          esac
+          gh label create "$label" --force --color "$color" --description "opened by full-build.yml" || true
           title=$(python -c "import json; print(json.load(open('fresh/compare.json'))['issue_title'])")
           gh issue create --title "$title ($(date -u +%Y-%m-%d))" --label "$label" --body-file fresh/issue.md
       - name: Fail the run on a regression

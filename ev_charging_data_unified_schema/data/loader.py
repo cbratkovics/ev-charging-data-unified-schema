@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from dataclasses import asdict
 from pathlib import Path
 
@@ -18,6 +19,8 @@ from ev_charging_data_unified_schema.config import (
     REPO_ROOT,
 )
 from ev_charging_data_unified_schema.interfaces import ManifestEntry
+
+log = logging.getLogger(__name__)
 
 
 def sha256_of(path: Path) -> str:
@@ -41,6 +44,10 @@ def row_hashes(frame: pd.DataFrame) -> pd.Series:
     """sha256 over the source columns of each row, in column order, nulls as the empty token.
     Stable across runs and machines; used for exact-duplicate detection downstream."""
     cols = [c for c in frame.columns if c not in META_COLUMNS]
+    if len(frame) == 0:
+        # a row-wise agg over an empty frame returns an empty DataFrame, not a Series, and
+        # assigning that to one column raises; an empty file hashes to no rows
+        return pd.Series([], index=frame.index, dtype="string")
     joined = frame[cols].fillna("\x00").astype(str).agg("\x1f".join, axis=1)
     return joined.map(lambda s: hashlib.sha256(s.encode("utf-8")).hexdigest()).astype("string")
 
@@ -48,7 +55,9 @@ def row_hashes(frame: pd.DataFrame) -> pd.Series:
 def land_frame(
     raw: pd.DataFrame, *, source: str, file_name: str, retrieved_at: str
 ) -> pd.DataFrame:
-    """The landed shape: source columns as strings plus the four metadata columns."""
+    """The landed shape: source columns as strings plus the four metadata columns. A frame with
+    zero data rows lands as zero rows (the drift policy decides where; ADR-0015 amendment)."""
+    log.info("%s/%s: landing %d row(s), %d column(s)", source, file_name, len(raw), raw.shape[1])
     out = as_strings(raw)
     out["_source"] = pd.Series(source, index=out.index, dtype="string")
     out["_file_name"] = pd.Series(file_name, index=out.index, dtype="string")

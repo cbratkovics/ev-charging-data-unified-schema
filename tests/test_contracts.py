@@ -114,3 +114,23 @@ def test_real_contracts_cover_every_configured_source_and_declare_no_user_column
         assert con.user_level_columns == ()
         for fam in con.families:
             assert fam.required_names(), fam.family
+
+
+def test_a_header_only_file_quarantines_as_empty_file_without_judging_types() -> None:
+    frame = pd.DataFrame({"id": [], "kwh": [], "note": []}, dtype="string")
+    _, drift = c.check_file(frame, CON, "fixture-empty.csv")
+    assert drift.outcome == "quarantine" and drift.reason_codes == ["empty_file"]
+    assert drift.rows == 0 and ("*", "quarantine", "empty_file") in _codes(drift)
+    assert not any(f.code in ("all_null", "retyped_required") for f in drift.findings)
+    # a missing required column is still reported alongside
+    _, drift = c.check_file(pd.DataFrame({"id": []}, dtype="string"), CON, "fixture-empty.csv")
+    assert drift.reason_codes == ["empty_file", "missing_required"]
+
+
+def test_unreadable_drift_quarantines_with_the_loader_error() -> None:
+    drift = c.unreadable_drift("s", "f.csv", ValueError("No columns to parse from file"))
+    assert drift.outcome == "quarantine" and drift.reason_codes == ["unreadable_file"]
+    assert drift.rows == 0 and "No columns to parse" in drift.findings[0].detail
+    art = c.drift_artifact("r", "c", [drift])
+    assert art["summary"]["quarantined_files"] == ["s/f.csv"]
+    assert {"empty_file", "unreadable_file", "refresh_kept_cached"} <= set(art["policy"])

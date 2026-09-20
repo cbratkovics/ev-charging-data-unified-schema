@@ -7,7 +7,14 @@ Two cases, decided from the input hashes recorded in the silver summary artifact
   files whose hash or row count changed.
 * ``regression``: input hashes are identical but an output differs beyond tolerance, or the
   fresh reconciliation status is blocking.
-* ``ok``: identical inputs, outputs within tolerance, reconciliation not blocking.
+* ``source_problem``: inputs and outputs are as committed, but the fresh ingest quarantined a
+  file (an empty or unreadable delivery whose last good landed copy was kept, or a contract
+  breach). The landed data did not move, so nothing regressed; the owner still needs to look.
+* ``ok``: identical inputs, outputs within tolerance, reconciliation not blocking, nothing
+  quarantined.
+
+Whenever the fresh drift artifact lists quarantined files, the issue body carries a section
+naming each file, its reason codes and what was kept (ADR-0015, amendment of 2026-09-20).
 
 Tolerances: row and session counts exact; kWh, utilization and shares within 1e-6 relative.
 Pure over the loaded JSON payloads; tested per branch.
@@ -115,11 +122,36 @@ def compare_outputs(
     return diffs
 
 
+def quarantined_files(drift: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """The files the fresh ingest quarantined: name, reason codes and the file-level details
+    (the ``*`` findings, which say what was kept)."""
+    if not drift:
+        return []
+    out = []
+    for f in drift.get("files", []):
+        if f.get("outcome") != "quarantine":
+            continue
+        out.append(
+            {
+                "file": f"{f['source']}/{f['file_name']}",
+                "reason_codes": list(f.get("reason_codes", [])),
+                "rows": f.get("rows"),
+                "details": [x["detail"] for x in f.get("findings", []) if x.get("column") == "*"],
+            }
+        )
+    return out
+
+
 def classify_run(
-    committed_silver: dict, fresh_silver: dict, committed_sens: dict, fresh_sens: dict
+    committed_silver: dict,
+    fresh_silver: dict,
+    committed_sens: dict,
+    fresh_sens: dict,
+    fresh_drift: dict | None = None,
 ) -> dict[str, Any]:
     inputs = compare_inputs(committed_silver, fresh_silver)
     outputs = compare_outputs(committed_silver, fresh_silver, committed_sens, fresh_sens)
+    quarantined = quarantined_files(fresh_drift)
     blocking = fresh_silver.get("status") == "blocking"
     if blocking:
         status = "regression"
@@ -127,6 +159,8 @@ def classify_run(
         status = "upstream_changed"
     elif outputs:
         status = "regression"
+    elif quarantined:
+        status = "source_problem"
     else:
         status = "ok"
     return {
@@ -134,10 +168,31 @@ def classify_run(
         "reconciliation_status": fresh_silver.get("status"),
         "input_changes": inputs,
         "output_differences": outputs,
+        "quarantined_files": quarantined,
         "committed_run_id": committed_silver.get("run_id"),
         "fresh_run_id": fresh_silver.get("run_id"),
+        "drift_run_id": (fresh_drift or {}).get("run_id"),
         "tolerance": {"counts": "exact", "measures_relative": REL_TOL},
     }
+
+
+def _quarantine_section(report: dict[str, Any]) -> list[str]:
+    q = report.get("quarantined_files") or []
+    if not q:
+        return []
+    lines = [
+        "",
+        f"### Quarantined files (ingest run `{report.get('drift_run_id')}`)",
+        "",
+        "Each file below was quarantined by the drift policy. For `empty_file` and `unreadable_file` the last good landed file and its manifest entry were kept, so bronze still reads the previous delivery.",
+        "",
+        "| File | Reason codes | Rows | Detail |",
+        "|---|---|---|---|",
+    ]
+    for f in q:
+        detail = "; ".join(f["details"]).replace("|", "\\|")
+        lines.append(f"| `{f['file']}` | {', '.join(f['reason_codes'])} | {f['rows']} | {detail} |")
+    return lines
 
 
 def issue_body(report: dict[str, Any]) -> tuple[str, str]:
@@ -158,6 +213,11 @@ def issue_body(report: dict[str, Any]) -> tuple[str, str]:
             "",
             f"Fresh reconciliation status: **{report['reconciliation_status']}**. Review the uploaded artifacts and run `make release` locally to publish a new version.",
         ]
+    elif report["status"] == "source_problem":
+        title = "Source file quarantined"
+        lines = [
+            "The scheduled full build refreshed the sources and the ingest quarantined at least one file. Inputs and outputs are as committed, so nothing regressed; the publisher's delivery needs a look.",
+        ]
     else:
         title = "Full build regression"
         lines = [
@@ -172,4 +232,5 @@ def issue_body(report: dict[str, Any]) -> tuple[str, str]:
             "",
             "Tolerance: counts exact; measures within 1e-6 relative. Artifacts are attached to the workflow run.",
         ]
+    lines += _quarantine_section(report)
     return title, "\n".join(lines)

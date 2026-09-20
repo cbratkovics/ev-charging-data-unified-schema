@@ -73,3 +73,61 @@ def test_blocking_reconciliation_is_a_regression_even_with_new_inputs() -> None:
     fresh["status"] = "blocking"
     fresh["inputs"]["boulder/x.csv"]["sha256"] = "b"
     assert classify_run(SILVER, fresh, SENS, _copy(SENS))["status"] == "regression"
+
+
+DRIFT = {
+    "run_id": "ingest-1",
+    "files": [
+        {
+            "source": "boulder",
+            "file_name": "x.csv",
+            "outcome": "ok",
+            "reason_codes": [],
+            "rows": 10,
+            "findings": [],
+        },
+        {
+            "source": "cary",
+            "file_name": "y.csv",
+            "outcome": "quarantine",
+            "reason_codes": ["empty_file"],
+            "rows": 0,
+            "findings": [
+                {
+                    "column": "*",
+                    "severity": "quarantine",
+                    "code": "empty_file",
+                    "detail": "a header but no data rows",
+                },
+                {
+                    "column": "*",
+                    "severity": "info",
+                    "code": "last_good_kept",
+                    "detail": "last good landed file kept: data/landed/cary/y.parquet",
+                },
+            ],
+        },
+    ],
+}
+
+
+def test_a_quarantined_file_with_unchanged_data_is_a_source_problem_and_names_the_file() -> None:
+    r = classify_run(SILVER, _copy(SILVER), SENS, _copy(SENS), DRIFT)
+    assert r["status"] == "source_problem"
+    assert [q["file"] for q in r["quarantined_files"]] == ["cary/y.csv"]
+    title, body = issue_body(r)
+    assert title == "Source file quarantined"
+    assert "`cary/y.csv`" in body and "empty_file" in body and "last good landed file kept" in body
+
+
+def test_quarantine_section_rides_along_with_the_other_statuses() -> None:
+    fresh_s = _copy(SENS)
+    fresh_s["results"][0]["utilization"] = 0.11
+    r = classify_run(SILVER, _copy(SILVER), SENS, fresh_s, DRIFT)
+    assert r["status"] == "regression"
+    title, body = issue_body(r)
+    assert title == "Full build regression" and "Quarantined files" in body
+    clean = {"run_id": "ingest-2", "files": DRIFT["files"][:1]}
+    r = classify_run(SILVER, _copy(SILVER), SENS, _copy(SENS), clean)
+    assert r["status"] == "ok" and r["quarantined_files"] == []
+    assert "Quarantined" not in issue_body(r)[1]
