@@ -34,7 +34,7 @@ Endpoints, verbatim licence text and retrieval hashes: [docs/DATA_SOURCES.md](do
 Only sources with an explicit open licence are used ([ADR-0004](docs/adr/0004-source-policy.md)).
 
 ```mermaid
-flowchart LR
+flowchart TB
   S["3 public sources"] --> L["loaders + contracts<br/>(string parquet, hashes, drift artifact)"]
   L --> B["bronze<br/>brz_*"]
   B --> V["silver<br/>conformed sessions + quarantine"]
