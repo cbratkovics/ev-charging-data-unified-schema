@@ -48,12 +48,13 @@ midnight, and how the SCD2 snapshot stays reproducible.
    any exist, else robust max at N = 5 over non-trivial sessions, floored at 1; `low_evidence`
    below 5 active days; the active window from the first non-trivial session start to the last
    non-trivial session's effective end (its end, or start plus charging minutes where the
-   source has no end, so a Cary session that charges for 47 hours extends the window) minus
+   source has no end, so a Cary session that charges for two days extends the window) minus
    gaps over the source threshold measured from that effective end (Boulder 30 days, DfT 90
-   days, Cary 30 days). ADR-0006 said start-to-next-start for Cary; the effective end is used
+   days, Cary 30 days). <!-- param -->
+   ADR-0006 said start-to-next-start for Cary; the effective end is used
    instead so that the window, the gaps and the midnight split agree on where a session ends.
    Available minutes per local date come from the UTC instants of local midnight to the next
-   local midnight, so DST transition days are 1,380 or 1,500 minutes (ADR-0010 e).
+   local midnight, so DST transition days are 1,380 or 1,500 minutes (ADR-0010 e). <!-- param -->
 
 8. **Connector ids are their leading integer.** The first sensitivity run showed a DfT unit
    with eight "connector ids": the fasts anomalies file publishes variants such as

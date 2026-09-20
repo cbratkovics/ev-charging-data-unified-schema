@@ -12,9 +12,8 @@ The owner answered all four.
    the larger is the tighter bound. `ports_source` records which bound was binding
    (`connector_ids`, `observed_concurrency`, or `floor` when neither reached 1). The sensitivity
    artifact keeps both pure definitions alongside; the first Phase 4 run showed why: under
-   connector ids alone, 224 DfT station-days exceeded 100% utilization; under the robust max
-   alone, 175 (`artifacts/sensitivity/sensitivity-20260920T013439Z.json`,
-   `results[].station_days_over_100pct`). ADR-0007 item 4's precedence (connector ids first) is
+   connector ids alone, 224 DfT station-days exceeded full utilization; under the robust max
+   alone, 175. <!-- cite: artifacts/sensitivity/sensitivity-20260920T013439Z.json#results[34].station_days_over_100pct; artifacts/sensitivity/sensitivity-20260920T013439Z.json#results[22].station_days_over_100pct --> ADR-0007 item 4's precedence (connector ids first) is
    superseded.
 2. **`capacity_grain` has one meaning.** It lives on `dim_station` (and, copied from there, on
    `fct_station_day`) and says what the station key identifies: `unit` throughout. The session

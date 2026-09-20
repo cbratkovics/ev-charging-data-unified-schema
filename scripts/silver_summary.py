@@ -44,7 +44,15 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f"  {s}: bronze {v['bronze']} accepted {v['accepted']} non_trivial {v['non_trivial']} quarantined {v['quarantined']}"
         )
-    return 0
+    for s, v in payload["reconciliation"]["by_source"].items():
+        i, ii = v["total"]["identity_i"], v["total"]["identity_ii"]
+        print(
+            f"  reconciliation {s}: rows {i['rows']['status']}, kwh {i['kwh']['status']}; sessions {ii['sessions']['status']}, kwh {ii['kwh']['status']}"
+        )
+    status = payload["status"]
+    print(f"reconciliation status: {status}")
+    # a blocking residual fails the run (ADR-0013 item 1)
+    return 1 if status == "blocking" else 0
 
 
 if __name__ == "__main__":

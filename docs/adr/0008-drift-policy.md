@@ -15,10 +15,10 @@ needs a place to go that bronze cannot read.
    one family each.
 2. **Logical type is what the values parse as.** Each column declares one of integer,
    decimal, datetime, date, duration_hms or text; the check infers the landed column's type
-   from its values with the same 99% rule the profiler uses, after removing the family's null
+   from its values with the same 99% rule the profiler uses, <!-- param --> after removing the family's null
    tokens. Integer values satisfy a decimal declaration; text accepts anything; a wholly null
    column is not judged (info `all_null`). Identifier columns are declared text even when
-   most values look numeric (DfT `ChargingEvent` is 80% integers and 20% UUIDs; the first
+   most values look numeric (DfT `ChargingEvent` is a mix of integers and UUIDs; the first
    real run flagged it as retyped under an integer declaration, and the contract was
    corrected, not the data).
 3. **Outcomes.** Unknown column: `warn`, the column is landed and carried through bronze.

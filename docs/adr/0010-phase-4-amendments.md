@@ -36,11 +36,11 @@ four amendments to the gold design (d–g). Numbers cite `artifacts/silver/silve
 - **(e) Available minutes in station-local time.** `available_port_minutes` for a
   station-day is `ports_inferred` times the number of minutes in that local date: 1,440 on
   ordinary days, 1,380 on the spring-forward day and 1,500 on the fall-back day, computed
-  from the UTC instants of local midnight to the next local midnight. A dbt unit test covers
+  from the UTC instants of local midnight to the next local midnight. <!-- param --> A dbt unit test covers
   both transition days.
 - **(f) Utilization is not clipped.** Ratios above 100% are kept; the sensitivity artifact
   counts station-days above 100% under every denominator definition as a diagnostic of
-  undercounted ports.
+  undercounted ports. <!-- param -->
 - **(g) Null, never zero.** Where a source lacks a duration type the measure is null;
   rollups use `sum` (which ignores nulls) and expose the count of contributing rows so a
   null-heavy rollup is visible; no `coalesce(..., 0)` on a measure.

@@ -4,12 +4,12 @@
 an empirical check of DuckDB's timezone behaviour before any silver SQL was written.
 
 **Empirical findings (DuckDB 1.5.5, pinned in `constraints.txt`; `tests/test_duckdb_timezone.py`
-pins them so a version bump that changes them fails loudly).**
+pins them so a version bump that changes them fails loudly).** <!-- param -->
 
 - The `icu` extension is statically linked into the `duckdb` Python wheel
   (`duckdb_extensions()` reports `install_mode = STATICALLY_LINKED`) and `LOAD icu` succeeds
   with `autoinstall_known_extensions` and `autoload_known_extensions` both off. CI needs no
-  network install. dbt-duckdb 1.11.0 uses the same library.
+  network install. dbt-duckdb 1.11.0 uses the same library. <!-- param -->
 - `timezone(zone, naive_ts)` interprets the naive timestamp as wall-clock local time in
   `zone` and returns the UTC instant. An **ambiguous fall-back time resolves to the second
   occurrence (standard time)**: `2023-11-05 01:30` in `America/Denver` becomes
@@ -24,8 +24,9 @@ pins them so a version bump that changes them fails loudly).**
   `nonexistent_local_time` iff the round trip differs;
   `is_dst_ambiguous` iff the round trip is equal and `timezone(zone, L) - timezone(zone,
   L - 1 hour) = 2 hours` (the hour before an ambiguous hour maps two hours earlier in UTC
-  under second-occurrence resolution). The naive `+ 1 hour` variant is wrong under this
-  resolution: it flags the hour *before* the ambiguous one.
+  under second-occurrence resolution). <!-- param -->
+  The naive `+ 1 hour` variant is wrong under this resolution: it flags the hour *before* the
+  ambiguous one. <!-- param -->
 
 **Decision.**
 
@@ -62,10 +63,11 @@ pins them so a version bump that changes them fails loudly).**
 7. **Tolerance on `charging_exceeds_connected`.** Connected time is computed from the
    published timestamps, which Boulder gives at minute precision on most rows, while charging
    time has seconds; so on a valid row charging can exceed the computed connected time by up
-   to a minute. The first real build with a one-second tolerance quarantined 10,627 Boulder
-   rows (scratch query on that build); the excess was under a minute on all but 3. The rule
-   was first relaxed to a global 2 minutes and then, per ADR-0010 (a), to the row's own
-   timestamp precision with a within-tolerance flag. On the committed silver summary
+   to a minute. <!-- param -->
+   The first real build with a one-second tolerance quarantined 10,627 Boulder rows; the
+   excess was under a minute on all but 3. <!-- scratch -->
+   The rule was first relaxed to a global 2 minutes and then, per ADR-0010 (a), to the row's
+   own timestamp precision with a within-tolerance flag. <!-- param --> On the committed silver summary
    `artifacts/silver/silver-20260920T005935Z.json`: `by_source.boulder.flags.charging_exceeds_connected_within_precision`
    rows are flagged and `by_source.boulder.by_primary_reason.charging_exceeds_connected` rows
    quarantined.

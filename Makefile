@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture silver-summary sensitivity profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture silver-summary sensitivity findings render-docs check-numbers prune-artifacts profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -20,6 +20,9 @@ help:
 	@echo "release       - regenerate every published artifact in one run at one commit (network; clean tree required)"
 	@echo "silver-summary - write artifacts/silver/<run_id>.json from the built dev warehouse"
 	@echo "sensitivity   - write artifacts/sensitivity/<run_id>.json (denominator sensitivity) from the built dev warehouse"
+	@echo "findings      - write artifacts/findings/<run_id>.json and render docs/FINDINGS.md"
+	@echo "render-docs   - render the generated blocks of README.md and docs/CARD.md from the artifacts"
+	@echo "prune-artifacts - keep only the latest artifact per kind plus those cited by an ADR"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
 	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
@@ -67,6 +70,15 @@ silver-summary:
 sensitivity:
 	$(PY) scripts/sensitivity.py
 
+findings:
+	$(PY) scripts/findings.py
+
+render-docs:
+	$(PY) scripts/render_docs.py
+
+prune-artifacts:
+	$(PY) scripts/prune_artifacts.py
+
 render-contracts:
 	$(PY) scripts/render_contracts.py
 
@@ -83,6 +95,10 @@ release:
 	$(MAKE) dbt-dev
 	$(PY) scripts/silver_summary.py
 	$(PY) scripts/sensitivity.py
+	$(PY) scripts/findings.py
+	$(PY) scripts/render_docs.py
+	$(PY) scripts/prune_artifacts.py
+	$(PY) scripts/check_doc_numbers.py
 	@echo "release run complete at $$(git rev-parse --short HEAD); review and commit artifacts/ and docs/"
 
 dbt-deps:
@@ -126,3 +142,5 @@ check-docs:
 
 check-numbers:
 	$(PY) scripts/check_doc_numbers.py
+	$(PY) scripts/findings.py --check
+	$(PY) scripts/render_docs.py --check

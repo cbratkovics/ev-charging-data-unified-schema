@@ -45,6 +45,8 @@ jobs:
         run: python scripts/render_profile.py --check
       - name: Contract docs match the contract definitions
         run: python scripts/render_contracts.py --check
+      - name: Every measured number in the docs resolves to an artifact key; rendered blocks are current
+        run: make check-numbers PY=python
       - name: dbt parse
         run: make dbt-parse DBT=dbt
       - name: dbt build on the fixture (offline)

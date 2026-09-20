@@ -11,9 +11,9 @@ with five amendments (a–e). Numbers below are read from
   `Europe/London`; Cary is already UTC). Where the source also publishes a duration column
   (Boulder `Total_Duration`, DfT `PluginDuration`), the published value is kept as
   `connected_minutes_reported` and `duration_disagreement_minutes` records the difference; a
-  disagreement above a tolerance of 2 minutes sets the flag `duration_disagrees`. The tolerance
-  comes from the profile: 99.77% of Boulder rows and the bulk of DfT rows agree within 2 minutes
-  (`answers.durations.span_vs_recorded_duration.within_2_min`), and the wall-clock DST shifts
+  disagreement above a tolerance of 2 minutes sets the flag `duration_disagrees`. <!-- param -->
+  The tolerance comes from the profile: 147,795 of 148,132 Boulder rows agree within it. <!-- cite: artifacts/profile/profile-20260919T235137Z.json#sources.boulder.answers.durations.span_vs_recorded_duration.within_2_min; artifacts/profile/profile-20260919T235137Z.json#sources.boulder.answers.durations.span_vs_recorded_duration.rows_compared -->
+  The wall-clock DST shifts
   that motivated computing from UTC show up as ±60-minute disagreements on transition dates
   (`answers.timezone.dst_transition_gaps`). A rounded-to-the-half-hour source (the DfT reports
   say some bodies rounded) will flag more rows; that is reported, not hidden.

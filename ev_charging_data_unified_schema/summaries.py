@@ -15,6 +15,7 @@ from typing import Any
 import duckdb
 
 from ev_charging_data_unified_schema.interfaces import ManifestEntry
+from ev_charging_data_unified_schema.reconciliation import reconciliation
 
 SILVER = "silver"
 
@@ -128,8 +129,11 @@ def silver_summary(
         select source_family, bucket, count(*) as n from classified group by 1, 2 order by 1, 3 desc
         """,
     )
+    recon = reconciliation(con)
     return {
         "artifact": "silver_summary",
+        "status": recon["status"],
+        "reconciliation": recon,
         "run_id": rid,
         "generated_at_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
         "code_commit": code_commit,
