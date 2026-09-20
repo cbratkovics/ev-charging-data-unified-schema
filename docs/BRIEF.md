@@ -163,20 +163,28 @@ One row per session: `session_sk`, `source`, `source_family`, `source_session_id
 `idle_minutes`, `duration_availability`, `is_non_trivial`, `quality_flags[]`, `_row_hash`.
 
 Implied-power ceilings for the `implied_kw_over_ceiling` reason: Cary 20 kW, Boulder 20 kW,
-DfT rapids 55 kW, DfT fasts 30 kW (ADR-0007).
+DfT rapids 55 kW, DfT fasts 30 kW (ADR-0007). `charging_exceeds_connected` allows the row's
+`timestamp_precision_seconds`; rows within it are flagged and `idle_minutes` is clamped at zero
+(ADR-0010 a). A committed silver summary artifact (`artifacts/silver/<run_id>.json`) records
+accepted, non-trivial, quarantined by primary reason, flags, the unknown-station share and the
+publisher-rule decomposition per source and file (ADR-0010 b, c).
 
 ### Gold
 
 - `fct_charging_session`: grain is one session. Surrogate key, enforced contract,
-  **incremental** with a lookback window so late or re-delivered rows are handled.
+  **incremental** on `session_sk`, driven by delivery metadata (new or changed landed files)
+  plus a short event-time lookback, so a re-delivered file of old sessions is reprocessed
+  exactly as a full refresh would (ADR-0010 d); proven by the fixture test.
 - One **non-trivial session** rule, applied consistently across all sources at gold and used
   for utilization and findings: energy above zero and connected (or, where only charging is
   available, charging) time above 3 minutes (ADR-0007). Trivial sessions stay in the fact with
   `is_non_trivial = false`.
 - `fct_station_day`: grain is station × station-local date. Sessions crossing midnight are
   split across days. Measures: sessions, energy_kwh, charging_minutes, connected_minutes,
-  available_port_minutes. Every row carries `capacity_grain`; rollups never mix grains
-  (ADR-0005 d).
+  available_port_minutes. Available minutes are computed in station-local time, so DST
+  transition days are 1,380 or 1,500 minutes (ADR-0010 e). Every row carries `capacity_grain`;
+  rollups never mix grains (ADR-0005 d). Where a source lacks a duration type the measure is
+  null, never zero, and rollups do not treat null as zero (ADR-0010 g).
 - `dim_station` (with `capacity_grain`, `ports_inferred`, `ports_source`, `low_evidence`,
   `active_from`, `active_to`, `excluded_days`, `registry_match_status`), `dim_operator`,
   `dim_date`.
@@ -194,6 +202,8 @@ DfT rapids 55 kW, DfT fasts 30 kW (ADR-0007).
   reported separately. A sensitivity artifact (`artifacts/sensitivity/<run_id>.json`) reports
   utilization under robust max at N in {1, 2, 3, 5, 10}, the original trailing-90-day rule,
   connector-id counts and registry counts; findings state how sensitive each conclusion is.
+  Utilization is not clipped at 100%; station-days above 100% are counted per denominator as a
+  diagnostic of undercounted ports (ADR-0010 f).
   Model docs and the README state that port counts are inferred, availability is assumed 24
   hours, and both bias directions are known.
 - One **versioned model** only if a genuine contract change arises; otherwise skip and say so.
@@ -292,3 +302,4 @@ Next phase proposal: <one paragraph>
 | 2026-09-19 | 1 (re-approval) | Capacity denominator: (f) robust max at N = 5 from the days-at-level distribution; (g) active window excludes gaps beyond a per-source threshold from inter-session gaps; (h) sensitivity artifact; (i) stated limitations on inferred ports, 24-hour availability and both bias directions | ADR-0006 |
 | 2026-09-19 | 2 | Personal data confirmed none; DfT natural key approved, null-safe, `unknown/<Name>` share reported; publisher rule reproduced as a quality flag with mismatch reported; one non-trivial session rule at gold; port-count precedence (connector ids, else robust max N = 5, floored at 1, `low_evidence` flag); DfT implied-kW ceilings per family (rapids 55 kW, fasts 30 kW) | ADR-0007 |
 | 2026-09-20 | 3 | Per-family drift design kept, with a generated contract-diff document; a `make release` target that regenerates every artifact at one commit; nonexistent local times quarantined and ambiguous ones resolved to DuckDB's second occurrence, verified empirically and pinned by a test; the ICU extension verified statically linked; every failing quarantine reason kept plus one primary reason by fixed precedence; every dedup order ends in `_row_hash` | ADR-0009 |
+| 2026-09-20 | 3 (re-approval) / 4 | (a) charging tolerance from per-row timestamp precision with a within-tolerance flag and idle clamped at zero; (b) committed silver summary artifact; (c) decomposition of anomalies rows not meeting the publisher rule; (d) delivery-driven incremental merge; (e) local-time available minutes on DST days; (f) unclipped utilization with over-100% diagnostics; (g) null never zero for absent durations. Fall-back resolution kept as DuckDB's; reported-duration disambiguation to ROADMAP | ADR-0010 |

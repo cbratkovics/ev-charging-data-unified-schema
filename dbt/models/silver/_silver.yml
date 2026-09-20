@@ -112,7 +112,8 @@ models:
       (ADR-0005 a)
   - &id022
     name: idle_minutes
-    description: connected minus charging; Boulder only
+    description: connected minus charging, clamped at zero (a charging time that exceeds the minute-precision connected
+      time within tolerance gives 0, not a negative idle); Boulder only
   - &id023
     name: duration_availability
     description: 'which durations this source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
@@ -134,24 +135,29 @@ models:
     name: implied_kw
     description: energy over hours of charging (or connected where charging is not published); the implied_kw_over_ceiling
       reason compares it with the source's ceiling
-  - &id026
+  - name: timestamp_precision_seconds
+    description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
+      the charging_exceeds_connected rule (ADR-0009 item 7)
+    data_tests: &id026
+    - not_null
+  - &id027
     name: natural_key_hash
     description: md5 of the null-safe natural key (ADR-0009); unique among accepted rows
     data_tests:
     - not_null
-  - &id027
-    name: quality_flags
-    description: 'flags on the row: zero_energy, over_24h, duration_disagrees, dst_ambiguous, publisher_excluded_rule,
-      unknown_station'
   - &id028
+    name: quality_flags
+    description: 'flags on the row: zero_energy, charging_exceeds_connected_within_precision, over_24h, duration_disagrees,
+      dst_ambiguous, publisher_excluded_rule, unknown_station'
+  - &id029
     name: _row_hash
     description: landing metadata; sha256 over the source columns of the bronze row
     data_tests:
     - not_null
-  - &id029
+  - &id030
     name: quarantine_reasons
     description: every failing quarantine reason, in precedence order; empty on accepted rows
-  - &id030
+  - &id031
     name: primary_reason
     description: the first failing reason by the fixed precedence (ADR-0009); null on accepted rows
 - name: slv_sessions__cary
@@ -188,11 +194,15 @@ models:
   - *id023
   - *id024
   - *id025
-  - *id026
+  - name: timestamp_precision_seconds
+    description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
+      the charging_exceeds_connected rule (ADR-0009 item 7)
+    data_tests: *id026
   - *id027
   - *id028
   - *id029
   - *id030
+  - *id031
 - name: slv_sessions__dft_2017
   description: UK DfT 2017 events conformed to the unified contract, one row per bronze row across the four files.
     NA tokens nulled, dates ISO or day-first per value, PluginDuration converted with its per-file unit, wall-clock
@@ -229,11 +239,15 @@ models:
   - *id023
   - *id024
   - *id025
-  - *id026
+  - name: timestamp_precision_seconds
+    description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
+      the charging_exceeds_connected rule (ADR-0009 item 7)
+    data_tests: *id026
   - *id027
   - *id028
   - *id029
   - *id030
+  - *id031
 - name: slv_sessions_unioned
   description: The unified session contract (docs/BRIEF.md section 5a) over every source's accepted rows, one row
     per session, with the one non-trivial-session rule gold and the findings use.
@@ -274,9 +288,13 @@ models:
   - *id023
   - *id024
   - *id025
-  - *id026
+  - name: timestamp_precision_seconds
+    description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
+      the charging_exceeds_connected rule (ADR-0009 item 7)
+    data_tests: *id026
   - *id027
   - *id028
+  - *id029
   - name: is_non_trivial
     description: energy above zero and the available duration (connected, else charging) above 3 minutes (ADR-0007
       item 3); utilization and findings use non-trivial sessions only

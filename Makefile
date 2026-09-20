@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture silver-summary profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -18,6 +18,7 @@ help:
 	@echo "check-profile - docs/PROFILE.md and the DATA_SOURCES inventory match the newest profile artifact"
 	@echo "check-contracts - docs/CONTRACTS.md matches the contract definitions"
 	@echo "release       - regenerate every published artifact in one run at one commit (network; clean tree required)"
+	@echo "silver-summary - write artifacts/silver/<run_id>.json from the built dev warehouse"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
 	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
@@ -59,6 +60,9 @@ render-profile:
 check-profile:
 	$(PY) scripts/render_profile.py --check
 
+silver-summary:
+	$(PY) scripts/silver_summary.py
+
 render-contracts:
 	$(PY) scripts/render_contracts.py
 
@@ -73,6 +77,7 @@ release:
 	$(MAKE) profile
 	$(MAKE) render-contracts
 	$(MAKE) dbt-dev
+	$(PY) scripts/silver_summary.py
 	@echo "release run complete at $$(git rev-parse --short HEAD); review and commit artifacts/ and docs/"
 
 dbt-deps:

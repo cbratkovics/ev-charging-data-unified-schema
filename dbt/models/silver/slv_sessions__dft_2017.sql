@@ -45,6 +45,8 @@ typed as (
             when 'fasts_anomalies' then try_cast(nullif(pluginduration, 'NA') as double) * 60
         end as connected_minutes_reported,
         try_cast(nullif(energy, 'NA') as double) as energy_kwh,
+        -- published times carry seconds in every family (hh:mm:ss); dates are whole days
+        1 as timestamp_precision_seconds,
         (
             nullif(cpid, 'NA') is null and nullif(startdate, 'NA') is null
             and nullif(enddate, 'NA') is null and nullif(energy, 'NA') is null
@@ -137,6 +139,7 @@ select
     'plug_in_only' as duration_availability,
     publisher_excluded_rule,
     implied_kw,
+    timestamp_precision_seconds,
     natural_key_hash,
     {{ quality_flags_list(flags) }} as quality_flags,
     {{ quarantine_reasons_list(reasons) }} as quarantine_reasons,

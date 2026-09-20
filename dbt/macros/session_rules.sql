@@ -1,7 +1,9 @@
 {#- The value rules every silver model applies, in one place (docs/BRIEF.md § 5, ADR-0007,
     ADR-0009). Column names are the conformed silver names. charging_exceeds_connected allows
-    2 minutes: connected time is computed from minute-precision timestamps while charging time
-    has seconds, so charging can exceed it by up to a minute on a valid row (ADR-0009). -#}
+    the row's own timestamp precision: connected time is computed from the published
+    timestamps (minute precision on most Boulder rows, seconds on some) while charging time has
+    seconds, so charging can exceed the computed connected time by up to one precision unit on
+    a valid row; such rows are flagged, not quarantined (ADR-0009 item 7). -#}
 
 {% macro session_quarantine_rules(kw_ceiling_expr) -%}
     {{ return([
@@ -14,7 +16,7 @@
         ['end_before_start', 'connected_minutes < 0'],
         ['negative_energy', 'energy_kwh < 0'],
         ['energy_sentinel', 'energy_kwh < -1000'],
-        ['charging_exceeds_connected', 'charging_minutes > connected_minutes + 2'],
+        ['charging_exceeds_connected', 'charging_minutes > connected_minutes + timestamp_precision_seconds / 60.0'],
         ['implied_kw_over_ceiling', 'implied_kw > ' ~ kw_ceiling_expr],
     ]) }}
 {%- endmacro %}
@@ -22,6 +24,7 @@
 {% macro session_quality_flags() -%}
     {{ return([
         ['zero_energy', 'energy_kwh = 0'],
+        ['charging_exceeds_connected_within_precision', 'charging_minutes > connected_minutes and charging_minutes <= connected_minutes + timestamp_precision_seconds / 60.0'],
         ['over_24h', 'coalesce(connected_minutes, charging_minutes) > 1440'],
         ['duration_disagrees', 'abs(duration_disagreement_minutes) > 2'],
         ['dst_ambiguous', 'is_dst_ambiguous'],

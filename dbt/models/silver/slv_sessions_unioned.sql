@@ -39,6 +39,7 @@ select
     duration_availability,
     publisher_excluded_rule,
     implied_kw,
+    timestamp_precision_seconds,
     coalesce(energy_kwh > 0, false)
     and coalesce(coalesce(connected_minutes, charging_minutes) > 3, false) as is_non_trivial,
     quality_flags,

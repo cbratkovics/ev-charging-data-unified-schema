@@ -41,8 +41,6 @@ jobs:
         run: |
           ruff check $PKG tests scripts
           black --check $PKG tests scripts
-      - name: Tests (offline, fixture only)
-        run: python -m pytest tests
       - name: Rendered profile docs match the committed artifact
         run: python scripts/render_profile.py --check
       - name: Contract docs match the contract definitions
@@ -51,6 +49,8 @@ jobs:
         run: make dbt-parse DBT=dbt
       - name: dbt build on the fixture (offline)
         run: make dbt-fixture DBT=dbt PY=python
+      - name: Tests (offline; the fixture warehouse is built above)
+        run: python -m pytest tests
       - name: dbt docs generate + every model, column and source described
         run: |
           EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --vars '{landed_dir: tests/fixtures/landed}' --static

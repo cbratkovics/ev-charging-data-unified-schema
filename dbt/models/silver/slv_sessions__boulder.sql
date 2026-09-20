@@ -21,6 +21,14 @@ typed as (
         address,
         {{ parse_us_mixed_timestamp('start_date_time') }} as start_local,
         {{ parse_us_mixed_timestamp('end_date_time') }} as end_local,
+        -- precision of the published timestamps: ISO rows carry seconds, M/D/YYYY H:MM rows do not
+        case
+            when
+                regexp_matches(start_date_time, '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$')
+                and regexp_matches(end_date_time, '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$')
+                then 1
+            else 60
+        end as timestamp_precision_seconds,
         {{ hms_to_minutes('total_duration_hh_mm_ss') }} as connected_minutes_reported,
         {{ hms_to_minutes('charging_time_hh_mm_ss') }} as charging_minutes,
         try_cast(energy_kwh as double) as energy_kwh,
@@ -116,10 +124,11 @@ select
     connected_minutes,
     connected_minutes_reported,
     duration_disagreement_minutes,
-    connected_minutes - charging_minutes as idle_minutes,
+    greatest(connected_minutes - charging_minutes, 0) as idle_minutes,
     'both' as duration_availability,
     publisher_excluded_rule,
     implied_kw,
+    timestamp_precision_seconds,
     natural_key_hash,
     {{ quality_flags_list(flags) }} as quality_flags,
     {{ quarantine_reasons_list(reasons) }} as quarantine_reasons,

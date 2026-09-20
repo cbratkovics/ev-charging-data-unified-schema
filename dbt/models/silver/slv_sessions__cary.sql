@@ -19,6 +19,7 @@ typed as (
         station_name,
         address_1,
         try_cast(start_date as timestamptz) as start_utc,
+        1 as timestamp_precision_seconds,
         {{ hms_to_minutes('charging_time_hh_mm_ss') }} as charging_minutes,
         try_cast(energy_kwh as double) as energy_kwh,
         (
@@ -99,6 +100,7 @@ select
     'charging_only' as duration_availability,
     publisher_excluded_rule,
     implied_kw,
+    timestamp_precision_seconds,
     natural_key_hash,
     {{ quality_flags_list(flags) }} as quality_flags,
     {{ quarantine_reasons_list(reasons) }} as quarantine_reasons,
