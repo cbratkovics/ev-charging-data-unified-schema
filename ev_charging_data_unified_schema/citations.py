@@ -12,6 +12,9 @@ only) marks a sentence whose numbers came from an exploratory query, not a commi
 (a threshold, a tolerance, a minutes-in-a-day figure), not measurements.
 Generated blocks (``<!-- generated:<name> start -->`` ... ``end``) are skipped: their renderer's
 ``--check`` validates them.
+
+A ratio stated in words ("about four times", "more than a quarter of") is a measured claim
+too: it needs a citation and the cited value must satisfy the qualifier (``word_ratio_bounds``).
 """
 
 from __future__ import annotations
@@ -70,6 +73,41 @@ LICENCE_VERSION_RE = re.compile(
 )
 CONTEXT_ALLOW_RE = re.compile(
     r"(ADR-|Phase |phase |item |§ |v\d|version |dbt[- ]core|duckdb|python )", re.I
+)
+# ratios in words: "<number word> times" (a multiple) and "<fraction> of" (a share). "half hour",
+# "a third source" and "counted twice" are not ratios and do not match.
+MULTIPLE_WORDS = {
+    "two": 2.0,
+    "three": 3.0,
+    "four": 4.0,
+    "five": 5.0,
+    "six": 6.0,
+    "seven": 7.0,
+    "eight": 8.0,
+    "nine": 9.0,
+    "ten": 10.0,
+}
+FRACTION_WORDS = {
+    "half": 0.5,
+    "a third": 1 / 3,
+    "two thirds": 2 / 3,
+    "a quarter": 0.25,
+    "three quarters": 0.75,
+    "a fifth": 0.2,
+    "a tenth": 0.1,
+}
+UPPER_QUALIFIERS = ("up to", "at most", "no more than", "under", "less than", "below")
+LOWER_QUALIFIERS = ("more than", "over", "at least", "above")
+APPROX_QUALIFIERS = ("about", "roughly", "around", "some")
+NEARLY_QUALIFIERS = ("nearly", "almost", "just under")
+_QUALIFIER_RE = "|".join(
+    re.escape(q)
+    for q in UPPER_QUALIFIERS + LOWER_QUALIFIERS + APPROX_QUALIFIERS + NEARLY_QUALIFIERS
+)
+WORD_RATIO_RE = re.compile(
+    rf"\b((?:(?:{_QUALIFIER_RE})\s+)*)"
+    rf"(?:({'|'.join(MULTIPLE_WORDS)})\s+times\b|({'|'.join(FRACTION_WORDS)})\s+of\b)",
+    re.I,
 )
 
 
@@ -203,6 +241,48 @@ def values_match(printed: float, is_percent: bool, actual: Any, printed_text: st
     )
 
 
+def word_ratio_bounds(qualifiers: str, value: float) -> tuple[float, float]:
+    """The [low, high] interval a cited value must fall in for a ratio in words to hold. The
+    tolerance is a quarter for a multiple ("about four times" covers 3.75 to 4.25) and a tenth of
+    the fraction for a share ("about a quarter of" covers 22.5% to 27.5%). "up to" and "more
+    than" are one-sided; "about" widens the open side of a one-sided phrase."""
+    words = qualifiers.lower().split()
+    text = " ".join(words)
+    tol = 0.25 if value >= 1 else value / 10
+    upper = any(q in text for q in UPPER_QUALIFIERS)
+    lower = any(q in text for q in LOWER_QUALIFIERS)
+    approx = any(q in text for q in APPROX_QUALIFIERS)
+    nearly = any(q in text for q in NEARLY_QUALIFIERS)
+    if upper:
+        return (float("-inf"), value + (tol if approx else 0.0))
+    if lower:
+        return (value - (tol if approx else 0.0), float("inf"))
+    if nearly:
+        return (value - tol, value)
+    return (value - tol, value + tol)
+
+
+def word_ratios(core: str) -> list[tuple[str, float, float, float]]:
+    """(phrase, ratio, low, high) for every ratio stated in words in the sentence."""
+    out = []
+    for m in WORD_RATIO_RE.finditer(core):
+        qualifiers, multiple, fraction = m.group(1) or "", m.group(2), m.group(3)
+        value = MULTIPLE_WORDS[multiple.lower()] if multiple else FRACTION_WORDS[fraction.lower()]
+        lo, hi = word_ratio_bounds(qualifiers, value)
+        out.append((m.group(0).strip(), value, lo, hi))
+    return out
+
+
+def ratio_matches(lo: float, hi: float, actual: Any) -> bool:
+    if isinstance(actual, bool) or actual is None:
+        return False
+    try:
+        a = float(actual)
+    except (TypeError, ValueError):
+        return False
+    return lo - 1e-9 <= a <= hi + 1e-9
+
+
 def check_document(
     path: Path, repo_root: Path, *, allow_scratch: bool
 ) -> tuple[list[str], int, int, int]:
@@ -268,5 +348,18 @@ def check_document(
             ):
                 problems.append(
                     f"{rel}:{line}: number {num_text}{'%' if pct else ''} does not match any cited value {[(c, v) for c, v in cited_values][:4]}"
+                )
+        for phrase, _value, lo, hi in word_ratios(core):
+            if is_scratch or is_param:
+                continue
+            checked += 1
+            if not cites:
+                problems.append(
+                    f"{rel}:{line}: uncited ratio in words {phrase!r} in: {core.strip()[:110]}"
+                )
+                continue
+            if cited_values and not any(ratio_matches(lo, hi, v) for _, v in cited_values):
+                problems.append(
+                    f"{rel}:{line}: ratio in words {phrase!r} (needs a cited value in [{lo:.3g}, {hi:.3g}]) does not match any cited value {[(c, v) for c, v in cited_values][:4]}"
                 )
     return problems, checked, scratch, params

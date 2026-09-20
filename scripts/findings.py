@@ -23,6 +23,12 @@ from ev_charging_data_unified_schema.profiling import git_commit  # noqa: E402
 
 OUT = REPO_ROOT / "docs" / "FINDINGS.md"
 CITE = "artifacts/findings/latest.json"
+RANGE_LABELS = {
+    "boulder__connected": "Boulder, connected-time",
+    "boulder__charging": "Boulder, charging-time",
+    "cary__charging": "Cary, charging-time",
+    "dft_2017__connected": "DfT 2017, connected-time",
+}
 
 
 def latest(kind: str) -> dict[str, Any]:
@@ -76,6 +82,7 @@ def render(a: dict[str, Any]) -> str:
     hours = a["boulder_idle_by_hour_production"]
     top_hours = sorted(hours, key=lambda r: -r["full_occupancy_idle_minutes"])[:3]
     ur = a["utilization_ranges"]
+    widest = max(ur, key=lambda k: ur[k]["relative_range"] or 0)
     pr = a["dft_publisher_rule"]
     pop = a["dft_anomalies_population"]
     rapids = pr["by_family"]["rapids"]
@@ -112,7 +119,8 @@ def render(a: dict[str, Any]) -> str:
         "",
         *[f"- {c}" for c in a["cannot_show"]],
         "",
-        "## 1. Boulder: idle-after-charge time is large; up to a quarter of it is idle at full occupancy",
+        f"## 1. Boulder: idle-after-charge time is large; up to {pct(idle['full_occupancy_share_of_idle'], 0)} of it is idle at full occupancy "
+        + cite("boulder_idle.production.full_occupancy_share_of_idle"),
         "",
         f"**Period.** Boulder, {p['boulder']['first_start_local'][:10]} to {p['boulder']['last_start_local'][:10]}, non-trivial sessions at known stations.",
         "",
@@ -140,8 +148,9 @@ def render(a: dict[str, Any]) -> str:
         + " -->",
         "",
         "**Why it matters.** The headline idle share is the number that usually gets quoted as recoverable capacity. "
-        "On this data it overstates what a policy could recover by about four times, and even the smaller figure is a ceiling: most idle minutes happen while "
-        "another port at the same station is free, and the rest may or may not have kept anyone waiting.",
+        f"On this data it is {idle['idle_to_full_occupancy_ratio']:.1f} times the full-occupancy figure, and even the smaller figure is a ceiling: most idle minutes happen while "
+        "another port at the same station is free, and the rest may or may not have kept anyone waiting. "
+        f"{cite('boulder_idle.production.idle_to_full_occupancy_ratio')}",
         "",
         '**What I would tell the decision-maker.** Quote the full-occupancy figure as "up to", never the headline. If an idle fee or a time limit is worth trying, '
         "target the late-morning-to-mid-afternoon hours at the multi-port stations, where the measure carries information; overnight idle at a single-port station "
@@ -177,17 +186,13 @@ def render(a: dict[str, Any]) -> str:
         "**What would change my mind.** A published methodology note listing the other exclusion criteria (incomplete records, events from other schemes) "
         "would explain the unexplained rows; the reports mention such criteria without counts.",
         "",
-        "## 3. Utilization depends on how ports are counted, by up to about a third of its value",
+        "## 3. Utilization depends on how ports are counted, by up to about a third of its value "
+        + cite(f"utilization_ranges.{widest}.relative_range"),
         "",
         "**Period.** Each source's own period (table above); no cross-source comparison.",
         "",
     ]
-    for key, label in (
-        ("boulder__connected", "Boulder, connected-time"),
-        ("boulder__charging", "Boulder, charging-time"),
-        ("cary__charging", "Cary, charging-time"),
-        ("dft_2017__connected", "DfT 2017, connected-time"),
-    ):
+    for key, label in RANGE_LABELS.items():
         r = ur.get(key)
         if not r:
             continue
@@ -198,6 +203,9 @@ def render(a: dict[str, Any]) -> str:
         )
     over = a["station_days_over_100pct_production"]
     lines += [
+        "",
+        f"The widest range is {RANGE_LABELS.get(widest, widest)}: its span across definitions is {pct(ur[widest]['relative_range'])} of the production value. "
+        f"{cite(f'utilization_ranges.{widest}.relative_range')}",
         "",
         f"Under the production port count, {n(over.get('dft_2017', 0))} DfT station-days and {n(over.get('boulder', 0))} Boulder station-day{'' if over.get('boulder', 0) == 1 else 's'} exceed full utilization: "
         f"days on which the inferred port count is lower than what the sessions imply. "
@@ -216,7 +224,7 @@ def render(a: dict[str, Any]) -> str:
         f"- DfT sessions with no charge-point id ({n(unknown['unknown_station_sessions'])} sessions, {n(unknown['unknown_station_kwh'])} kWh) are in the totals but have no station, so no capacity or utilization is stated for them. "
         f"{cite('unknown_station.dft_2017.unknown_station_sessions', 'unknown_station.dft_2017.unknown_station_kwh')}",
         "- No growth-by-operator finding: each source is one operator and the periods differ; growth within Boulder or Cary would mostly reflect stations being added, which the data records only as first sessions.",
-        "- No time-of-day finding beyond the blocking-idle hours: the hour profiles of session starts are in docs/PROFILE.md and do not change a decision on their own.",
+        "- No time-of-day finding beyond the full-occupancy idle hours: the hour profiles of session starts are in docs/PROFILE.md and do not change a decision on their own.",
         "",
     ]
     return "\n".join(lines)

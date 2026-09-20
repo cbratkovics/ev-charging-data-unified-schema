@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from ev_charging_data_unified_schema.config import ARTIFACTS_DIR, REPO_ROOT  # noqa: E402
+from ev_charging_data_unified_schema.config import ARTIFACTS_DIR, PROJECT, REPO_ROOT  # noqa: E402
 
 
 def latest(kind: str) -> dict[str, Any] | None:
@@ -32,6 +32,11 @@ def n(x: Any) -> str:
 
 def pct(x: float | None, d: int = 1) -> str:
     return "n/a" if x is None else f"{100 * x:.{d}f}%"
+
+
+def source_label(code: str) -> str:
+    """The source's display name; the code id stays in the artifact keys."""
+    return PROJECT.source(code).display_name
 
 
 def results_block(
@@ -51,7 +56,7 @@ def results_block(
                 f"{periods[src]['first_start_local'][:7]} to {periods[src]['last_start_local'][:7]}"
             )
             rows.append(
-                f"| {src} | {per} | {labels[fl]} {pct(r['production'])} | {pct(r['min'])} ({r['min_definition']}) to {pct(r['max'])} ({r['max_definition']}) |"
+                f"| {source_label(src)} | {per} | {labels[fl]} {pct(r['production'])} | {pct(r['min'])} ({r['min_definition']}) to {pct(r['max'])} ({r['max_definition']}) |"
             )
     lines = [
         (
@@ -74,13 +79,14 @@ def card_block(silver: dict[str, Any], findings: dict[str, Any] | None) -> str:
     """The card's headline figures, each with its key."""
     if not findings:
         return "_No findings artifact yet._"
+    labels = {"connected": "connected-time", "charging": "charging-time"}
     idle = findings["boulder_idle"]["production"]
     rows = [
-        f"- Boulder: {pct(idle['idle_share_of_connected'])} of connected time is idle after charging; up to "
+        f"- {source_label('boulder')}: {pct(idle['idle_share_of_connected'])} of connected time is idle after charging; up to "
         f"{pct(idle['full_occupancy_idle_share_of_connected'])} of connected time is idle while every inferred port was occupied.",
         "- Utilization by source (production port count; range across denominator definitions): "
         + "; ".join(
-            f"{k.split('__')[0]} {k.split('__')[1]} {pct(r['production'])} ({pct(r['min'])} to {pct(r['max'])})"
+            f"{source_label(k.split('__')[0])} {labels[k.split('__')[1]]} {pct(r['production'])} ({pct(r['min'])} to {pct(r['max'])})"
             for k, r in sorted(findings["utilization_ranges"].items())
         )
         + ".",

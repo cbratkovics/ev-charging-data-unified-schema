@@ -21,7 +21,7 @@ postal codes, vehicle details) and a policy. Phase 1 found:
 3. Device-level identifiers (charge-point ids, serial numbers) are not personal data; they
    identify chargers and are kept where they give a stable station or port key.
 4. Session counts per user, user-level dwell time, repeat-user analyses and any join between a
-   user id and a location are out of scope and go to ROADMAP.md if ever wanted.
+   user id and a location are out of scope and go to docs/ROADMAP.md if ever wanted.
 5. Any source added later gets a row in the table above before its loader ships.
 
 **Consequences.** Findings cannot use user behaviour (for example "share of sessions by

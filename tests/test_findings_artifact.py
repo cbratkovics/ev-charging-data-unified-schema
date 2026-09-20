@@ -33,6 +33,9 @@ def test_production_utilization_lies_inside_every_range(findings) -> None:
         assert r["production"] is not None, key
         assert r["min"] - 1e-9 <= r["production"] <= r["max"] + 1e-9, (key, r)
         assert 0 <= r["min"] <= r["max"] <= 5, key  # utilization above 100% is possible but bounded
+        assert r["relative_range"] == pytest.approx(
+            (r["max"] - r["min"]) / r["production"], abs=1e-6
+        ), key
 
 
 def test_idle_measures_are_shares_and_nest(findings) -> None:
@@ -49,6 +52,11 @@ def test_idle_measures_are_shares_and_nest(findings) -> None:
             "full_occupancy_share_of_idle",
         ):
             assert 0 <= v[k] <= 1, (label, k)
+        # the ratio rendered in words ("3.6 times") is the two minute totals divided
+        assert v["idle_to_full_occupancy_ratio"] == pytest.approx(
+            v["idle_minutes"] / v["full_occupancy_idle_minutes"], abs=1e-3
+        ), label
+        assert v["idle_to_full_occupancy_ratio"] >= 1.0, label
         hours = v["by_local_hour"].values()
         assert abs(sum(h["idle_minutes"] for h in hours) - v["idle_minutes"]) < 1.0, label
         assert (

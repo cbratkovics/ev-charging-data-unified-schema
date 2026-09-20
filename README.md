@@ -12,13 +12,17 @@ date formats and duration units differ. None publishes port counts, so the denom
 utilization figure has to be inferred. The job was to conform all of it into one tested schema on
 DuckDB, prove that nothing was lost between raw and gold, and say only what the data supports.
 
-**What was built.** An ingestion layer that lands every file as strings with hashes and checks it
-against a declared contract; a bronze / silver / gold dbt warehouse with a quarantine that keeps
-every rejected row and its reasons; a station dimension with inferred capacity and its stated
-bias; a station-day fact on a full spine with sessions split at local midnight; committed
-artifacts for profiling, drift, reconciliation, denominator sensitivity and findings; a number
-checker that fails CI when a documented figure has no artifact key; and an `exports/` read
-contract of aggregates only.
+**What was built.**
+
+- An ingestion layer that lands every file as strings with hashes and checks it against a
+  declared contract.
+- A bronze / silver / gold dbt warehouse with a quarantine that keeps every rejected row and its
+  reasons.
+- A station dimension with inferred capacity and its stated bias, and a station-day fact on a
+  full spine with sessions split at local midnight.
+- Committed artifacts for profiling, drift, reconciliation, denominator sensitivity and findings,
+  with a number checker that fails CI when a documented figure has no artifact key.
+- An `exports/` read contract of aggregates only.
 
 | Source | What it is | Period | Licence |
 |---|---|---|---|

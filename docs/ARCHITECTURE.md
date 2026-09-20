@@ -87,4 +87,4 @@ minutes. Every model and column is described; `scripts/check_dbt_descriptions.py
 ## What is intentionally absent
 
 An API or frontend (the exports are the read contract), a cloud warehouse, any language model in
-the pipeline, any paid service, any secret. Cut scope is listed in ROADMAP.md.
+the pipeline, any paid service, any secret. Cut scope is listed in docs/ROADMAP.md.

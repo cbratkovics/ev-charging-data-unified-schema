@@ -20,7 +20,7 @@ The point is engineering judgment under real mess: cleaning, standardizing, conf
 controlling denominators, reconciling, and proving the result. It is not a tool showcase.
 
 **Non-goals for v1:** no ML, no LLM, no API, no frontend, no Docker, no orchestrator, no cloud
-warehouse, no synthetic data sources. Ideas outside this brief go in `ROADMAP.md`.
+warehouse, no synthetic data sources. Ideas outside this brief go in `docs/ROADMAP.md`.
 
 ## 2. Repository origin
 
@@ -76,7 +76,7 @@ copier-tracked (ADR-0001). Conventions kept: bronze / silver / gold with `brz_`,
 
 Approved (ADR-0004). Endpoints, verbatim licences and retrieval records are in
 `docs/DATA_SOURCES.md`; profiles in `docs/PROFILE.md`. Station-registry matching was cut
-(ADR-0012; design in `ROADMAP.md`).
+(ADR-0012; design in `docs/ROADMAP.md`).
 
 | # | Source | Licence (verbatim source) | Period | Notes |
 |---|---|---|---|---|
@@ -85,7 +85,7 @@ Approved (ADR-0004). Endpoints, verbatim licences and retrieval records are in
 | 3 | UK Department for Transport, Electric Chargepoint Analysis 2017: Local Authority Rapids (revised) and Public Sector Fasts raw data, plus the two published incomplete-or-anomalous files | "All content is available under the Open Government Licence v3.0, except where otherwise stated" on both publication pages | 2017 | Four files with differing headers, date formats and duration units; plug-in duration only; connector ids on 44% of rows; wall-clock local timestamps |
 
 Removed after Phase 1 (ADR-0004): Palo Alto, CA (no dataset-level licence; portal unreachable)
-and Dundee, UK (licence unstated on every item). Deferred to `ROADMAP.md`: Perth & Kinross,
+and Dundee, UK (licence unstated on every item). Deferred to `docs/ROADMAP.md`: Perth & Kinross,
 Paris, Caltech ACN-Data.
 
 ## 5. Target design
@@ -279,10 +279,10 @@ is the stable read contract. No frontend or API is built.
 | 2. Bronze, contracts, drift | Loaders, manifest, bronze models, source contracts, drift artifact and policy | The drift artifact is committed and the policy branches are tested. |
 | 3. Silver | Per-source conforming, union, quarantine, dbt unit tests | The row-conservation test passes on real data. |
 | 4. Gold | Facts, dims, snapshot, midnight split, capacity, utilization, sensitivity artifact, incremental model, idempotency tests | Idempotency and ratio-of-sums tests pass. |
-| 5. Registry matching | **Cut** (ADR-0012); design in `ROADMAP.md` | n/a |
+| 5. Registry matching | **Cut** (ADR-0012); design in `docs/ROADMAP.md` | n/a |
 | 6. Reconciliation and findings | Reconciliation artifact, classification, `FINDINGS.md`, number checker | Every number in the docs resolves to an artifact key. |
 | 7. CI and exports | The workflows, Pages docs, `exports/` contract | Workflows pass locally where possible (the make targets they call), and the owner TODO is written. |
-| 8. Documentation | README (problem, sources table, lineage, design decisions linking ADRs, results table citing artifact keys, how to run, limitations, independence statement), `ARCHITECTURE.md`, `REPRODUCIBILITY.md`, `ROADMAP.md`, `docs/CARD.md` (title, two-sentence summary, four or five "what this demonstrates" bullets, the stack, no number without an artifact key) | Docs complete and the number checker passes. |
+| 8. Documentation | README (problem, sources table, lineage, design decisions linking ADRs, results table citing artifact keys, how to run, limitations, independence statement), `ARCHITECTURE.md`, `REPRODUCIBILITY.md`, `docs/ROADMAP.md`, `docs/CARD.md` (title, two-sentence summary, four or five "what this demonstrates" bullets, the stack, no number without an artifact key) | Docs complete and the number checker passes. |
 
 ## 9. Checkpoint format
 
@@ -308,9 +308,9 @@ Next phase proposal: <one paragraph>
 | 2026-09-19 | 1 (re-approval) | Capacity denominator: (f) robust max at N = 5 from the days-at-level distribution; (g) active window excludes gaps beyond a per-source threshold from inter-session gaps; (h) sensitivity artifact; (i) stated limitations on inferred ports, 24-hour availability and both bias directions | ADR-0006 |
 | 2026-09-19 | 2 | Personal data confirmed none; DfT natural key approved, null-safe, `unknown/<Name>` share reported; publisher rule reproduced as a quality flag with mismatch reported; one non-trivial session rule at gold; port-count precedence (connector ids, else robust max N = 5, floored at 1, `low_evidence` flag); DfT implied-kW ceilings per family (rapids 55 kW, fasts 30 kW) | ADR-0007 |
 | 2026-09-20 | 3 | Per-family drift design kept, with a generated contract-diff document; a `make release` target that regenerates every artifact at one commit; nonexistent local times quarantined and ambiguous ones resolved to DuckDB's second occurrence, verified empirically and pinned by a test; the ICU extension verified statically linked; every failing quarantine reason kept plus one primary reason by fixed precedence; every dedup order ends in `_row_hash` | ADR-0009 |
-| 2026-09-20 | 3 (re-approval) / 4 | (a) charging tolerance from per-row timestamp precision with a within-tolerance flag and idle clamped at zero; (b) committed silver summary artifact; (c) decomposition of anomalies rows not meeting the publisher rule; (d) delivery-driven incremental merge; (e) local-time available minutes on DST days; (f) unclipped utilization with over-100% diagnostics; (g) null never zero for absent durations. Fall-back resolution kept as DuckDB's; reported-duration disambiguation to ROADMAP | ADR-0010 |
+| 2026-09-20 | 3 (re-approval) / 4 | (a) charging tolerance from per-row timestamp precision with a within-tolerance flag and idle clamped at zero; (b) committed silver summary artifact; (c) decomposition of anomalies rows not meeting the publisher rule; (d) delivery-driven incremental merge; (e) local-time available minutes on DST days; (f) unclipped utilization with over-100% diagnostics; (g) null never zero for absent durations. Fall-back resolution kept as DuckDB's; reported-duration disambiguation to `docs/ROADMAP.md` | ADR-0010 |
 | 2026-09-20 | 4 | Source-level replace instead of a merge, no event-time lookback, change detection by file hashes on fact rows; only the session fact is incremental; a station x local-date spine with rows for zero-session days; allocation over the charging window where charging time exists, else the connected window; deterministic snapshot validity via data_as_of_utc | ADR-0011 |
-| 2026-09-20 | 4 (re-approval) / 5 | Ports = the larger of the connector-id count and the robust max (both lower bounds), `ports_source` = the binding bound; the fact's `capacity_grain` renamed `port_id_present` so the grain has one meaning on `dim_station`; unknown-station share reported in reconciliation and README; Phase 5 registry matching cut and every trace of the feature removed, design kept in `ROADMAP.md` | ADR-0012 |
+| 2026-09-20 | 4 (re-approval) / 5 | Ports = the larger of the connector-id count and the robust max (both lower bounds), `ports_source` = the binding bound; the fact's `capacity_grain` renamed `port_id_present` so the grain has one meaning on `dim_station`; unknown-station share reported in reconciliation and README; Phase 5 registry matching cut and every trace of the feature removed, design kept in `docs/ROADMAP.md` | ADR-0012 |
 | 2026-09-20 | 6 | Two reconciliation identities in the silver summary (raw = fact + quarantined; fact = counted + trivial + unknown) with the moved DfT events as a breakdown inside natural_key_duplicate; living docs cite latest.json, ADRs cite point-in-time artifacts, release prunes uncited artifacts; number blocks rendered between markers with HTML-comment citations in prose; Boulder blocking idle by hour; every finding states what the data cannot show | ADR-0013 |
 | 2026-09-20 | 6 (review) | Three coherence defects fixed: second-precision session ends in the gold SQL (Cary ports), the production definition inside every sensitivity range, one summing population table for the DfT anomalies file; coherence tests on the artifacts; "blocking idle" renamed idle at full occupancy, framed as an upper bound and split by single- and multi-port stations | ADR-0014 |
 | 2026-09-20 | 7 | Scheduled build never commits and opens issues (upstream changed vs regression), monthly plus manual; cache key from the committed silver artifact's input hashes; slim CI by state selection without deferral; exports aggregates only with Parquet everywhere, JSON for small relations and a 5 MB ceiling; owner TODO covers the remote, the public repository, Pages, the first run and the labels | ADR-0015 |

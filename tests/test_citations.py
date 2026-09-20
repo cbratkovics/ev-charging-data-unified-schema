@@ -96,3 +96,43 @@ def test_param_marker_allows_design_constants_everywhere(tmp_path) -> None:
         root, "A DST day has 1,380 or 1,500 minutes; the threshold is 30 days. <!-- param -->\n"
     )
     assert problems == [] and checked == 0 and params == 1
+
+
+def test_ratio_in_words_needs_a_citation_and_must_satisfy_its_qualifier(tmp_path) -> None:
+    root = _repo(tmp_path)
+    (root / "artifacts" / "silver" / "silver-x.json").write_text(
+        json.dumps({"ratio": 3.62, "share": 0.276, "spread": 0.31})
+    )
+    cite = "<!-- cite: artifacts/silver/latest.json#ratio -->"
+    problems, checked, _, _ = _check(root, "It overstates by about four times.\n")
+    assert checked == 1 and any("uncited ratio in words 'about four times'" in p for p in problems)
+    problems, checked, _, _ = _check(root, f"It overstates by about four times. {cite}\n")
+    assert checked == 1 and any("ratio in words 'about four times'" in p for p in problems)
+    for ok in ("more than three times", "3.6 times", "over three times"):
+        problems, checked, _, _ = _check(root, f"It is {ok} the figure. {cite}\n")
+        assert problems == [] and checked == 1, ok
+    share = "<!-- cite: artifacts/silver/latest.json#share -->"
+    problems, _, _, _ = _check(root, f"Up to a quarter of it is idle. {share}\n")
+    assert any("ratio in words 'Up to a quarter of'" in p for p in problems)
+    problems, _, _, _ = _check(root, f"More than a quarter of it is idle. {share}\n")
+    assert problems == []
+    spread = "<!-- cite: artifacts/silver/latest.json#spread -->"
+    problems, _, _, _ = _check(root, f"It moves by up to about a third of its value. {spread}\n")
+    assert problems == []
+    problems, _, _, _ = _check(root, f"It moves by nearly a third of its value. {spread}\n")
+    assert problems == []
+    problems, _, _, _ = _check(root, f"It moves by a third of its value. {spread}\n")
+    assert problems == []  # 31% is within a tenth of a third
+    problems, _, _, _ = _check(root, f"It moves by a third of its value. {share}\n")
+    assert any("ratio in words 'a third of'" in p for p in problems)  # 27.6% is not
+
+
+def test_words_that_are_not_ratios_are_ignored_and_scratch_covers_ratios(tmp_path) -> None:
+    root = _repo(tmp_path)
+    text = "A third source, a half-hour rounding, rows counted twice, fall-back times resolve, and ports times minutes.\n"
+    problems, checked, _, _ = _check(root, text)
+    assert problems == [] and checked == 0
+    problems, checked, scratch, _ = _check(
+        root, "The ceiling leaves about three times that. <!-- scratch -->\n", adr=True
+    )
+    assert problems == [] and checked == 0 and scratch == 1

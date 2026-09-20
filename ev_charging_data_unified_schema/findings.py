@@ -127,6 +127,8 @@ def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, A
             round(total_full / total_connected, 6) if total_connected else None
         ),
         "full_occupancy_share_of_idle": round(total_full / total_idle, 6) if total_idle else None,
+        # how many times the headline idle share overstates the full-occupancy figure
+        "idle_to_full_occupancy_ratio": round(total_idle / total_full, 3) if total_full else None,
         "stations_with_full_occupancy_idle": stations_with_full,
         "stations": int(sessions["station_key"].nunique()),
         "by_local_hour": {
@@ -278,7 +280,7 @@ def compute(
     defs = ports_by_definition(levels, stations)
     for label in (f"robust_max_n{n}" for n in N_VALUES):
         idle[label] = full_occupancy_idle(b, defs[label])
-    # by-hour headline profile: share of idle minutes and blocking idle minutes by local hour
+    # by-hour headline profile: idle minutes and full-occupancy idle minutes by local hour
     hour_rows = []
     for h in range(24):
         r = idle["production"]["by_local_hour"][str(h)]
@@ -315,6 +317,11 @@ def compute(
             k = f"{r['source']}__{flavour}"
             if k in ranges and r[flavour] is not None and not pd.isna(r[flavour]):
                 ranges[k]["production"] = round(float(r[flavour]), 6)
+    # width of the range as a share of the production value: the error bar a denominator choice adds
+    for rg in ranges.values():
+        rg["relative_range"] = (
+            round((rg["max"] - rg["min"]) / rg["production"], 6) if rg["production"] else None
+        )
     over100_prod = _df(
         con,
         "select source, count(*) as n from gold.fct_station_day where not is_excluded_day and coalesce(connected_minutes, charging_minutes) > available_port_minutes group by 1",
@@ -330,9 +337,10 @@ def compute(
         "definitions": {
             "idle_share_of_connected": "1 - charging minutes / connected minutes over non-trivial Boulder sessions at known stations",
             "full_occupancy_idle_share_of_connected": "idle minutes that elapsed while every inferred port at the station was occupied, over connected minutes; computed from the connected-interval sweep per station with the port count of the named definition",
-            "full_occupancy_share_of_idle": "blocking idle minutes over all idle minutes",
-            "by_local_hour": "idle and blocking-idle minutes attributed to the local hour in which they elapsed",
-            "utilization_range": "min and max of the sensitivity artifact's non-trivial-rule utilization across denominator definitions; production is the value under dim_station.ports_inferred",
+            "full_occupancy_share_of_idle": "full-occupancy idle minutes over all idle minutes",
+            "idle_to_full_occupancy_ratio": "idle minutes over full-occupancy idle minutes: how many times the headline idle share overstates the full-occupancy figure",
+            "by_local_hour": "idle and full-occupancy idle minutes attributed to the local hour in which they elapsed",
+            "utilization_range": "min and max of the sensitivity artifact's non-trivial-rule utilization across denominator definitions; production is the value under dim_station.ports_inferred; relative_range is (max - min) / production",
             "period": "first and last local session start per source in the fact",
         },
         "periods": periods,
@@ -348,7 +356,7 @@ def compute(
         "unknown_station": silver["unknown_station"],
         "cannot_show": [
             "no queue, arrival or turned-away-driver data exists in any source, so idle time is a ceiling on recoverable capacity, not demand",
-            "port counts are inferred lower bounds (ADR-0012); a station with more ports than inferred has lower true utilization and less blocking idle than reported",
+            "port counts are inferred lower bounds (ADR-0012); a station with more ports than inferred has lower true utilization and less idle at full occupancy than reported",
             "the DfT publication covers calendar 2017 only; Boulder 2018-2023 and Cary 2012-2023 are single operators; nothing here compares operators",
             "charging time is assumed to begin at session start; the sources publish no charging profile",
         ],

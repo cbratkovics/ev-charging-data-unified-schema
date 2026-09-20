@@ -29,7 +29,7 @@ The owner answered all four.
    `registry` value of `ports_source` never existed in built data and is removed from the
    docs, `.env.example` no longer names a key (the project reads no secret), and every mention
    of the registry as a feature is removed from the README, the brief, the data-sources page
-   and the sensitivity definitions. The design is preserved in ROADMAP.md. ADR-0002 item 3
+   and the sensitivity definitions. The design is preserved in docs/ROADMAP.md. ADR-0002 item 3
    and ADR-0006 (h) are annotated rather than rewritten.
 
 **Consequences.** `dim_station` has two fewer columns; the session fact contract changes one
