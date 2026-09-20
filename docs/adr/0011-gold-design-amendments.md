@@ -55,6 +55,11 @@ midnight, and how the SCD2 snapshot stays reproducible.
    Available minutes per local date come from the UTC instants of local midnight to the next
    local midnight, so DST transition days are 1,380 or 1,500 minutes (ADR-0010 e).
 
+8. **Connector ids are their leading integer.** The first sensitivity run showed a DfT unit
+   with eight "connector ids": the fasts anomalies file publishes variants such as
+   `2 - 22kW Type 2 Socket Only` beside `2`. Silver reduces `port_id` to the leading integer
+   before it enters the natural key and the port count.
+
 **Consequences.** `fct_charging_session` gains `source_file_sha256`; the gold layer gains
 `meta_landed_files`; the snapshot's `updated_at` is data-derived. The sensitivity artifact
 (ADR-0006 h, ADR-0010 f) is computed from the session fact by a script so every denominator

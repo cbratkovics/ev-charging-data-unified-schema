@@ -34,7 +34,9 @@ typed as (
         source_family,
         nullif(chargingevent, 'NA') as source_session_id,
         nullif(cpid, 'NA') as cpid,
-        nullif(connector, 'NA') as connector,
+        -- the connector id is its leading integer; the fasts anomalies file also publishes
+        -- text variants such as '2 - 22kW Type 2 Socket Only' for the same connector
+        nullif(regexp_extract(nullif(connector, 'NA'), '^\s*(\d+)', 1), '') as connector,
         nullif(name, 'NA') as name,
         {{ parse_date_plus_time("nullif(startdate, 'NA')", "nullif(starttime, 'NA')") }} as start_local,
         {{ parse_date_plus_time("nullif(enddate, 'NA')", "nullif(endtime, 'NA')") }} as end_local,

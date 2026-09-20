@@ -17,8 +17,7 @@ models:
       arguments:
         compare_model: ref('brz_boulder')
   columns:
-  - &id001
-    name: source
+  - name: source
     description: source short name
     data_tests:
     - not_null
@@ -28,39 +27,31 @@ models:
           - boulder
           - cary
           - dft_2017
-  - &id002
-    name: source_family
+  - name: source_family
     description: 'file family within the source: boulder, cary, or the DfT rapids / rapids_anomalies / fasts / fasts_anomalies'
     data_tests:
     - not_null
-  - &id003
-    name: source_session_id
+  - name: source_session_id
     description: publisher's session id where one is published (DfT ChargingEvent); null otherwise
-  - &id004
-    name: source_file
+  - name: source_file
     description: published file name the row came from
     data_tests:
     - not_null
-  - &id005
-    name: source_delivery_block
+  - name: source_delivery_block
     description: Boulder only; index of the concatenated delivery the row belongs to (0 = oldest)
-  - &id006
-    name: station_key
+  - name: station_key
     description: 'source-prefixed station identifier: boulder/<station name>, cary/<station name>, dft_2017/<CPID>,
       or dft_2017/unknown/<Name> when CPID is null'
     data_tests:
     - not_null
-  - &id007
-    name: station_name_raw
+  - name: station_name_raw
     description: the publisher's station identifier as landed (a name, or the CPID for DfT)
-  - &id008
-    name: site_key
+  - name: site_key
     description: 'site grouping: Boulder address, Cary address, DfT funding body'
-  - &id009
-    name: port_id
-    description: connector id where published (DfT Connector); null otherwise
-  - &id010
-    name: capacity_grain
+  - name: port_id
+    description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
+      of the fasts anomalies file count as the same connector); null otherwise
+  - name: capacity_grain
     description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
     data_tests:
     - not_null
@@ -70,52 +61,39 @@ models:
           - port
           - unit
           - site
-  - &id011
-    name: start_utc
+  - name: start_utc
     description: session start as a UTC instant
-  - &id012
-    name: end_utc
+  - name: end_utc
     description: session end as a UTC instant; null where the source publishes no end (Cary)
-  - &id013
-    name: start_local
+  - name: start_local
     description: session start in station-local wall-clock time (naive)
-  - &id014
-    name: end_local
+  - name: end_local
     description: session end in station-local wall-clock time; null for Cary
-  - &id015
-    name: start_tz
+  - name: start_tz
     description: IANA zone of the station
     data_tests:
     - not_null
-  - &id016
-    name: is_dst_ambiguous
+  - name: is_dst_ambiguous
     description: true when the local start falls in the repeated fall-back hour; resolved to the second occurrence
       (ADR-0009)
     data_tests:
     - not_null
-  - &id017
-    name: energy_kwh
+  - name: energy_kwh
     description: energy delivered, kWh
-  - &id018
-    name: charging_minutes
+  - name: charging_minutes
     description: minutes actively charging, from the published hh:mm:ss (Cary, Boulder); null for DfT, never imputed
-  - &id019
-    name: connected_minutes
+  - name: connected_minutes
     description: minutes plugged in, computed as end_utc minus start_utc (Boulder, DfT); null for Cary, never imputed
-  - &id020
-    name: connected_minutes_reported
+  - name: connected_minutes_reported
     description: the publisher's plug-in duration in minutes (Boulder Total_Duration; DfT PluginDuration with its
       per-file unit applied); null for Cary
-  - &id021
-    name: duration_disagreement_minutes
+  - name: duration_disagreement_minutes
     description: connected_minutes minus connected_minutes_reported; the duration_disagrees flag fires above 2 minutes
       (ADR-0005 a)
-  - &id022
-    name: idle_minutes
+  - name: idle_minutes
     description: connected minus charging, clamped at zero (a charging time that exceeds the minute-precision connected
       time within tolerance gives 0, not a negative idle); Boulder only
-  - &id023
-    name: duration_availability
+  - name: duration_availability
     description: 'which durations this source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
     data_tests:
     - not_null
@@ -125,40 +103,33 @@ models:
           - both
           - charging_only
           - plug_in_only
-  - &id024
-    name: publisher_excluded_rule
+  - name: publisher_excluded_rule
     description: DfT rows meeting the publisher's exclusion rule (zero energy or plug-in of 3 minutes or less),
       reproduced as a flag (ADR-0007); false elsewhere
     data_tests:
     - not_null
-  - &id025
-    name: implied_kw
+  - name: implied_kw
     description: energy over hours of charging (or connected where charging is not published); the implied_kw_over_ceiling
       reason compares it with the source's ceiling
   - name: timestamp_precision_seconds
     description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
       the charging_exceeds_connected rule (ADR-0009 item 7)
-    data_tests: &id026
+    data_tests:
     - not_null
-  - &id027
-    name: natural_key_hash
+  - name: natural_key_hash
     description: md5 of the null-safe natural key (ADR-0009); unique among accepted rows
     data_tests:
     - not_null
-  - &id028
-    name: quality_flags
+  - name: quality_flags
     description: 'flags on the row: zero_energy, charging_exceeds_connected_within_precision, over_24h, duration_disagrees,
       dst_ambiguous, publisher_excluded_rule, unknown_station'
-  - &id029
-    name: _row_hash
+  - name: _row_hash
     description: landing metadata; sha256 over the source columns of the bronze row
     data_tests:
     - not_null
-  - &id030
-    name: quarantine_reasons
+  - name: quarantine_reasons
     description: every failing quarantine reason, in precedence order; empty on accepted rows
-  - &id031
-    name: primary_reason
+  - name: primary_reason
     description: the first failing reason by the fixed precedence (ADR-0009); null on accepted rows
 - name: slv_sessions__cary
   description: Cary, NC sessions conformed to the unified contract, one row per bronze row. Timestamps are true
@@ -169,40 +140,120 @@ models:
       arguments:
         compare_model: ref('brz_cary')
   columns:
-  - *id001
-  - *id002
-  - *id003
-  - *id004
-  - *id005
-  - *id006
-  - *id007
-  - *id008
-  - *id009
-  - *id010
-  - *id011
-  - *id012
-  - *id013
-  - *id014
-  - *id015
-  - *id016
-  - *id017
-  - *id018
-  - *id019
-  - *id020
-  - *id021
-  - *id022
-  - *id023
-  - *id024
-  - *id025
+  - name: source
+    description: source short name
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - boulder
+          - cary
+          - dft_2017
+  - name: source_family
+    description: 'file family within the source: boulder, cary, or the DfT rapids / rapids_anomalies / fasts / fasts_anomalies'
+    data_tests:
+    - not_null
+  - name: source_session_id
+    description: publisher's session id where one is published (DfT ChargingEvent); null otherwise
+  - name: source_file
+    description: published file name the row came from
+    data_tests:
+    - not_null
+  - name: source_delivery_block
+    description: Boulder only; index of the concatenated delivery the row belongs to (0 = oldest)
+  - name: station_key
+    description: 'source-prefixed station identifier: boulder/<station name>, cary/<station name>, dft_2017/<CPID>,
+      or dft_2017/unknown/<Name> when CPID is null'
+    data_tests:
+    - not_null
+  - name: station_name_raw
+    description: the publisher's station identifier as landed (a name, or the CPID for DfT)
+  - name: site_key
+    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+  - name: port_id
+    description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
+      of the fasts anomalies file count as the same connector); null otherwise
+  - name: capacity_grain
+    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - port
+          - unit
+          - site
+  - name: start_utc
+    description: session start as a UTC instant
+  - name: end_utc
+    description: session end as a UTC instant; null where the source publishes no end (Cary)
+  - name: start_local
+    description: session start in station-local wall-clock time (naive)
+  - name: end_local
+    description: session end in station-local wall-clock time; null for Cary
+  - name: start_tz
+    description: IANA zone of the station
+    data_tests:
+    - not_null
+  - name: is_dst_ambiguous
+    description: true when the local start falls in the repeated fall-back hour; resolved to the second occurrence
+      (ADR-0009)
+    data_tests:
+    - not_null
+  - name: energy_kwh
+    description: energy delivered, kWh
+  - name: charging_minutes
+    description: minutes actively charging, from the published hh:mm:ss (Cary, Boulder); null for DfT, never imputed
+  - name: connected_minutes
+    description: minutes plugged in, computed as end_utc minus start_utc (Boulder, DfT); null for Cary, never imputed
+  - name: connected_minutes_reported
+    description: the publisher's plug-in duration in minutes (Boulder Total_Duration; DfT PluginDuration with its
+      per-file unit applied); null for Cary
+  - name: duration_disagreement_minutes
+    description: connected_minutes minus connected_minutes_reported; the duration_disagrees flag fires above 2 minutes
+      (ADR-0005 a)
+  - name: idle_minutes
+    description: connected minus charging, clamped at zero (a charging time that exceeds the minute-precision connected
+      time within tolerance gives 0, not a negative idle); Boulder only
+  - name: duration_availability
+    description: 'which durations this source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - both
+          - charging_only
+          - plug_in_only
+  - name: publisher_excluded_rule
+    description: DfT rows meeting the publisher's exclusion rule (zero energy or plug-in of 3 minutes or less),
+      reproduced as a flag (ADR-0007); false elsewhere
+    data_tests:
+    - not_null
+  - name: implied_kw
+    description: energy over hours of charging (or connected where charging is not published); the implied_kw_over_ceiling
+      reason compares it with the source's ceiling
   - name: timestamp_precision_seconds
     description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
       the charging_exceeds_connected rule (ADR-0009 item 7)
-    data_tests: *id026
-  - *id027
-  - *id028
-  - *id029
-  - *id030
-  - *id031
+    data_tests:
+    - not_null
+  - name: natural_key_hash
+    description: md5 of the null-safe natural key (ADR-0009); unique among accepted rows
+    data_tests:
+    - not_null
+  - name: quality_flags
+    description: 'flags on the row: zero_energy, charging_exceeds_connected_within_precision, over_24h, duration_disagrees,
+      dst_ambiguous, publisher_excluded_rule, unknown_station'
+  - name: _row_hash
+    description: landing metadata; sha256 over the source columns of the bronze row
+    data_tests:
+    - not_null
+  - name: quarantine_reasons
+    description: every failing quarantine reason, in precedence order; empty on accepted rows
+  - name: primary_reason
+    description: the first failing reason by the fixed precedence (ADR-0009); null on accepted rows
 - name: slv_sessions__dft_2017
   description: UK DfT 2017 events conformed to the unified contract, one row per bronze row across the four files.
     NA tokens nulled, dates ISO or day-first per value, PluginDuration converted with its per-file unit, wall-clock
@@ -214,40 +265,120 @@ models:
       arguments:
         compare_model: ref('brz_dft_2017')
   columns:
-  - *id001
-  - *id002
-  - *id003
-  - *id004
-  - *id005
-  - *id006
-  - *id007
-  - *id008
-  - *id009
-  - *id010
-  - *id011
-  - *id012
-  - *id013
-  - *id014
-  - *id015
-  - *id016
-  - *id017
-  - *id018
-  - *id019
-  - *id020
-  - *id021
-  - *id022
-  - *id023
-  - *id024
-  - *id025
+  - name: source
+    description: source short name
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - boulder
+          - cary
+          - dft_2017
+  - name: source_family
+    description: 'file family within the source: boulder, cary, or the DfT rapids / rapids_anomalies / fasts / fasts_anomalies'
+    data_tests:
+    - not_null
+  - name: source_session_id
+    description: publisher's session id where one is published (DfT ChargingEvent); null otherwise
+  - name: source_file
+    description: published file name the row came from
+    data_tests:
+    - not_null
+  - name: source_delivery_block
+    description: Boulder only; index of the concatenated delivery the row belongs to (0 = oldest)
+  - name: station_key
+    description: 'source-prefixed station identifier: boulder/<station name>, cary/<station name>, dft_2017/<CPID>,
+      or dft_2017/unknown/<Name> when CPID is null'
+    data_tests:
+    - not_null
+  - name: station_name_raw
+    description: the publisher's station identifier as landed (a name, or the CPID for DfT)
+  - name: site_key
+    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+  - name: port_id
+    description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
+      of the fasts anomalies file count as the same connector); null otherwise
+  - name: capacity_grain
+    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - port
+          - unit
+          - site
+  - name: start_utc
+    description: session start as a UTC instant
+  - name: end_utc
+    description: session end as a UTC instant; null where the source publishes no end (Cary)
+  - name: start_local
+    description: session start in station-local wall-clock time (naive)
+  - name: end_local
+    description: session end in station-local wall-clock time; null for Cary
+  - name: start_tz
+    description: IANA zone of the station
+    data_tests:
+    - not_null
+  - name: is_dst_ambiguous
+    description: true when the local start falls in the repeated fall-back hour; resolved to the second occurrence
+      (ADR-0009)
+    data_tests:
+    - not_null
+  - name: energy_kwh
+    description: energy delivered, kWh
+  - name: charging_minutes
+    description: minutes actively charging, from the published hh:mm:ss (Cary, Boulder); null for DfT, never imputed
+  - name: connected_minutes
+    description: minutes plugged in, computed as end_utc minus start_utc (Boulder, DfT); null for Cary, never imputed
+  - name: connected_minutes_reported
+    description: the publisher's plug-in duration in minutes (Boulder Total_Duration; DfT PluginDuration with its
+      per-file unit applied); null for Cary
+  - name: duration_disagreement_minutes
+    description: connected_minutes minus connected_minutes_reported; the duration_disagrees flag fires above 2 minutes
+      (ADR-0005 a)
+  - name: idle_minutes
+    description: connected minus charging, clamped at zero (a charging time that exceeds the minute-precision connected
+      time within tolerance gives 0, not a negative idle); Boulder only
+  - name: duration_availability
+    description: 'which durations this source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - both
+          - charging_only
+          - plug_in_only
+  - name: publisher_excluded_rule
+    description: DfT rows meeting the publisher's exclusion rule (zero energy or plug-in of 3 minutes or less),
+      reproduced as a flag (ADR-0007); false elsewhere
+    data_tests:
+    - not_null
+  - name: implied_kw
+    description: energy over hours of charging (or connected where charging is not published); the implied_kw_over_ceiling
+      reason compares it with the source's ceiling
   - name: timestamp_precision_seconds
     description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
       the charging_exceeds_connected rule (ADR-0009 item 7)
-    data_tests: *id026
-  - *id027
-  - *id028
-  - *id029
-  - *id030
-  - *id031
+    data_tests:
+    - not_null
+  - name: natural_key_hash
+    description: md5 of the null-safe natural key (ADR-0009); unique among accepted rows
+    data_tests:
+    - not_null
+  - name: quality_flags
+    description: 'flags on the row: zero_energy, charging_exceeds_connected_within_precision, over_24h, duration_disagrees,
+      dst_ambiguous, publisher_excluded_rule, unknown_station'
+  - name: _row_hash
+    description: landing metadata; sha256 over the source columns of the bronze row
+    data_tests:
+    - not_null
+  - name: quarantine_reasons
+    description: every failing quarantine reason, in precedence order; empty on accepted rows
+  - name: primary_reason
+    description: the first failing reason by the fixed precedence (ADR-0009); null on accepted rows
 - name: slv_sessions_unioned
   description: The unified session contract (docs/BRIEF.md section 5a) over every source's accepted rows, one row
     per session, with the one non-trivial-session rule gold and the findings use.
@@ -263,38 +394,116 @@ models:
     data_tests:
     - unique
     - not_null
-  - *id001
-  - *id002
-  - *id003
-  - *id004
-  - *id005
-  - *id006
-  - *id007
-  - *id008
-  - *id009
-  - *id010
-  - *id011
-  - *id012
-  - *id013
-  - *id014
-  - *id015
-  - *id016
-  - *id017
-  - *id018
-  - *id019
-  - *id020
-  - *id021
-  - *id022
-  - *id023
-  - *id024
-  - *id025
+  - name: source
+    description: source short name
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - boulder
+          - cary
+          - dft_2017
+  - name: source_family
+    description: 'file family within the source: boulder, cary, or the DfT rapids / rapids_anomalies / fasts / fasts_anomalies'
+    data_tests:
+    - not_null
+  - name: source_session_id
+    description: publisher's session id where one is published (DfT ChargingEvent); null otherwise
+  - name: source_file
+    description: published file name the row came from
+    data_tests:
+    - not_null
+  - name: source_delivery_block
+    description: Boulder only; index of the concatenated delivery the row belongs to (0 = oldest)
+  - name: station_key
+    description: 'source-prefixed station identifier: boulder/<station name>, cary/<station name>, dft_2017/<CPID>,
+      or dft_2017/unknown/<Name> when CPID is null'
+    data_tests:
+    - not_null
+  - name: station_name_raw
+    description: the publisher's station identifier as landed (a name, or the CPID for DfT)
+  - name: site_key
+    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+  - name: port_id
+    description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
+      of the fasts anomalies file count as the same connector); null otherwise
+  - name: capacity_grain
+    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - port
+          - unit
+          - site
+  - name: start_utc
+    description: session start as a UTC instant
+  - name: end_utc
+    description: session end as a UTC instant; null where the source publishes no end (Cary)
+  - name: start_local
+    description: session start in station-local wall-clock time (naive)
+  - name: end_local
+    description: session end in station-local wall-clock time; null for Cary
+  - name: start_tz
+    description: IANA zone of the station
+    data_tests:
+    - not_null
+  - name: is_dst_ambiguous
+    description: true when the local start falls in the repeated fall-back hour; resolved to the second occurrence
+      (ADR-0009)
+    data_tests:
+    - not_null
+  - name: energy_kwh
+    description: energy delivered, kWh
+  - name: charging_minutes
+    description: minutes actively charging, from the published hh:mm:ss (Cary, Boulder); null for DfT, never imputed
+  - name: connected_minutes
+    description: minutes plugged in, computed as end_utc minus start_utc (Boulder, DfT); null for Cary, never imputed
+  - name: connected_minutes_reported
+    description: the publisher's plug-in duration in minutes (Boulder Total_Duration; DfT PluginDuration with its
+      per-file unit applied); null for Cary
+  - name: duration_disagreement_minutes
+    description: connected_minutes minus connected_minutes_reported; the duration_disagrees flag fires above 2 minutes
+      (ADR-0005 a)
+  - name: idle_minutes
+    description: connected minus charging, clamped at zero (a charging time that exceeds the minute-precision connected
+      time within tolerance gives 0, not a negative idle); Boulder only
+  - name: duration_availability
+    description: 'which durations this source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - both
+          - charging_only
+          - plug_in_only
+  - name: publisher_excluded_rule
+    description: DfT rows meeting the publisher's exclusion rule (zero energy or plug-in of 3 minutes or less),
+      reproduced as a flag (ADR-0007); false elsewhere
+    data_tests:
+    - not_null
+  - name: implied_kw
+    description: energy over hours of charging (or connected where charging is not published); the implied_kw_over_ceiling
+      reason compares it with the source's ceiling
   - name: timestamp_precision_seconds
     description: precision of the published timestamps on this row (1 = seconds, 60 = minutes); the tolerance of
       the charging_exceeds_connected rule (ADR-0009 item 7)
-    data_tests: *id026
-  - *id027
-  - *id028
-  - *id029
+    data_tests:
+    - not_null
+  - name: natural_key_hash
+    description: md5 of the null-safe natural key (ADR-0009); unique among accepted rows
+    data_tests:
+    - not_null
+  - name: quality_flags
+    description: 'flags on the row: zero_energy, charging_exceeds_connected_within_precision, over_24h, duration_disagrees,
+      dst_ambiguous, publisher_excluded_rule, unknown_station'
+  - name: _row_hash
+    description: landing metadata; sha256 over the source columns of the bronze row
+    data_tests:
+    - not_null
   - name: is_non_trivial
     description: energy above zero and the available duration (connected, else charging) above 3 minutes (ADR-0007
       item 3); utilization and findings use non-trivial sessions only

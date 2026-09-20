@@ -8,7 +8,8 @@
 -- the connected window where the source has no end time), floored at 1. Port counts are
 -- inferred, not inventoried: they undercount ports never used concurrently and overcount where
 -- overlapping records are data errors; availability is assumed 24 hours within the active
--- window (docs/BRIEF.md § 5, README limitations).
+-- window (docs/BRIEF.md § 5, README limitations). Unknown-station keys (dft_2017/unknown/<Name>)
+-- are not stations and are excluded here and from fct_station_day (ADR-0007 item 1).
 {{ config(materialized='table') }}
 
 {% set robust_n = 5 %}
@@ -29,7 +30,9 @@ with sessions as (
         coalesce(end_local, start_local + to_minutes(cast(round(charging_minutes) as bigint))) as end_eff_local,
         port_id
     from {{ ref('fct_charging_session') }}
-    where is_non_trivial
+    -- unknown-station keys (a null CPID under a funding body) stay in the session fact and its
+    -- totals but have no capacity or utilization (ADR-0007 item 1)
+    where is_non_trivial and not contains(station_key, '/unknown/')
 ),
 
 per_station as (

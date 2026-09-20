@@ -1,6 +1,6 @@
 -- The midnight split conserves the measures: per source, energy, charging and connected
--- minutes summed over fct_station_day equal the sums over non-trivial sessions in
--- fct_charging_session (to 1e-6 relative), and session counts match exactly.
+-- minutes summed over fct_station_day equal the sums over non-trivial sessions at known
+-- stations in fct_charging_session (to 1e-6 relative), and session counts match exactly.
 with sessions as (
     select
         source,
@@ -9,6 +9,8 @@ with sessions as (
         sum(charging_minutes) filter (where is_non_trivial) as charging_minutes,
         sum(connected_minutes) filter (where is_non_trivial) as connected_minutes
     from {{ ref('fct_charging_session') }}
+    -- unknown-station keys have no station-day rows by design (ADR-0007 item 1)
+    where not contains(station_key, '/unknown/')
     group by source
 ),
 
