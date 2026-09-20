@@ -37,43 +37,66 @@ def pct(x: float | None, d: int = 1) -> str:
 def results_block(
     silver: dict[str, Any], sens: dict[str, Any], findings: dict[str, Any] | None
 ) -> str:
+    """Utilization with its range per source, and the reconciliation status; nothing more."""
+    labels = {"connected": "connected-time", "charging": "charging-time"}
     rows = [
-        "| Source | Raw rows | Sessions in the fact | Quarantined | Non-trivial sessions | Stations with capacity | Utilization (production port count) |",
-        "|---|---|---|---|---|---|---|",
+        "| Source | Period | Utilization (production port count) | Range across denominator definitions |",
+        "|---|---|---|---|",
     ]
-    prod = {}
     if findings:
-        for k, v in findings["utilization_ranges"].items():
-            src, fl = k.split("__")
-            if v.get("production") is not None:
-                prod.setdefault(src, []).append(f"{fl} {pct(v['production'])}")
-    stations = {}
-    for s in silver["by_source"]:
-        stations[s] = None
-    dim = sens.get("dim_station", {})
-    for s, v in silver["by_source"].items():
-        util = ", ".join(prod.get(s, [])) or "n/a"
-        rows.append(
-            f"| {s} | {n(v['bronze'])} | {n(v['accepted'])} | {n(v['quarantined'])} | {n(v['non_trivial'])} | see below | {util} |"
-        )
+        periods = findings["periods"]
+        for key, r in sorted(findings["utilization_ranges"].items()):
+            src, fl = key.split("__")
+            per = (
+                f"{periods[src]['first_start_local'][:7]} to {periods[src]['last_start_local'][:7]}"
+            )
+            rows.append(
+                f"| {src} | {per} | {labels[fl]} {pct(r['production'])} | {pct(r['min'])} ({r['min_definition']}) to {pct(r['max'])} ({r['max_definition']}) |"
+            )
     lines = [
-        f"_Rendered by `scripts/render_docs.py` from `artifacts/silver/{silver['run_id']}.json` and `artifacts/sensitivity/{sens['run_id']}.json`"
-        + (f" and `artifacts/findings/{findings['run_id']}.json`" if findings else "")
-        + "._",
+        (
+            f"_Rendered by `scripts/render_docs.py` from `artifacts/findings/{findings['run_id']}.json` and "
+            f"`artifacts/silver/{silver['run_id']}.json`; a ratio of summed minutes over summed available port minutes, "
+            "never an average of daily percentages; ports are inferred lower bounds, so these are upper bounds on utilization._"
+            if findings
+            else "_No findings artifact yet._"
+        ),
         "",
         *rows,
         "",
-        f"Stations with inferred capacity: {n(dim.get('stations', 0))} ({', '.join(f'{k} ports: {n(v)}' for k, v in sorted(dim.get('ports_inferred_distribution', {}).items(), key=lambda kv: int(kv[0])))}); "
-        f"binding bound: {', '.join(f'{k} {n(v)}' for k, v in sorted(dim.get('ports_source', {}).items()))}. "
-        f"Excluded days: {n(dim.get('excluded_days_total', 0))} of {n(dim.get('window_days_total', 0))} station-window days.",
-        "",
-        f"Reconciliation status: **{silver.get('status', 'n/a')}** (both identities per source and month; ADR-0013).",
+        f"Reconciliation status (both identities, every source and month): **{silver.get('status', 'n/a')}**. "
+        "Sources cover different years and countries; nothing here compares one with another.",
     ]
     return "\n".join(lines)
 
 
+def card_block(silver: dict[str, Any], findings: dict[str, Any] | None) -> str:
+    """The card's headline figures, each with its key."""
+    if not findings:
+        return "_No findings artifact yet._"
+    idle = findings["boulder_idle"]["production"]
+    rows = [
+        f"- Boulder: {pct(idle['idle_share_of_connected'])} of connected time is idle after charging; up to "
+        f"{pct(idle['full_occupancy_idle_share_of_connected'])} of connected time is idle while every inferred port was occupied.",
+        "- Utilization by source (production port count; range across denominator definitions): "
+        + "; ".join(
+            f"{k.split('__')[0]} {k.split('__')[1]} {pct(r['production'])} ({pct(r['min'])} to {pct(r['max'])})"
+            for k, r in sorted(findings["utilization_ranges"].items())
+        )
+        + ".",
+        f"- Reconciliation: every source reconciles exactly on rows and sessions; status **{silver.get('status', 'n/a')}**.",
+        f"- Rows: {n(sum(v['bronze'] for v in silver['by_source'].values()))} landed, "
+        f"{n(sum(v['accepted'] for v in silver['by_source'].values()))} accepted sessions, "
+        f"{n(sum(v['quarantined'] for v in silver['by_source'].values()))} quarantined with a primary reason each.",
+        f"_Keys: `artifacts/findings/{findings['run_id']}.json` boulder_idle.production, utilization_ranges; "
+        f"`artifacts/silver/{silver['run_id']}.json` status, by_source._",
+    ]
+    return "\n".join(rows)
+
+
 BLOCKS = {
     "results": lambda: results_block(latest("silver"), latest("sensitivity"), latest("findings")),
+    "card": lambda: card_block(latest("silver"), latest("findings")),
 }
 
 

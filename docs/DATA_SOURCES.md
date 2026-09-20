@@ -1,7 +1,7 @@
 # Data sources
 
 Three public session sources, every one under an explicit open licence
-(docs/adr/0004-source-policy.md). Station-registry matching is not built (ROADMAP.md). Per source: the exact endpoints used, the licence
+(docs/adr/0004-source-policy.md). Per source: the exact endpoints used, the licence
 **verbatim as published** with the URL it was read from, and what this repository commits
 (docs/adr/0002-source-redistribution.md). Retrieval time, size, row count and SHA-256 of every
 downloaded file are in the generated inventory at the end of this page; the full hashes are in

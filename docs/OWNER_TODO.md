@@ -9,3 +9,6 @@ Steps only the owner can take. Nothing here needs a secret.
 5. **Issue labels.** The workflow creates `new-source-data` and `full-build-regression` with `--force` when it first needs them; nothing to set up.
 6. **Releases are yours.** When an issue says new source data is available, run `make release` locally, review the regenerated artifacts and docs, and commit. The scheduled build never commits.
 7. **CI on pull requests.** Once Pages serves `manifest.json`, pull requests build only the modified models and their ancestors; until then they run the full fixture build.
+8. **Tag the release.** After the first manual full build succeeds: `git tag -a v0.1.0 -m "v0.1.0: three sources, bronze to gold, artifacts, findings, exports" && git push origin v0.1.0`.
+
+In order: push, make public, enable Pages, first manual full build, then tag `v0.1.0`.

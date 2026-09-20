@@ -65,7 +65,8 @@ ALLOW_RE = [
     re.compile(r"^\d{4}-\d{2}(-\d{2})?$"),  # ISO dates handled by NUMBER_RE exclusion of '-' anyway
 ]
 LICENCE_VERSION_RE = re.compile(
-    r"(CC0 |OGL |Licence v|License v|v|§ ?|rule |section |item |Phase |Brief )\d+(\.\d+)*$", re.I
+    r"(CC0 |OGL |Licence v|License v|v|§ ?|rule |section |item |Phase |Brief |Python |DuckDB |dbt-core |dbt-duckdb |pandas |pyarrow )\d+(\.\d+)*$",
+    re.I,
 )
 CONTEXT_ALLOW_RE = re.compile(
     r"(ADR-|Phase |phase |item |§ |v\d|version |dbt[- ]core|duckdb|python )", re.I

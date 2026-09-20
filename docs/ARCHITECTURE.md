@@ -1,58 +1,90 @@
-> **Template text.** This file still describes the prediction-pipeline template this repository was rendered from (docs/adr/0001-origin.md). It is rewritten in Phase 8; nothing in it describes the current project.
-
 # Architecture
 
-One Python package (`ev_charging_data_unified_schema/`), one dbt project (`dbt/`), one set of committed artifacts
-(`artifacts/`), one FastAPI server that reads those artifacts, one scheduled GitHub Actions job
-that refreshes them. The only
-hosted service is MotherDuck's free tier, which holds the analytics warehouse; serving never
-touches it.
+One Python package (`ev_charging_data_unified_schema/`), one dbt project (`dbt/`), committed
+artifacts (`artifacts/`), committed exports (`exports/`), and two GitHub Actions workflows. No
+hosted service: DuckDB files locally and in CI. The amended brief is `docs/BRIEF.md`; every
+decision is an ADR under `docs/adr/`.
 
-## Modules
+## Flow
 
-| Module | Responsibility | Key invariant |
-|---|---|---|
-| `config.py` | `PROJECT`: the one project configuration | dbt vars, the frontend config JSON and the workflow cron are mirrors checked by `tests/test_project_config.py` |
-| `interfaces.py` | `SourceLoader`, `TargetSpec`, `FeatureModule` | satisfied by `data.loader.LOADER`, `target.TARGET_SPEC`, `features.asof` (`tests/test_interfaces.py`) |
-| `data/loader.py` | the only data source; dated parquet cache | one row per grain; **stub** until replaced |
-| `data/contracts.py` | runs `dbt build --select +tag:silver`, maps run results to the contract report | the checks are dbt tests; HOLD on any failure |
-| `target.py` | target by explicit rules; reconcile against the published value | row-for-row reconciliation is a test |
-| `features/asof.py` | **the** feature builder | every feature of row *t* uses rows strictly earlier within the entity |
-| `models/train.py` | RF champion + GBM challenger per cohort, season split, intervals, drift reference | pipelines carry `feature_names_in_`; metadata records input sha256 + commit |
-| `models/registry.py` | manifest I/O, slots, `should_promote` | deterministic promotion rule, unit-tested |
-| `eval/evaluator.py` | forward holdout, causal baseline, rolling-origin folds, artifact 2.1 | every metric on the same rows; artifact carries hashes, commit, definitions |
-| `eval/drift.py` | PSI per feature vs the training reference (bucket inside a season, matched across the boundary); `artifacts/drift/<run_id>.json` every run | thresholds uncalibrated by default; recipe in the module |
-| `pipeline/scheduled.py` | the autonomous job | policy is pure Python (`tests/test_policy.py`) |
-| `serve/app.py` | FastAPI reading `artifacts/manifest.json` | fails fast without a manifest; GET only |
-| `serve/marts.py` | in-process DuckDB over `artifacts/marts/*.parquet` | versioned marts read at an explicit version |
-| `dbt/` | bronze → silver → gold over the repo's own files | gold reconciles to `artifacts/eval/*.json` or the build fails |
+```
+publisher files ──(sources/*.py, acquire.py)──▶ data/raw/<source>/           git-ignored
+   │ read as strings, contract check (data/contracts.py), drift artifact
+   ▼
+data/landed/<source>/*.parquet + manifest.json                                git-ignored
+   │ dbt sources (external parquet)
+   ▼
+bronze  brz_<source>            string copy, names normalised, landing metadata
+silver  slv_sessions__<source>  typed, UTC + local, durations, flags, all reasons, primary reason
+        slv_sessions_unioned    accepted rows on the unified contract
+        slv_sessions_quarantined
+gold    meta_landed_files, fct_charging_session (incremental, source-level replace)
+        int_station_gaps, dim_station, dim_operator, dim_date
+        fct_station_day (spine + midnight split), mart_monthly
+        snp_station (SCD2)
+   │
+   ├─▶ artifacts/  profile · drift · silver (with reconciliation) · sensitivity · findings
+   ├─▶ exports/    station-day grain and above, Parquet (+ JSON for small relations)
+   └─▶ docs/       PROFILE, CONTRACTS, FINDINGS and the README / CARD blocks, rendered
+```
+
+## Package modules
+
+| Module | Responsibility |
+|---|---|
+| `config.py` | paths, the source list, the dbt vars mirror (checked by a test) |
+| `interfaces.py` | the `SourceLoader` protocol and the manifest entry |
+| `acquire.py` | polite cached HTTP downloads with conditional requests and a per-directory record |
+| `sources/` | one loader per source: download, read raw as strings |
+| `data/loader.py` | landing: string frames, row hashes, parquet, the landing manifest |
+| `data/contracts.py` | per-source, per-family contracts; the drift policy; the drift artifact |
+| `ingest.py` | the CLI that downloads, checks and lands, and writes `artifacts/drift/` |
+| `profiling.py` | column profiling and the session helpers (hh:mm:ss, mixed timestamps, concurrency sweep, DST gaps) |
+| `summaries.py` | the silver summary artifact (counts, flags, publisher rule) |
+| `reconciliation.py` | the two identities and residual classification |
+| `sensitivity.py` | utilization under every denominator definition |
+| `findings.py` | the findings artifact (idle at full occupancy, DfT population table, ranges) |
+| `exports.py` | the exports read contract |
+| `compare.py` | fresh-versus-committed classification for the scheduled build |
+| `citations.py` | the number checker's rules and resolver |
+
+## Scripts, make targets, workflows
+
+Scripts under `scripts/` are thin CLIs over the modules; `make help` lists the targets. The ones
+that produce committed outputs: `profile`, `ingest` (drift), `silver-summary`, `sensitivity`,
+`findings`, `export`, `render-docs`, `render-contracts`, `render-profile`; `release` runs them all
+at one commit and prunes uncited artifacts. Checks: `check-numbers` (the citation checker plus
+the rendered-doc checks), `check-docs` (every dbt column described), `lint`, `dbt-lint`, `test`.
+
+`ci.yml` (push and pull request, offline): lint, description check, the fixture build (state-
+selected on pull requests when the published manifest is reachable), pytest, the rendered-doc
+and citation checks. `full-build.yml` (manual and monthly): real sources, full build, fresh
+artifacts, comparison with the committed ones, issues, Pages; never commits (ADR-0015).
 
 ## Artifact contract
 
-| Path | Schema | Written by | Read by |
+| Kind | Written by | Carries | Cited by |
 |---|---|---|---|
-| `artifacts/manifest.json` | `schemas/manifest.schema.json` | evaluate, scheduled job | API, scheduled job |
-| `artifacts/models/<v>/*.pkl`, `metadata.json`, `test_predictions.csv` | `schemas/model_metadata.schema.json` | `scripts/train.py` | evaluator, API, job |
-| `artifacts/eval/<eval_id>.json` | `schemas/eval_artifact.schema.json` | `scripts/evaluate.py` | API `/performance`, model card, dbt |
-| `artifacts/eval/rolling_<season>.json` | — | scheduled job | promotion rule, dbt |
-| `artifacts/predictions/<season>/period_<pp>.json` | `schemas/predictions_file.schema.json` | scheduled job | API, dbt |
-| `artifacts/drift/<run_id>.json` | `schemas/drift_report.schema.json` | scheduled job (every run with passing contracts) | anyone diagnosing a hold |
-| `artifacts/marts/*.parquet`, `_export_manifest.json` | — | `dbt run-operation export_gold` (prod) | API `/marts/{mart}` |
+| `artifacts/profile/` | `scripts/profile_sources.py` | per-file hashes and column profiles; the six profiling questions per source | `docs/PROFILE.md` (rendered), ADRs |
+| `artifacts/drift/` | `ingest.py` | per-file contract outcome and findings | ADR-0008 |
+| `artifacts/silver/` | `scripts/silver_summary.py` | accepted / quarantined by reason, flags, publisher rule, reconciliation identities and status, input hashes | README, findings, ADRs |
+| `artifacts/sensitivity/` | `scripts/sensitivity.py` | utilization per denominator definition, over-100% counts | findings, ADRs |
+| `artifacts/findings/` | `scripts/findings.py` | every number in `docs/FINDINGS.md` | FINDINGS, CARD, README |
+| `exports/manifest.json` | `scripts/export.py` | rows, bytes, sha256 per exported file | `exports/SCHEMA.md` |
 
-## Analytics warehouse (dbt)
+Each kind has a `latest.json`; `scripts/check_doc_numbers.py` resolves citations through it or
+by run id; `scripts/prune_artifacts.py` keeps the current file and every file an ADR cites.
 
-* Targets: `dev` = `.duckdb/dev.duckdb`; `prod` = MotherDuck `md:ev_charging_data_unified_schema`
-  (`MOTHERDUCK_TOKEN`). Schemas are exactly `bronze`, `silver`, `gold`, `snapshots`.
-* `slv_period_rows` is incremental (delete+insert, `rows_lookback_periods` restatement lookback,
-  documented full-refresh policy; equivalence proven by `tests/test_dbt_incremental.py`).
-* `snp_entity` (SCD2) feeds `dim_entity_current` / `dim_entity_asof` (`is_exact_asof`).
-* `fct_decision_policy` is versioned: v1 served under the plain relation name, v2 additive with a
-  reconciliation test for its artifact-shaped metric; the API pins `DECISIONS_MART_VERSION`.
-* CI builds `dev` (full on `main`, `state:modified+ --defer` against the cached `main` build
-  elsewhere); prod builds happen only in `scheduled.yml`. Toolchain pinned in `constraints.txt`.
-* Reproducibility of exports: `docs/REPRODUCIBILITY.md`.
+## dbt project
+
+Schemas are exactly `bronze`, `silver`, `gold`, `snapshots` (macro `generate_schema_name`). Gold
+contracts are enforced. Tests: unique and not-null on grain keys, relationships, accepted values,
+row conservation per source and file, primary-reason completeness, ratio-of-sums versus mean of
+daily ratios, spine completeness, grain mixing, measure conservation across the midnight split,
+no unknown-station capacity; unit tests for parsing, DST, dedup, the midnight split and DST-day
+minutes. Every model and column is described; `scripts/check_dbt_descriptions.py` enforces it.
 
 ## What is intentionally absent
 
-Redis, Celery, auth, payments, any language model, WebSockets, scraping, any paid API, and any
-database on the serving path.
+An API or frontend (the exports are the read contract), a cloud warehouse, any language model in
+the pipeline, any paid service, any secret. Cut scope is listed in ROADMAP.md.

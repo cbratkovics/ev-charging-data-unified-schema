@@ -1,6 +1,7 @@
 # Roadmap
 
-Ideas outside the v1 brief. Nothing here is built; nothing here is promised.
+Ideas outside the v1 brief. Nothing here is built; nothing here is promised. The built scope is
+three sources (Boulder, Cary, UK DfT 2017), bronze to gold, artifacts, findings and exports.
 
 ## Deferred sources
 
@@ -22,6 +23,10 @@ side by side with the inferred ones, never blended.
 
 ## Deferred capabilities
 
+- A versioned public mart, once a genuine contract change arises (none has; ADR-0012's column
+  rename was handled by a full refresh because nothing outside the repository reads the fact).
+- Registry port counts as a fourth denominator definition in the sensitivity artifact, if the
+  registry matching above is ever built.
 - Disambiguating fall-back local times with the publisher's reported duration: where a source
   publishes a plug-in duration, a session starting in the repeated hour could be assigned the
   occurrence whose computed duration matches the reported one, instead of DuckDB's fixed
