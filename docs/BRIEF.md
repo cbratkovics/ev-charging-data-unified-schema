@@ -51,11 +51,10 @@ copier-tracked (ADR-0001). Conventions kept: bronze / silver / gold with `brz_`,
    portal states no licence, record "unstated" and do not use the source; do not infer a
    licence from sibling datasets or a portal-wide assumption without citing the page that says
    so. Sources that fail this rule are removed entirely (ADR-0004).
-6. **Confidentiality guardrail.** This is an independent project. Nothing in the repo (code,
-   names, comments, docs, commit messages) may reference advertising, out-of-home media, any
-   employer, or any employer-derived table names, schemas, vendor names, thresholds, or
-   business rules. All logic must be derived from the public data and documented reasoning in
-   this repo.
+6. **Independence guardrail.** This is an independent project. Nothing in the repository
+   (code, names, comments, docs, commit messages) may contain employer-derived code, data,
+   names, schemas, vendor names, thresholds or business rules of any kind. All logic derives
+   from the public data and the reasoning documented here.
 7. **No secrets in the tree.** The project reads no secret; `.env.example` says so and
    `.env*` is git-ignored.
 8. **Personal data.** User-level fields (user ids, driver postal codes, vehicle details) are
@@ -315,3 +314,4 @@ Next phase proposal: <one paragraph>
 | 2026-09-20 | 6 | Two reconciliation identities in the silver summary (raw = fact + quarantined; fact = counted + trivial + unknown) with the moved DfT events as a breakdown inside natural_key_duplicate; living docs cite latest.json, ADRs cite point-in-time artifacts, release prunes uncited artifacts; number blocks rendered between markers with HTML-comment citations in prose; Boulder blocking idle by hour; every finding states what the data cannot show | ADR-0013 |
 | 2026-09-20 | 6 (review) | Three coherence defects fixed: second-precision session ends in the gold SQL (Cary ports), the production definition inside every sensitivity range, one summing population table for the DfT anomalies file; coherence tests on the artifacts; "blocking idle" renamed idle at full occupancy, framed as an upper bound and split by single- and multi-port stations | ADR-0014 |
 | 2026-09-20 | 7 | Scheduled build never commits and opens issues (upstream changed vs regression), monthly plus manual; cache key from the committed silver artifact's input hashes; slim CI by state selection without deferral; exports aggregates only with Parquet everywhere, JSON for small relations and a 5 MB ceiling; owner TODO covers the remote, the public repository, Pages, the first run and the labels | ADR-0015 |
+| 2026-09-20 | pre-public | Rule 6 reworded to a generic independence guardrail (no employer-derived code, data, names, schemas, thresholds or business rules of any kind) | none |
