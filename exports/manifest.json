@@ -1,7 +1,7 @@
 {
   "artifact": "exports",
   "attribution": "Contains public sector information licensed under the Open Government Licence v3.0 (UK Department for Transport, Electric Chargepoint Analysis 2017). Boulder, CO and Cary, NC data are published under CC0; see docs/DATA_SOURCES.md for the verbatim licences and URLs.",
-  "code_commit": "21404f9487dc1bbd6bdbc923aeac25df8c524d72",
+  "code_commit": "d51a4afa67613f012d7c257cdaea8c7cf5e9b41d",
   "files": {
     "dim_date.json": {
       "bytes": 695839,
@@ -99,7 +99,7 @@
       "sha256": "8995a26194ecf9aec05e8d8dee53a893a157fa3274bee619204f9aa91b7056a2"
     }
   },
-  "generated_at_utc": "2026-09-20T02:39:08+00:00",
-  "run_id": "export-20260920T023907Z",
+  "generated_at_utc": "2026-09-20T02:44:30+00:00",
+  "run_id": "export-20260920T024429Z",
   "size_ceiling_bytes": 5242880
 }
