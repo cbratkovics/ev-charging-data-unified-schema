@@ -1,6 +1,6 @@
 {
   "artifact": "profile",
-  "code_commit": "29a5bfe1953614a35aac6d6989bcdf04e60bdce1",
+  "code_commit": "5aa9fde4e7e653588a3c52e29ba2a7c3bd0f2df7",
   "definitions": {
     "charging_over_24h": "rows whose hh:mm:ss charging duration exceeds 1440 minutes",
     "delivery_blocks": "segments of one file delimited by the per-delivery row id restarting at 0; each compared with the last block on the natural key",
@@ -16,10 +16,10 @@
     "one_hour_gap_rows": "rows where (end - start) differs from the recorded duration by 55..65 minutes",
     "span_over_24h": "rows whose parsed end minus start exceeds 1440 minutes"
   },
-  "generated_at_utc": "2026-09-20T02:54:21+00:00",
+  "generated_at_utc": "2026-09-20T18:55:22+00:00",
   "package_version": "0.1.0",
   "pandas_version": "3.0.6",
-  "run_id": "profile-20260920T025421Z",
+  "run_id": "profile-20260920T185522Z",
   "sources": {
     "boulder": {
       "answers": {

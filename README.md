@@ -47,14 +47,14 @@ flowchart LR
 ## Results
 
 <!-- generated:results start -->
-_Rendered by `scripts/render_docs.py` from `artifacts/findings/findings-20260920T025549Z.json` and `artifacts/silver/silver-20260920T025526Z.json`; a ratio of summed minutes over summed available port minutes, never an average of daily percentages; ports are inferred lower bounds, so these are upper bounds on utilization._
+_Rendered by `scripts/render_docs.py` from `artifacts/findings/findings-20260920T185640Z.json` and `artifacts/silver/silver-20260920T185621Z.json`; a ratio of summed minutes over summed available port minutes, never an average of daily percentages; ports are inferred lower bounds, so these are upper bounds on utilization._
 
 | Source | Period | Utilization (production port count) | Range across denominator definitions |
 |---|---|---|---|
-| boulder | 2018-01 to 2023-11 | charging-time 6.2% | 5.8% (robust_max_n1) to 6.8% (trailing_90d_max) |
-| boulder | 2018-01 to 2023-11 | connected-time 11.4% | 10.5% (robust_max_n1) to 12.4% (trailing_90d_max) |
-| cary | 2012-04 to 2023-01 | charging-time 7.1% | 6.1% (robust_max_n1) to 7.4% (robust_max_n10) |
-| dft_2017 | 2017-01 to 2017-12 | connected-time 8.7% | 8.7% (production) to 11.4% (robust_max_n10) |
+| Boulder, CO | 2018-01 to 2023-11 | charging-time 6.2% | 5.8% (robust_max_n1) to 6.8% (trailing_90d_max) |
+| Boulder, CO | 2018-01 to 2023-11 | connected-time 11.4% | 10.5% (robust_max_n1) to 12.4% (trailing_90d_max) |
+| Cary, NC | 2012-04 to 2023-01 | charging-time 7.1% | 6.1% (robust_max_n1) to 7.4% (robust_max_n10) |
+| UK DfT chargepoint analysis 2017 | 2017-01 to 2017-12 | connected-time 8.7% | 8.7% (production) to 11.4% (robust_max_n10) |
 
 Reconciliation status (both identities, every source and month): **non_blocking**. Sources cover different years and countries; nothing here compares one with another.
 <!-- generated:results end -->

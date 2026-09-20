@@ -107,6 +107,7 @@
       "full_occupancy_share_of_idle": 0.276127,
       "idle_minutes": 6643228.883,
       "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.622,
       "stations": 50,
       "stations_with_full_occupancy_idle": 50
     },
@@ -216,6 +217,7 @@
       "full_occupancy_share_of_idle": 0.257979,
       "idle_minutes": 6643228.883,
       "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.876,
       "stations": 50,
       "stations_with_full_occupancy_idle": 50
     },
@@ -325,6 +327,7 @@
       "full_occupancy_share_of_idle": 0.277081,
       "idle_minutes": 6643228.883,
       "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.609,
       "stations": 50,
       "stations_with_full_occupancy_idle": 50
     },
@@ -434,6 +437,7 @@
       "full_occupancy_share_of_idle": 0.27024,
       "idle_minutes": 6643228.883,
       "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.7,
       "stations": 50,
       "stations_with_full_occupancy_idle": 50
     },
@@ -543,6 +547,7 @@
       "full_occupancy_share_of_idle": 0.270266,
       "idle_minutes": 6643228.883,
       "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.7,
       "stations": 50,
       "stations_with_full_occupancy_idle": 50
     },
@@ -652,6 +657,7 @@
       "full_occupancy_share_of_idle": 0.276127,
       "idle_minutes": 6643228.883,
       "idle_share_of_connected": 0.45062,
+      "idle_to_full_occupancy_ratio": 3.622,
       "stations": 50,
       "stations_with_full_occupancy_idle": 50
     }
@@ -885,6 +891,7 @@
       "full_occupancy_share_of_idle": 0.219138,
       "idle_minutes": 6158396.1,
       "idle_share_of_connected": 0.434791,
+      "idle_to_full_occupancy_ratio": 4.563,
       "stations": 36,
       "stations_with_full_occupancy_idle": 36
     },
@@ -994,24 +1001,26 @@
       "full_occupancy_share_of_idle": 1.0,
       "idle_minutes": 484832.783,
       "idle_share_of_connected": 0.838248,
+      "idle_to_full_occupancy_ratio": 1.0,
       "stations": 14,
       "stations_with_full_occupancy_idle": 14
     }
   },
   "cannot_show": [
     "no queue, arrival or turned-away-driver data exists in any source, so idle time is a ceiling on recoverable capacity, not demand",
-    "port counts are inferred lower bounds (ADR-0012); a station with more ports than inferred has lower true utilization and less blocking idle than reported",
+    "port counts are inferred lower bounds (ADR-0012); a station with more ports than inferred has lower true utilization and less idle at full occupancy than reported",
     "the DfT publication covers calendar 2017 only; Boulder 2018-2023 and Cary 2012-2023 are single operators; nothing here compares operators",
     "charging time is assumed to begin at session start; the sources publish no charging profile"
   ],
-  "code_commit": "29a5bfe1953614a35aac6d6989bcdf04e60bdce1",
+  "code_commit": "5aa9fde4e7e653588a3c52e29ba2a7c3bd0f2df7",
   "definitions": {
-    "by_local_hour": "idle and blocking-idle minutes attributed to the local hour in which they elapsed",
+    "by_local_hour": "idle and full-occupancy idle minutes attributed to the local hour in which they elapsed",
     "full_occupancy_idle_share_of_connected": "idle minutes that elapsed while every inferred port at the station was occupied, over connected minutes; computed from the connected-interval sweep per station with the port count of the named definition",
-    "full_occupancy_share_of_idle": "blocking idle minutes over all idle minutes",
+    "full_occupancy_share_of_idle": "full-occupancy idle minutes over all idle minutes",
     "idle_share_of_connected": "1 - charging minutes / connected minutes over non-trivial Boulder sessions at known stations",
+    "idle_to_full_occupancy_ratio": "idle minutes over full-occupancy idle minutes: how many times the headline idle share overstates the full-occupancy figure",
     "period": "first and last local session start per source in the fact",
-    "utilization_range": "min and max of the sensitivity artifact's non-trivial-rule utilization across denominator definitions; production is the value under dim_station.ports_inferred"
+    "utilization_range": "min and max of the sensitivity artifact's non-trivial-rule utilization across denominator definitions; production is the value under dim_station.ports_inferred; relative_range is (max - min) / production"
   },
   "dft_anomalies_population": {
     "accepted": 38376,
@@ -1055,10 +1064,10 @@
       }
     }
   },
-  "generated_at_utc": "2026-09-20T02:55:51+00:00",
+  "generated_at_utc": "2026-09-20T18:56:42+00:00",
   "inputs": {
-    "sensitivity_run_id": "sensitivity-20260920T025527Z",
-    "silver_run_id": "silver-20260920T025526Z"
+    "sensitivity_run_id": "sensitivity-20260920T185622Z",
+    "silver_run_id": "silver-20260920T185621Z"
   },
   "periods": {
     "boulder": {
@@ -1077,7 +1086,7 @@
       "sessions": 259683
     }
   },
-  "run_id": "findings-20260920T025549Z",
+  "run_id": "findings-20260920T185640Z",
   "station_days_over_100pct_production": {
     "boulder": 1,
     "dft_2017": 169
@@ -1118,7 +1127,8 @@
         "robust_max_n5": 0,
         "trailing_90d_max": 0
       },
-      "production": 0.062436
+      "production": 0.062436,
+      "relative_range": 0.172032
     },
     "boulder__connected": {
       "max": 0.124385,
@@ -1135,7 +1145,8 @@
         "robust_max_n5": 1,
         "trailing_90d_max": 7
       },
-      "production": 0.113601
+      "production": 0.113601,
+      "relative_range": 0.172023
     },
     "cary__charging": {
       "max": 0.074442,
@@ -1152,7 +1163,8 @@
         "robust_max_n5": 0,
         "trailing_90d_max": 0
       },
-      "production": 0.071208
+      "production": 0.071208,
+      "relative_range": 0.182114
     },
     "dft_2017__connected": {
       "max": 0.114069,
@@ -1169,7 +1181,8 @@
         "robust_max_n5": 175,
         "trailing_90d_max": 31
       },
-      "production": 0.087327
+      "production": 0.087327,
+      "relative_range": 0.306228
     }
   }
 }

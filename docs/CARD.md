@@ -21,11 +21,11 @@ is inferred, bounded, and reported with its sensitivity instead of as a single f
 ## Headline figures
 
 <!-- generated:card start -->
-- Boulder: 45.1% of connected time is idle after charging; up to 12.4% of connected time is idle while every inferred port was occupied.
-- Utilization by source (production port count; range across denominator definitions): boulder charging 6.2% (5.8% to 6.8%); boulder connected 11.4% (10.5% to 12.4%); cary charging 7.1% (6.1% to 7.4%); dft_2017 connected 8.7% (8.7% to 11.4%).
+- Boulder, CO: 45.1% of connected time is idle after charging; up to 12.4% of connected time is idle while every inferred port was occupied.
+- Utilization by source (production port count; range across denominator definitions): Boulder, CO charging-time 6.2% (5.8% to 6.8%); Boulder, CO connected-time 11.4% (10.5% to 12.4%); Cary, NC charging-time 7.1% (6.1% to 7.4%); UK DfT chargepoint analysis 2017 connected-time 8.7% (8.7% to 11.4%).
 - Reconciliation: every source reconciles exactly on rows and sessions; status **non_blocking**.
 - Rows: 440,575 landed, 357,606 accepted sessions, 82,969 quarantined with a primary reason each.
-_Keys: `artifacts/findings/findings-20260920T025549Z.json` boulder_idle.production, utilization_ranges; `artifacts/silver/silver-20260920T025526Z.json` status, by_source._
+_Keys: `artifacts/findings/findings-20260920T185640Z.json` boulder_idle.production, utilization_ranges; `artifacts/silver/silver-20260920T185621Z.json` status, by_source._
 <!-- generated:card end -->
 
 ## Stack
