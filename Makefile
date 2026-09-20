@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture silver-summary profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture silver-summary sensitivity profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -19,6 +19,7 @@ help:
 	@echo "check-contracts - docs/CONTRACTS.md matches the contract definitions"
 	@echo "release       - regenerate every published artifact in one run at one commit (network; clean tree required)"
 	@echo "silver-summary - write artifacts/silver/<run_id>.json from the built dev warehouse"
+	@echo "sensitivity   - write artifacts/sensitivity/<run_id>.json (denominator sensitivity) from the built dev warehouse"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
 	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
@@ -48,7 +49,7 @@ ingest:
 	$(PY) -m $(PKG).ingest
 
 fixture:
-	$(PY) -m $(PKG).ingest --no-download --raw-dir tests/fixtures/raw --landed-dir tests/fixtures/landed --drift-dir .dbt-state/fixture-drift
+	$(PY) -m $(PKG).ingest --no-download --raw-dir tests/fixtures/raw --landed-dir tests/fixtures/landed --drift-dir .dbt-state/fixture-drift --retrieved-at 2026-01-01T00:00:00+00:00
 
 profile:
 	$(PY) scripts/profile_sources.py
@@ -62,6 +63,9 @@ check-profile:
 
 silver-summary:
 	$(PY) scripts/silver_summary.py
+
+sensitivity:
+	$(PY) scripts/sensitivity.py
 
 render-contracts:
 	$(PY) scripts/render_contracts.py
@@ -78,6 +82,7 @@ release:
 	$(MAKE) render-contracts
 	$(MAKE) dbt-dev
 	$(PY) scripts/silver_summary.py
+	$(PY) scripts/sensitivity.py
 	@echo "release run complete at $$(git rev-parse --short HEAD); review and commit artifacts/ and docs/"
 
 dbt-deps:

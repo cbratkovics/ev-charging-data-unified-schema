@@ -51,6 +51,7 @@ def land_source(
     *,
     download: bool,
     refresh: bool,
+    retrieved_at: str | None = None,
 ) -> tuple[list[FileDrift], list[str]]:
     """Land one source. Returns the drift records for every file seen and the manifest keys
     that were (re)landed."""
@@ -77,11 +78,15 @@ def land_source(
             continue  # unchanged bytes, same outcome: a no-op
         sub = landed_dir / name / (QUARANTINE_DIR if drift.outcome == "quarantine" else "")
         rec = records.get(path.name)
-        retrieved_at = (
-            rec.retrieved_at if rec else dt.datetime.now(dt.UTC).isoformat(timespec="seconds")
+        # offline landings (the fixture, tests) pass a fixed retrieved_at so the landed files,
+        # and everything derived from them, are deterministic
+        file_retrieved_at = (
+            rec.retrieved_at
+            if rec
+            else (retrieved_at or dt.datetime.now(dt.UTC).isoformat(timespec="seconds"))
         )
         landed = landing.land_frame(
-            frame, source=name, file_name=path.name, retrieved_at=retrieved_at
+            frame, source=name, file_name=path.name, retrieved_at=file_retrieved_at
         )
         out = landing.write_landed(landed, sub / (path.stem + ".parquet"))
         # a file that changed outcome must not linger in the other location
@@ -94,7 +99,7 @@ def land_source(
             source=name,
             file_name=path.name,
             url=rec.url if rec else "",
-            retrieved_at=retrieved_at,
+            retrieved_at=file_retrieved_at,
             bytes=path.stat().st_size,
             sha256=landing.sha256_of(path),
             row_count=int(len(landed)),
@@ -114,6 +119,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument(
         "--refresh", action="store_true", help="re-request files with conditional headers"
     )
+    p.add_argument(
+        "--retrieved-at",
+        default=None,
+        help="ISO-8601 UTC timestamp recorded for files without a download record (offline landings)",
+    )
     a = p.parse_args(argv)
     rid = run_id()
     manifest = landing.read_manifest(a.landed_dir)
@@ -121,7 +131,13 @@ def main(argv: list[str] | None = None) -> int:
     summary: dict[str, Any] = {}
     for name in a.sources:
         drifts, landed = land_source(
-            name, a.raw_dir, a.landed_dir, manifest, download=not a.no_download, refresh=a.refresh
+            name,
+            a.raw_dir,
+            a.landed_dir,
+            manifest,
+            download=not a.no_download,
+            refresh=a.refresh,
+            retrieved_at=a.retrieved_at,
         )
         all_drifts += drifts
         summary[name] = {

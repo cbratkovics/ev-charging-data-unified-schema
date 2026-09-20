@@ -1,4 +1,53 @@
 version: 2
 
-# The SCD2 snapshot of station attributes (snp_station) is added in Phase 4.
-snapshots: []
+snapshots:
+- name: snp_station
+  description: SCD Type 2 history of the inferred station attributes (ports, source of the count, active window,
+    excluded days, evidence flag, grain, site), check strategy; validity stamps come from data_as_of_utc so identical
+    inputs give an identical snapshot (ADR-0011 item 6).
+  columns:
+  - name: station_key
+    data_type: varchar
+    description: station identifier
+  - name: source
+    data_type: varchar
+    description: source short name
+  - name: site_key
+    data_type: varchar
+    description: site grouping at capture (check column)
+  - name: capacity_grain
+    data_type: varchar
+    description: grain at capture (check column)
+  - name: ports_inferred
+    data_type: integer
+    description: inferred ports at capture (check column)
+  - name: ports_source
+    data_type: varchar
+    description: where the count came from at capture (check column)
+  - name: active_from
+    data_type: date
+    description: active window start at capture (check column)
+  - name: active_to
+    data_type: date
+    description: active window end at capture (check column)
+  - name: excluded_days
+    data_type: bigint
+    description: excluded days at capture (check column)
+  - name: low_evidence
+    data_type: boolean
+    description: evidence flag at capture (check column)
+  - name: data_as_of_utc
+    data_type: timestamp with time zone
+    description: latest retrieval time of the source's files; the snapshot's updated_at
+  - name: dbt_scd_id
+    data_type: varchar
+    description: 'dbt: hash of station_key and data_as_of_utc'
+  - name: dbt_updated_at
+    data_type: timestamp with time zone
+    description: 'dbt: data_as_of_utc of the version'
+  - name: dbt_valid_from
+    data_type: timestamp with time zone
+    description: 'dbt: data_as_of_utc when this version was first captured'
+  - name: dbt_valid_to
+    data_type: timestamp with time zone
+    description: 'dbt: data_as_of_utc of the superseding version; null for the current version'

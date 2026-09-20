@@ -1,5 +1,599 @@
 version: 2
 
-# gold models are added from Phase 2 onwards; every model and column must carry a description
-# (scripts/check_dbt_descriptions.py).
-models: []
+# Gold = the product. Every model has an enforced contract, a description per column and tests.
+# export_gold writes the models without meta export=false to exports/ (Phase 7).
+
+models:
+- name: meta_landed_files
+  description: 'The landing manifest as a table: one row per landed file that bronze reads (quarantined batches
+    excluded), with the sha256 fct_charging_session compares against (ADR-0011 item 2). Not exported.'
+  config:
+    contract:
+      enforced: true
+  columns:
+  - name: manifest_key
+    data_type: varchar
+    description: <source>/<file name>
+    data_tests:
+    - unique
+    - not_null
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+  - name: file_name
+    data_type: varchar
+    description: published file name
+    data_tests:
+    - not_null
+  - name: sha256
+    data_type: varchar
+    description: sha256 of the raw file
+    data_tests:
+    - not_null
+  - name: row_count
+    data_type: bigint
+    description: rows landed from the file
+  - name: retrieved_at_utc
+    data_type: timestamp with time zone
+    description: download time
+  - name: landed_path
+    data_type: varchar
+    description: repo-relative path of the landed parquet
+- name: fct_charging_session
+  description: 'One row per accepted session with the unified contract; incremental by source-level replace driven
+    by the landed files'' hashes (ADR-0011 items 1 and 2). Grain: session_sk.'
+  config:
+    contract:
+      enforced: true
+  constraints:
+  - type: primary_key
+    columns:
+    - session_sk
+  columns:
+  - name: session_sk
+    data_type: varchar
+    description: surrogate key, md5 of source and the natural key hash
+    data_tests:
+    - unique
+    - not_null
+    constraints: &id001
+    - type: not_null
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - boulder
+          - cary
+          - dft_2017
+    constraints: *id001
+  - name: source_family
+    data_type: varchar
+    description: file family within the source
+    data_tests:
+    - not_null
+  - name: source_session_id
+    data_type: varchar
+    description: publisher's session id where published (DfT ChargingEvent)
+  - name: source_file
+    data_type: varchar
+    description: published file name the row came from
+    data_tests:
+    - not_null
+  - name: source_file_sha256
+    data_type: varchar
+    description: sha256 of the landed file the row came from, from the landing manifest; compared with meta_landed_files
+      to decide which sources to replace (ADR-0011 item 2)
+    data_tests:
+    - not_null
+  - name: source_delivery_block
+    data_type: integer
+    description: Boulder only; index of the concatenated delivery the row belongs to
+  - name: operator_key
+    data_type: varchar
+    description: 'operator: the source for Boulder and Cary, dft_2017/<funding body> for DfT'
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_operator')
+          field: operator_key
+  - name: station_key
+    data_type: varchar
+    description: 'source-prefixed station identifier (a unit: station name or charge-point id)'
+    data_tests:
+    - not_null
+  - name: station_name_raw
+    data_type: varchar
+    description: the publisher's station identifier as landed
+  - name: site_key
+    data_type: varchar
+    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+  - name: port_id
+    data_type: varchar
+    description: connector id where published (DfT Connector)
+  - name: capacity_grain
+    data_type: varchar
+    description: what this row's station identifier resolves to (port when a connector id exists, else unit); the
+      station dimension's grain is unit
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - port
+          - unit
+          - site
+  - name: start_utc
+    data_type: timestamp with time zone
+    description: session start as a UTC instant
+    data_tests:
+    - not_null
+  - name: end_utc
+    data_type: timestamp with time zone
+    description: session end as a UTC instant; null for Cary
+  - name: start_local
+    data_type: timestamp
+    description: session start in station-local wall-clock time
+    data_tests:
+    - not_null
+  - name: end_local
+    data_type: timestamp
+    description: session end in station-local wall-clock time; null for Cary
+  - name: start_tz
+    data_type: varchar
+    description: IANA zone of the station
+    data_tests:
+    - not_null
+  - name: is_dst_ambiguous
+    data_type: boolean
+    description: start falls in the repeated fall-back hour; resolved to the second occurrence (ADR-0009)
+    data_tests:
+    - not_null
+  - name: energy_kwh
+    data_type: double
+    description: energy delivered, kWh
+  - name: charging_minutes
+    data_type: double
+    description: minutes actively charging (Cary, Boulder); null for DfT, never imputed
+  - name: connected_minutes
+    data_type: double
+    description: minutes plugged in, computed from UTC (Boulder, DfT); null for Cary, never imputed
+  - name: connected_minutes_reported
+    data_type: double
+    description: the publisher's plug-in duration in minutes; null for Cary
+  - name: duration_disagreement_minutes
+    data_type: double
+    description: connected_minutes minus connected_minutes_reported
+  - name: idle_minutes
+    data_type: double
+    description: connected minus charging, clamped at zero; Boulder only
+  - name: duration_availability
+    data_type: varchar
+    description: 'which durations the source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - both
+          - charging_only
+          - plug_in_only
+  - name: publisher_excluded_rule
+    data_type: boolean
+    description: DfT rows meeting the publisher's exclusion rule (ADR-0007 item 2); false elsewhere
+    data_tests:
+    - not_null
+  - name: implied_kw
+    data_type: double
+    description: energy over hours of charging (or connected where charging is not published)
+  - name: timestamp_precision_seconds
+    data_type: integer
+    description: precision of the published timestamps (1 or 60)
+    data_tests:
+    - not_null
+  - name: is_non_trivial
+    data_type: boolean
+    description: energy above zero and the available duration above 3 minutes (ADR-0007 item 3); utilization and
+      findings use non-trivial sessions only
+    data_tests:
+    - not_null
+  - name: quality_flags
+    data_type: varchar
+    description: comma-separated quality flags on the row (silver's list, joined for the contract)
+  - name: natural_key_hash
+    data_type: varchar
+    description: md5 of the null-safe natural key
+    data_tests:
+    - not_null
+  - name: _row_hash
+    data_type: varchar
+    description: sha256 over the source columns of the bronze row
+    data_tests:
+    - not_null
+- name: dim_operator
+  description: 'One row per operator: the three publishers and one row per DfT funding body with the publisher as
+    parent. Full rebuild.'
+  config:
+    contract:
+      enforced: true
+  columns:
+  - name: operator_key
+    data_type: varchar
+    description: operator identifier; sessions carry it
+    data_tests:
+    - unique
+    - not_null
+    constraints: *id001
+  - name: operator_name
+    data_type: varchar
+    description: display name
+    data_tests:
+    - not_null
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+  - name: parent_operator_key
+    data_type: varchar
+    description: the publisher for DfT funding bodies; null for publishers
+  - name: country
+    data_type: varchar
+    description: ISO country of the operator
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - US
+          - GB
+  - name: timezone
+    data_type: varchar
+    description: IANA zone of the operator's stations
+    data_tests:
+    - not_null
+- name: int_station_gaps
+  description: 'Zero-session gaps longer than the source threshold between consecutive non-trivial sessions at a
+    station (ADR-0006 g); the dates strictly between are excluded from availability. Thresholds from the profile
+    artifact: Boulder 30, Cary 30, DfT 90 days. Not exported.'
+  config:
+    contract:
+      enforced: true
+  columns:
+  - name: station_key
+    data_type: varchar
+    description: station identifier
+    data_tests:
+    - not_null
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+  - name: gap_after_date
+    data_type: date
+    description: local end date of the session before the gap (its start date where the source has no end)
+    data_tests:
+    - not_null
+  - name: gap_before_date
+    data_type: date
+    description: local start date of the session after the gap
+    data_tests:
+    - not_null
+  - name: gap_days
+    data_type: double
+    description: days between the two sessions
+    data_tests:
+    - not_null
+  - name: threshold_days
+    data_type: integer
+    description: the source's gap threshold in days
+    data_tests:
+    - not_null
+  - name: excluded_days
+    data_type: integer
+    description: dates strictly inside the gap
+    data_tests:
+    - not_null
+- name: dim_station
+  description: 'One row per station key (a unit) with inferred capacity, active window and excluded days (ADR-0006,
+    ADR-0007 item 4, ADR-0011 item 7). Port counts are inferred from connector ids or observed concurrency, not
+    inventoried: they undercount ports never used concurrently and overcount where overlapping records are data
+    errors; availability is assumed 24 hours a day within the active window. Full rebuild.'
+  config:
+    contract:
+      enforced: true
+  constraints:
+  - type: primary_key
+    columns:
+    - station_key
+  columns:
+  - name: station_key
+    data_type: varchar
+    description: station identifier
+    data_tests:
+    - unique
+    - not_null
+    constraints: *id001
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+  - name: operator_key
+    data_type: varchar
+    description: operator
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_operator')
+          field: operator_key
+  - name: site_key
+    data_type: varchar
+    description: site grouping
+  - name: station_name_raw
+    data_type: varchar
+    description: the publisher's station identifier
+  - name: station_tz
+    data_type: varchar
+    description: IANA zone
+    data_tests:
+    - not_null
+  - name: capacity_grain
+    data_type: varchar
+    description: 'grain of the station key: unit throughout (port-level keys are not built; ADR-0005 d)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - unit
+  - name: ports_inferred
+    data_type: integer
+    description: 'ports in service: distinct connector ids where any exist, else the robust max of observed concurrency
+      at N = 5 over non-trivial sessions, floored at 1 (ADR-0007 item 4)'
+    data_tests:
+    - not_null
+  - name: ports_source
+    data_type: varchar
+    description: where ports_inferred came from
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - connector_ids
+          - observed_concurrency
+          - floor
+  - name: ports_inferred_n
+    data_type: integer
+    description: the N of the robust max (distinct active dates a level must be reached on)
+    data_tests:
+    - not_null
+  - name: robust_max_n5
+    data_type: integer
+    description: highest concurrency level reached on at least N distinct dates; null when none
+  - name: plain_max_concurrency
+    data_type: integer
+    description: highest concurrency level reached on any date
+  - name: connector_ids
+    data_type: bigint
+    description: distinct connector ids published for the unit (DfT)
+    data_tests:
+    - not_null
+  - name: low_evidence
+    data_type: boolean
+    description: 'fewer than N active dates: the inferred port count rests on little evidence'
+    data_tests:
+    - not_null
+  - name: non_trivial_sessions
+    data_type: bigint
+    description: non-trivial sessions at the unit
+    data_tests:
+    - not_null
+  - name: active_days
+    data_type: bigint
+    description: distinct local dates with a non-trivial session start
+    data_tests:
+    - not_null
+  - name: active_from
+    data_type: date
+    description: first non-trivial session date
+    data_tests:
+    - not_null
+  - name: active_to
+    data_type: date
+    description: last non-trivial session end date
+    data_tests:
+    - not_null
+  - name: window_days
+    data_type: integer
+    description: dates in the active window
+    data_tests:
+    - not_null
+  - name: excluded_days
+    data_type: bigint
+    description: dates inside gaps over the source threshold, excluded from availability
+    data_tests:
+    - not_null
+  - name: excluded_gaps
+    data_type: bigint
+    description: number of such gaps
+    data_tests:
+    - not_null
+  - name: registry_match_status
+    data_type: varchar
+    description: 'station-registry status (Phase 5): out_of_coverage for the UK, unmatched until matched'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - out_of_coverage
+          - unmatched
+          - matched
+  - name: ports_registry
+    data_type: integer
+    description: port count from the station registry where matched (Phase 5); side by side with ports_inferred,
+      never blended
+  - name: data_as_of_utc
+    data_type: timestamp with time zone
+    description: latest retrieval time of the source's landed files; drives the snapshot's validity stamps (ADR-0011
+      item 6)
+    data_tests:
+    - not_null
+- name: dim_date
+  description: One row per calendar date spanning every station's active window. Full rebuild.
+  config:
+    contract:
+      enforced: true
+  columns:
+  - name: date_key
+    data_type: date
+    description: calendar date
+    data_tests:
+    - unique
+    - not_null
+    constraints: *id001
+  - name: year
+    data_type: integer
+    description: year
+    data_tests:
+    - not_null
+  - name: month
+    data_type: integer
+    description: month 1..12
+    data_tests:
+    - not_null
+  - name: day_of_month
+    data_type: integer
+    description: day of month
+    data_tests:
+    - not_null
+  - name: iso_day_of_week
+    data_type: integer
+    description: 1 = Monday .. 7 = Sunday
+    data_tests:
+    - not_null
+  - name: is_weekend
+    data_type: boolean
+    description: Saturday or Sunday
+    data_tests:
+    - not_null
+  - name: year_month
+    data_type: varchar
+    description: YYYY-MM
+    data_tests:
+    - not_null
+- name: fct_station_day
+  description: 'One row per station x station-local date over the station''s active window (spine), with sessions
+    crossing midnight split into per-date pieces. Energy and charging minutes are allocated over the charging window,
+    assumed to begin at session start, where the source publishes charging time; over the connected window where
+    it does not (DfT). Connected minutes are allocated over the connected window. Measures use non-trivial sessions
+    only; a source''s absent duration type is null, never zero. available_port_minutes = ports_inferred x minutes
+    in the local date (1,380 or 1,500 on DST days); 0 on excluded days. No ratio is stored: utilization is sum over
+    sum at the rollup (macro utilization_ratio). Full rebuild.'
+  config:
+    contract:
+      enforced: true
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - station_key
+        - local_date
+  columns:
+  - name: station_key
+    data_type: varchar
+    description: station identifier
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_station')
+          field: station_key
+  - name: local_date
+    data_type: date
+    description: station-local calendar date
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_date')
+          field: date_key
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+  - name: operator_key
+    data_type: varchar
+    description: operator
+    data_tests:
+    - not_null
+  - name: capacity_grain
+    data_type: varchar
+    description: grain of the station key (unit)
+    data_tests:
+    - not_null
+  - name: ports_inferred
+    data_type: integer
+    description: the station's inferred ports (denominator basis)
+    data_tests:
+    - not_null
+  - name: is_excluded_day
+    data_type: boolean
+    description: date lies inside a zero-session gap over the source threshold; availability is 0
+    data_tests:
+    - not_null
+  - name: day_minutes
+    data_type: double
+    description: 'minutes in the local date: 1440, or 1380 / 1500 on DST transition days'
+    data_tests:
+    - not_null
+  - name: available_port_minutes
+    data_type: double
+    description: ports_inferred x day_minutes on available days; 0 on excluded days
+    data_tests:
+    - not_null
+  - name: sessions
+    data_type: bigint
+    description: non-trivial sessions starting on the date
+    data_tests:
+    - not_null
+  - name: trivial_sessions
+    data_type: bigint
+    description: trivial sessions starting on the date (not in the measures)
+    data_tests:
+    - not_null
+  - name: energy_kwh
+    data_type: double
+    description: energy allocated to the date (non-trivial sessions); null when no non-trivial piece falls on it
+  - name: charging_minutes
+    data_type: double
+    description: charging minutes allocated to the date; null where the source has no charging time or no piece
+      falls on it
+  - name: connected_minutes
+    data_type: double
+    description: connected minutes allocated to the date; null where the source has no end time or no piece falls
+      on it
+  - name: charging_pieces
+    data_type: bigint
+    description: session pieces contributing charging minutes (visibility of nulls in rollups)
+    data_tests:
+    - not_null
+  - name: connected_pieces
+    data_type: bigint
+    description: session pieces contributing connected minutes
+    data_tests:
+    - not_null
+  - name: idle_minutes
+    data_type: double
+    description: connected minus charging, clamped at zero, where both exist (Boulder)

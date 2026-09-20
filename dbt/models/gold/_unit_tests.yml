@@ -1,0 +1,63 @@
+version: 2
+
+# Gold unit tests (docs/BRIEF.md § 6): the midnight split with both allocation rules, local-day
+# minutes on DST transition days, null-never-zero, and the excluded-day spine. Every row of a
+# given block lists the same columns; unlisted columns are null.
+unit_tests:
+  - name: station_day_splits_at_local_midnight_and_allocates_over_the_charging_window
+    model: fct_station_day
+    given:
+      - input: ref('dim_station')
+        rows:
+          - { station_key: "boulder/S", source: boulder, operator_key: boulder, station_tz: America/Denver, capacity_grain: unit, ports_inferred: 2, active_from: "2023-06-02", active_to: "2023-06-03" }
+      - input: ref('int_station_gaps')
+        rows: []
+      - input: ref('fct_charging_session')
+        rows:
+          # 22:15 -> 01:45 local: 210 connected minutes, 105 before midnight; charging 180 min
+          # from 22:15 -> 01:15: 105 before midnight, 75 after; energy 18 kWh split 10.5 / 7.5
+          - { session_sk: a, station_key: "boulder/S", is_non_trivial: true, start_utc: "2023-06-03 04:15:00+00:00", end_utc: "2023-06-03 07:45:00+00:00", start_local: "2023-06-02 22:15:00", end_local: "2023-06-03 01:45:00", energy_kwh: 18.0, charging_minutes: 180.0, connected_minutes: 210.0, start_tz: America/Denver }
+    expect:
+      rows:
+        - { station_key: "boulder/S", local_date: "2023-06-02", is_excluded_day: false, day_minutes: 1440.0, available_port_minutes: 2880.0, sessions: 1, trivial_sessions: 0, energy_kwh: 10.5, charging_minutes: 105.0, connected_minutes: 105.0, idle_minutes: 0.0 }
+        - { station_key: "boulder/S", local_date: "2023-06-03", is_excluded_day: false, day_minutes: 1440.0, available_port_minutes: 2880.0, sessions: 0, trivial_sessions: 0, energy_kwh: 7.5, charging_minutes: 75.0, connected_minutes: 105.0, idle_minutes: 30.0 }
+
+  - name: station_day_dst_transition_days_have_1380_and_1500_minutes_and_null_stays_null
+    model: fct_station_day
+    given:
+      - input: ref('dim_station')
+        rows:
+          - { station_key: "dft_2017/CP", source: dft_2017, operator_key: "dft_2017/Body", station_tz: Europe/London, capacity_grain: unit, ports_inferred: 1, active_from: "2017-03-26", active_to: "2017-03-26" }
+          - { station_key: "boulder/S", source: boulder, operator_key: boulder, station_tz: America/Denver, capacity_grain: unit, ports_inferred: 3, active_from: "2023-11-05", active_to: "2023-11-05" }
+      - input: ref('int_station_gaps')
+        rows: []
+      - input: ref('fct_charging_session')
+        rows:
+          # DfT: no charging time -> energy over the connected window; charging stays null
+          - { session_sk: d, station_key: "dft_2017/CP", is_non_trivial: true, start_utc: "2017-03-26 10:00:00+00:00", end_utc: "2017-03-26 11:00:00+00:00", start_local: "2017-03-26 11:00:00", end_local: "2017-03-26 12:00:00", energy_kwh: 20.0, charging_minutes: null, connected_minutes: 60.0, start_tz: Europe/London }
+    expect:
+      rows:
+        - { station_key: "dft_2017/CP", local_date: "2017-03-26", day_minutes: 1380.0, available_port_minutes: 1380.0, sessions: 1, energy_kwh: 20.0, charging_minutes: null, connected_minutes: 60.0, idle_minutes: null }
+        - { station_key: "boulder/S", local_date: "2023-11-05", day_minutes: 1500.0, available_port_minutes: 4500.0, sessions: 0, energy_kwh: null, charging_minutes: null, connected_minutes: null, idle_minutes: null }
+
+  - name: station_day_excluded_days_have_zero_available_minutes_and_the_spine_covers_the_window
+    model: fct_station_day
+    given:
+      - input: ref('dim_station')
+        rows:
+          - { station_key: "cary/S", source: cary, operator_key: cary, station_tz: America/New_York, capacity_grain: unit, ports_inferred: 1, active_from: "2022-07-01", active_to: "2022-07-05" }
+      - input: ref('int_station_gaps')
+        rows:
+          - { station_key: "cary/S", gap_after_date: "2022-07-01", gap_before_date: "2022-07-05" }
+      - input: ref('fct_charging_session')
+        rows:
+          # Cary: no end time -> connected null; charging window from start
+          - { session_sk: c1, station_key: "cary/S", is_non_trivial: true, start_utc: "2022-07-01 14:05:00+00:00", end_utc: null, start_local: "2022-07-01 10:05:00", end_local: null, energy_kwh: 6.5, charging_minutes: 60.0, connected_minutes: null, start_tz: America/New_York }
+          - { session_sk: c2, station_key: "cary/S", is_non_trivial: false, start_utc: "2022-07-05 14:05:00+00:00", end_utc: null, start_local: "2022-07-05 10:05:00", end_local: null, energy_kwh: 0.0, charging_minutes: 0.0, connected_minutes: null, start_tz: America/New_York }
+    expect:
+      rows:
+        - { station_key: "cary/S", local_date: "2022-07-01", is_excluded_day: false, available_port_minutes: 1440.0, sessions: 1, trivial_sessions: 0, energy_kwh: 6.5, charging_minutes: 60.0, connected_minutes: null }
+        - { station_key: "cary/S", local_date: "2022-07-02", is_excluded_day: true, available_port_minutes: 0.0, sessions: 0, trivial_sessions: 0, energy_kwh: null, charging_minutes: null, connected_minutes: null }
+        - { station_key: "cary/S", local_date: "2022-07-03", is_excluded_day: true, available_port_minutes: 0.0, sessions: 0, trivial_sessions: 0, energy_kwh: null, charging_minutes: null, connected_minutes: null }
+        - { station_key: "cary/S", local_date: "2022-07-04", is_excluded_day: true, available_port_minutes: 0.0, sessions: 0, trivial_sessions: 0, energy_kwh: null, charging_minutes: null, connected_minutes: null }
+        - { station_key: "cary/S", local_date: "2022-07-05", is_excluded_day: false, available_port_minutes: 1440.0, sessions: 0, trivial_sessions: 1, energy_kwh: null, charging_minutes: null, connected_minutes: null }
