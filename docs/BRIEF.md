@@ -1,0 +1,287 @@
+# Build brief: ev-charging-data-unified-schema
+
+The owner's build brief, as amended at each phase checkpoint. This is the working contract for
+the project; every phase starts by re-reading it. The original brief was given on 2026-09-19;
+amendments are logged at the bottom with their ADR ids. Where an amendment changed a section,
+the section reads as amended and the log records what changed.
+
+Environment: `~/Desktop/portfolio_projects/ev-charging-data-unified-schema`, Intel Mac, zsh,
+VS Code, `uv`, Python 3.12. The `evidence-first-ml-pipeline` skill's working rules, claim
+discipline and $0 cost rule apply; its modeling phases do not (there is no ML model).
+
+## 1. What this repo is
+
+A public portfolio project that consolidates **real, public EV-charging session data from
+several operators, each published in a different shape and each under an explicit open
+licence**, into one tested, documented dbt schema on DuckDB, and then uses that schema to
+produce a small set of evidence-backed findings.
+
+The point is engineering judgment under real mess: cleaning, standardizing, conforming grain,
+controlling denominators, reconciling, and proving the result. It is not a tool showcase.
+
+**Non-goals for v1:** no ML, no LLM, no API, no frontend, no Docker, no orchestrator, no cloud
+warehouse, no synthetic data sources. Ideas outside this brief go in `ROADMAP.md`.
+
+## 2. Repository origin
+
+Rendered from the private copier template `ds-dbt-stack-template` v0.2.3 and stripped; not
+copier-tracked (ADR-0001). Conventions kept: bronze / silver / gold with `brz_`, `slv_`, `fct_`,
+`dim_` prefixes; descriptions on every model and column (enforced by
+`scripts/check_dbt_descriptions.py`); ADRs in `docs/adr/`; conventional commits.
+
+## 3. Hard rules
+
+1. **$0 runtime.** DuckDB + dbt-core (`dbt-duckdb`) locally and in GitHub Actions. No paid
+   service, no managed database. The MotherDuck target was removed.
+2. **Real data only.** The approved sources in section 4. The only non-real data allowed is a
+   tiny hand-built **test fixture** under `tests/fixtures/`, used for unit and offline CI tests
+   and labelled as such.
+3. **Claim discipline.** No number appears in the README, docs, findings, or card copy unless it
+   is read from a committed artifact under `artifacts/` that records run id, code commit, input
+   file hashes, and metric definitions. This applies to `docs/PROFILE.md`, which is rendered
+   from `artifacts/profile/<run_id>.json`. A checker script fails CI when a README or findings
+   number has no artifact key.
+4. **Licensing.** For every source, record the licence exactly as published, the URL where it
+   was found, retrieval timestamp, row count, and SHA-256 in `docs/DATA_SOURCES.md`. Only commit
+   raw or sampled rows from a source whose licence clearly permits redistribution; the current
+   decision is to commit no rows from any source, only manifests and aggregates (ADR-0002).
+5. **Source policy.** Only sources with an explicit, verbatim open licence are used. If a
+   portal states no licence, record "unstated" and do not use the source; do not infer a
+   licence from sibling datasets or a portal-wide assumption without citing the page that says
+   so. Sources that fail this rule are removed entirely (ADR-0004).
+6. **Confidentiality guardrail.** This is an independent project. Nothing in the repo (code,
+   names, comments, docs, commit messages) may reference advertising, out-of-home media, any
+   employer, or any employer-derived table names, schemas, vendor names, thresholds, or
+   business rules. All logic must be derived from the public data and documented reasoning in
+   this repo.
+7. **No secrets in the tree.** The registry API key is read from the `NREL_API_KEY` environment
+   variable. `.env.example` is provided; `.env*` is git-ignored.
+8. **Personal data.** User-level fields (user ids, driver postal codes, vehicle details) are
+   landed in bronze and never selected by silver, so they cannot reach gold or exports
+   (ADR-0003). None of the approved sources carries any.
+9. **Polite acquisition.** No parallel hammering of a portal, respect rate limits, cache
+   downloads, never re-download an unchanged file.
+10. **Phases with checkpoints.** One phase = one or more conventional commits, local only.
+    **Never push**; the owner pushes. After each phase, stop and print a checkpoint (section
+    9). Wait for the owner's go-ahead before the next phase. Before writing code in any phase,
+    state the plan for that phase in a few lines and wait for the go-ahead.
+11. **Depart loudly.** If this brief is wrong on the data, implement the better approach, write
+    an ADR, and say so in the checkpoint. Silent deviation is the failure mode.
+12. **No superlatives or unsupported claims** in any doc. Include an honest, specific
+    Limitations section.
+13. **Re-read this brief** at the start of every phase.
+
+## 4. Data sources
+
+Approved (ADR-0004). Endpoints, verbatim licences and retrieval records are in
+`docs/DATA_SOURCES.md`; profiles in `docs/PROFILE.md`.
+
+| # | Source | Licence (verbatim source) | Period | Notes |
+|---|---|---|---|---|
+| 1 | Boulder, CO charging transactions (ArcGIS Hub item) | "CC0 License" linked to CC0 1.0, in the item metadata | 2018-01 to 2023-11 | One CSV holding two concatenated deliveries; wall-clock local timestamps in two formats; charging and total (plug-in) durations |
+| 2 | Cary, NC town-owned station sessions (Opendatasoft) | `"license": "CC0 1.0 Universal"` in the dataset metadata | 2012-04 to 2023-01 | True UTC timestamps; charging duration only, no end time; station names only |
+| 3 | UK Department for Transport, Electric Chargepoint Analysis 2017: Local Authority Rapids (revised) and Public Sector Fasts raw data, plus the two published incomplete-or-anomalous files | "All content is available under the Open Government Licence v3.0, except where otherwise stated" on both publication pages | 2017 | Four files with differing headers, date formats and duration units; plug-in duration only; connector ids on 44% of rows; wall-clock local timestamps |
+| 4 | Station registry (reference dimension): Alternative Fuel Stations API, now at `developer.nlr.gov` | "may be used for any purpose whatsoever" (AFDC data download terms) | n/a | US and Canada only; the UK chargepoints are `out_of_coverage`. Pull deferred until `NREL_API_KEY` is set |
+
+Removed after Phase 1 (ADR-0004): Palo Alto, CA (no dataset-level licence; portal unreachable)
+and Dundee, UK (licence unstated on every item). Deferred to `ROADMAP.md`: Perth & Kinross,
+Paris, Caltech ACN-Data.
+
+## 5. Target design
+
+### Ingestion (Python, in the package)
+
+- One loader per source implementing the `SourceLoader` interface.
+- Download to `data/raw/<source>/` (git-ignored) through the polite cached downloader.
+- Write a manifest entry for each file: URL, retrieved_at, bytes, sha256, row count.
+- Land as Parquet with **all columns as strings** plus `_source`, `_file_name`,
+  `_retrieved_at`, `_row_hash`.
+- Re-running with unchanged files is a no-op.
+
+### Bronze
+
+- One `brz_` model per source (or per file family), reading the landed Parquet as-is.
+- No cleaning beyond column-name normalization.
+
+### Source contracts and schema drift
+
+- A declared expected schema per source (and per file family where files differ).
+- On each run, compare actual columns and types per file against the contract and write
+  `artifacts/drift/<run_id>.json`.
+- Policy: a new unknown column produces a warning; a missing or retyped required column
+  quarantines that file's batch with a reason code and the pipeline continues; a renamed
+  column is handled through an explicit alias map recorded in the contract.
+- Real drift to demonstrate: the four DfT headers differ, `PluginDuration` changes unit
+  between files, dates change format, `Connector` gains text variants, and Boulder mixes two
+  timestamp formats in one column.
+
+### Silver
+
+- `slv_sessions__<source>`: types, timestamp parsing, and timezone handling. Keep both UTC and
+  station-local timestamps. Boulder and DfT are wall-clock local (proven on DST transition
+  dates); Cary is true UTC (proven by the seasonal raw-hour shift). Fall-back ambiguity resolves
+  to the first occurrence and is flagged.
+- **All durations are computed from UTC after conversion.** Where a source publishes a
+  duration, keep it as `*_reported`, record the disagreement, flag above a 2-minute tolerance
+  (ADR-0005 a).
+- **Duration availability is declared per source and never imputed** (ADR-0005 e): Cary
+  `charging_only`, Boulder `both`, DfT `plug_in_only`.
+- Units: energy in kWh, durations in minutes. Parse `HH:MM:SS` strings and numeric durations
+  with their declared unit per file.
+- Deduplicate on a documented natural key, null-safe on every key column:
+  - Boulder: (station name, start minute, end minute, energy), preferring the latest delivery
+    block then the highest row id; a test asserts block 0 is a subset of block 1 (ADR-0005 b).
+  - Cary: (station name, start second), keeping the larger charging time; conflicts are
+    counted in the reconciliation artifact (ADR-0005 c).
+  - DfT: (CPID, Connector, start minute, end minute, energy), preferring the raw file over the
+    anomalies file. Rows with a null CPID get the station key `unknown/<Name>`; their share of
+    sessions and energy is reported in the reconciliation artifact (ADR-0007).
+- Row-level quality flags, including `publisher_excluded_rule` for DfT rows that meet the
+  publisher's exclusion rule (zero energy or plug-in of 3 minutes or less), with the mismatch
+  against the publisher's file split reported (ADR-0007). Zero-energy and over-24-hour rows
+  are kept and flagged in every source.
+- `slv_sessions_unioned`: every source conformed to one unified session contract (section
+  5a).
+- `slv_sessions_quarantined`: rejected rows with reason codes: blank_row, exact_duplicate,
+  natural_key_duplicate, end_sentinel_1970, end_before_start, unparseable_timestamp,
+  negative_energy, energy_sentinel, charging_exceeds_connected, implied_kw_over_ceiling.
+- Never drop rows silently. Accepted + quarantined must equal bronze, per source and per file.
+
+### 5a. Unified session contract
+
+One row per session: `session_sk`, `source`, `source_family`, `source_session_id`,
+`source_file`, `source_delivery_block`, `station_key`, `station_name_raw`, `site_key`,
+`port_id`, `capacity_grain` (port | unit | site), `start_utc`, `end_utc`, `start_local`,
+`end_local`, `start_tz`, `is_dst_ambiguous`, `energy_kwh`, `charging_minutes`,
+`connected_minutes`, `connected_minutes_reported`, `duration_disagreement_minutes`,
+`idle_minutes`, `duration_availability`, `is_non_trivial`, `quality_flags[]`, `_row_hash`.
+
+Implied-power ceilings for the `implied_kw_over_ceiling` reason: Cary 20 kW, Boulder 20 kW,
+DfT rapids 55 kW, DfT fasts 30 kW (ADR-0007).
+
+### Gold
+
+- `fct_charging_session`: grain is one session. Surrogate key, enforced contract,
+  **incremental** with a lookback window so late or re-delivered rows are handled.
+- One **non-trivial session** rule, applied consistently across all sources at gold and used
+  for utilization and findings: energy above zero and connected (or, where only charging is
+  available, charging) time above 3 minutes (ADR-0007). Trivial sessions stay in the fact with
+  `is_non_trivial = false`.
+- `fct_station_day`: grain is station × station-local date. Sessions crossing midnight are
+  split across days. Measures: sessions, energy_kwh, charging_minutes, connected_minutes,
+  available_port_minutes. Every row carries `capacity_grain`; rollups never mix grains
+  (ADR-0005 d).
+- `dim_station` (with `capacity_grain`, `ports_inferred`, `ports_source`, `low_evidence`,
+  `active_from`, `active_to`, `excluded_days`, `registry_match_status`), `dim_operator`,
+  `dim_date`.
+- An **SCD2 snapshot** on station attributes.
+- Utilization is a **ratio recomputed from summed numerator and denominator at whatever rollup
+  is requested**, never an average of daily percentages; a singular test shows the two differ.
+  Two flavours where the data allows: charging-time and connected-time utilization; their
+  difference is idle-after-charge time.
+- **Capacity denominator** (ADR-0006, ADR-0007): port count precedence is connector ids where
+  present, else the robust max of observed concurrency (the highest level reached on at least
+  N = 5 distinct days over the station's active life), floored at 1; stations with fewer than
+  N active days carry `low_evidence`. Registry counts stay side by side, never blended. The
+  active window runs from first to last observed session minus zero-session gaps longer than
+  the source's threshold (Boulder 30 days, DfT 90 days, Cary 30 days), with excluded days
+  reported separately. A sensitivity artifact (`artifacts/sensitivity/<run_id>.json`) reports
+  utilization under robust max at N in {1, 2, 3, 5, 10}, the original trailing-90-day rule,
+  connector-id counts and registry counts; findings state how sensitive each conclusion is.
+  Model docs and the README state that port counts are inferred, availability is assumed 24
+  hours, and both bias directions are known.
+- One **versioned model** only if a genuine contract change arises; otherwise skip and say so.
+
+### Station registry matching (Phase 5, cuttable)
+
+Match US stations to the registry: normalize names and addresses; exact match; fuzzy match with
+`rapidfuzz` on the remainder; weighted score; confidence tiers; a review file for low-confidence
+and suspicious matches; an explicit `out_of_coverage` status for the UK chargepoints. Keep
+method, score and tier on every mapping row. A match rate is coverage, not accuracy; hand-review
+a small random sample and report what was found.
+
+### Reconciliation artifact
+
+`artifacts/reconciliation/<run_id>.json` plus `latest.json`. Per source: rows at raw, bronze,
+silver-accepted, quarantined (by reason), and gold; kWh and session totals by source and month,
+raw versus gold; the dedup section (rows removed by rule; Cary conflict count); the
+`unknown/<Name>` share for DfT; the publisher-rule mismatch for DfT; variance against a stated
+tolerance, each variance classified release-blocking or non-blocking with a one-line
+interpretation. A blocking variance fails the build.
+
+### Findings
+
+`docs/FINDINGS.md`, generated by a script from gold. Three to five findings, each: what was
+found, why it matters, what I would tell the decision-maker, and how sensitive it is to the
+denominator. Candidate topics: saturated versus underused stations, idle-after-charge share as
+recoverable capacity (Boulder only), time-of-day peaks, growth by operator. The sources cover
+different years and countries; do not compare across operators without stating the period
+mismatch, and prefer within-operator findings.
+
+### Exports for a future frontend
+
+`export_gold` writes small Parquet and JSON files with a documented schema to `exports/`. This
+is the stable read contract. No frontend or API is built.
+
+## 6. Tests
+
+- **dbt:** unique and not-null on every grain key; relationships and accepted values; enforced
+  contracts on gold; row-conservation test (bronze = accepted + quarantined); join-fanout test;
+  the ratio-of-sums singular test; a grain-mixing test; source freshness where meaningful.
+- **dbt unit tests:** duration parsing, timezone and DST conversion, day-first dates, midnight
+  split, dedup, utilization rollup.
+- **pytest:** loaders against the fixture; contract and drift policy branches; idempotency
+  (build twice and assert byte-identical exported gold; load fixture files out of order and with
+  a re-delivered overlapping file and assert the same result); reconciliation classification
+  branches; README-number checker; assertions on the committed profile artifact.
+- Everything in the default `make test` runs offline on the fixture.
+
+## 7. CI (GitHub Actions, $0)
+
+- `ci.yml` on push and PR: lint (ruff, sqlfluff), description check, pytest and `dbt build` on
+  the fixture, rendered-profile check, README-number check.
+- `full-build.yml`, manual and weekly: download the real sources with `actions/cache` keyed on
+  the manifest hashes; full `dbt build`; drift, reconciliation and sensitivity artifacts;
+  regenerate the findings; publish dbt docs to GitHub Pages; upload `manifest.json` as the
+  production state.
+- Slim CI on PRs: `dbt build --select state:modified+ --defer --state <dir>` against the latest
+  production manifest.
+- The owner sets secrets and enables Pages; the owner TODO lists those steps.
+
+## 8. Phases and definitions of done
+
+| Phase | Work | Done when |
+|---|---|---|
+| 0. Repair the chassis | Dependencies, Makefile, `ci.yml`, dangling references, MotherDuck removed, README stub, ADR-0001 | `make install && make test && dbt parse` pass on an empty project. **Done 2026-09-19.** |
+| 1. Acquire and profile | Endpoints, licences, hashes; `docs/PROFILE.md` rendered from a committed profile artifact; the six questions per source; personal-data check; stop and present the contract, the capacity denominator, the redistribution decision, source problems | The owner approves the contract. **Done 2026-09-19 (amended and re-approved the same day).** |
+| 2. Bronze, contracts, drift | Loaders, manifest, bronze models, source contracts, drift artifact and policy | The drift artifact is committed and the policy branches are tested. |
+| 3. Silver | Per-source conforming, union, quarantine, dbt unit tests | The row-conservation test passes on real data. |
+| 4. Gold | Facts, dims, snapshot, midnight split, capacity, utilization, sensitivity artifact, incremental model, idempotency tests | Idempotency and ratio-of-sums tests pass. |
+| 5. Registry matching | As specified. Cut to `ROADMAP.md` if phases 1–4 ran long; ask the owner | Mapping table, review file, and sampled-review note exist. |
+| 6. Reconciliation and findings | Reconciliation artifact, classification, `FINDINGS.md`, number checker | Every number in the docs resolves to an artifact key. |
+| 7. CI and exports | The workflows, Pages docs, `exports/` contract | Workflows pass locally where possible, and the owner TODO is written. |
+| 8. Documentation | README (problem, sources table, lineage, design decisions linking ADRs, results table citing artifact keys, how to run, limitations, independence statement), `ARCHITECTURE.md`, `REPRODUCIBILITY.md`, `ROADMAP.md`, `docs/CARD.md` (title, two-sentence summary, four or five "what this demonstrates" bullets, the stack, no number without an artifact key) | Docs complete and the number checker passes. |
+
+## 9. Checkpoint format
+
+```
+PHASE <n> CHECKPOINT
+Commits: <hashes and messages>
+What changed: <bullets>
+Tests: <commands run and results>
+Numbers: <value -> artifact path and key>, or "none"
+Departures from the brief: <ADR ids>, or "none"
+Open questions for the owner: <numbered>
+Next phase proposal: <one paragraph>
+```
+
+## Amendments
+
+| Date | Phase | Amendment | ADR |
+|---|---|---|---|
+| 2026-09-19 | 0 | `contracts.py` deleted although listed as kept; MotherDuck target removed; dependencies trimmed; CI installs from `pyproject.toml` under `constraints.txt`, no `requirements.txt` | ADR-0001 |
+| 2026-09-19 | 1 | Claim discipline extended to `docs/PROFILE.md`: rendered from `artifacts/profile/<run_id>.json`; licences captured verbatim with URLs, "unstated" never inferred; polite acquisition; registry pull deferred without a key; per-source personal-data check with user-level fields never reaching gold or exports | ADR-0002, ADR-0003 |
+| 2026-09-19 | 1 (re-approval) | **Source policy**: explicit, verbatim open licence or nothing. Dundee and Palo Alto removed entirely; UK DfT Electric Chargepoint Analysis 2017 added after a mini Phase 1 | ADR-0004 |
+| 2026-09-19 | 1 (re-approval) | Contract amendments: (a) durations from UTC with reported-value disagreement flags; (b) Boulder dedup prefers the latest delivery, subset test; (c) Cary UTC corroborated by the seasonal shift, dedup rule justified, conflicts reported; (d) `capacity_grain` on the station dimension; (e) duration availability declared per source, never imputed | ADR-0005 |
+| 2026-09-19 | 1 (re-approval) | Capacity denominator: (f) robust max at N = 5 from the days-at-level distribution; (g) active window excludes gaps beyond a per-source threshold from inter-session gaps; (h) sensitivity artifact; (i) stated limitations on inferred ports, 24-hour availability and both bias directions | ADR-0006 |
+| 2026-09-19 | 2 | Personal data confirmed none; DfT natural key approved, null-safe, `unknown/<Name>` share reported; publisher rule reproduced as a quality flag with mismatch reported; one non-trivial session rule at gold; port-count precedence (connector ids, else robust max N = 5, floored at 1, `low_evidence` flag); DfT implied-kW ceilings per family (rapids 55 kW, fasts 30 kW) | ADR-0007 |
