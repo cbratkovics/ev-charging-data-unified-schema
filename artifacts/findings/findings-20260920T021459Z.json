@@ -784,7 +784,7 @@
     "the DfT publication covers calendar 2017 only; Boulder 2018-2023 and Cary 2012-2023 are single operators; nothing here compares operators",
     "charging time is assumed to begin at session start; the sources publish no charging profile"
   ],
-  "code_commit": "dd562be569b72720db61fd0e91931debccab77fc",
+  "code_commit": "e83ba46fb9cc73f3c2875a41258a07cbc41be6f1",
   "definitions": {
     "blocking_idle_share_of_connected": "idle minutes that elapsed while every inferred port at the station was occupied, over connected minutes; computed from the connected-interval sweep per station with the port count of the named definition",
     "blocking_share_of_idle": "blocking idle minutes over all idle minutes",
@@ -821,10 +821,10 @@
     },
     "rapids_anomalies_total": null
   },
-  "generated_at_utc": "2026-09-20T02:06:51+00:00",
+  "generated_at_utc": "2026-09-20T02:15:01+00:00",
   "inputs": {
-    "sensitivity_run_id": "sensitivity-20260920T014309Z",
-    "silver_run_id": "silver-20260920T014308Z"
+    "sensitivity_run_id": "sensitivity-20260920T021440Z",
+    "silver_run_id": "silver-20260920T021439Z"
   },
   "periods": {
     "boulder": {
@@ -843,7 +843,7 @@
       "sessions": 259683
     }
   },
-  "run_id": "findings-20260920T020649Z",
+  "run_id": "findings-20260920T021459Z",
   "station_days_over_100pct_production": {
     "boulder": 1,
     "dft_2017": 169
@@ -869,7 +869,7 @@
     }
   },
   "utilization_ranges": {
-    "boulder.charging": {
+    "boulder__charging": {
       "max": 0.068363,
       "max_definition": "trailing_90d_max",
       "min": 0.057622,
@@ -885,7 +885,7 @@
       },
       "production": 0.062436
     },
-    "boulder.connected": {
+    "boulder__connected": {
       "max": 0.124385,
       "max_definition": "trailing_90d_max",
       "min": 0.104843,
@@ -901,7 +901,7 @@
       },
       "production": 0.113601
     },
-    "cary.charging": {
+    "cary__charging": {
       "max": 0.074442,
       "max_definition": "robust_max_n10",
       "min": 0.061474,
@@ -917,7 +917,7 @@
       },
       "production": 0.06184
     },
-    "dft_2017.connected": {
+    "dft_2017__connected": {
       "max": 0.114069,
       "max_definition": "robust_max_n10",
       "min": 0.087471,

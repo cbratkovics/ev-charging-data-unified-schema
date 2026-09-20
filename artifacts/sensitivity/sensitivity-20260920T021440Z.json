@@ -1,6 +1,6 @@
 {
   "artifact": "sensitivity",
-  "code_commit": "04f47786fda7697316ddee3a169314f555a67f6c",
+  "code_commit": "e83ba46fb9cc73f3c2875a41258a07cbc41be6f1",
   "definitions": {
     "connector_ids": "ports = distinct published connector ids where the unit has any, else robust_max_n5",
     "production_definition": "dim_station.ports_inferred = max(connector_ids, robust_max_n5), floored at 1 (ADR-0012)",
@@ -25,7 +25,7 @@
     "stations": 908,
     "window_days_total": 306091
   },
-  "generated_at_utc": "2026-09-20T01:43:28+00:00",
+  "generated_at_utc": "2026-09-20T02:14:58+00:00",
   "ports_by_definition": {
     "connector_ids": {
       "distribution": {
@@ -920,5 +920,5 @@
       "utilization": null
     }
   ],
-  "run_id": "sensitivity-20260920T014309Z"
+  "run_id": "sensitivity-20260920T021440Z"
 }

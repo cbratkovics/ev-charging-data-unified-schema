@@ -30,7 +30,7 @@ SHA-256 per source once downloaded.
 ## Results
 
 <!-- generated:results start -->
-_Rendered by `scripts/render_docs.py` from `artifacts/silver/silver-20260920T014308Z.json` and `artifacts/sensitivity/sensitivity-20260920T014309Z.json` and `artifacts/findings/findings-20260920T020923Z.json`._
+_Rendered by `scripts/render_docs.py` from `artifacts/silver/silver-20260920T021439Z.json` and `artifacts/sensitivity/sensitivity-20260920T021440Z.json` and `artifacts/findings/findings-20260920T021459Z.json`._
 
 | Source | Raw rows | Sessions in the fact | Quarantined | Non-trivial sessions | Stations with capacity | Utilization (production port count) |
 |---|---|---|---|---|---|---|
@@ -40,7 +40,7 @@ _Rendered by `scripts/render_docs.py` from `artifacts/silver/silver-20260920T014
 
 Stations with inferred capacity: 908 (1 ports: 408, 2 ports: 395, 3 ports: 105); binding bound: connector_ids 262, floor 46, observed_concurrency 600. Excluded days: 28,861 of 306,091 station-window days.
 
-Reconciliation status: **n/a** (both identities per source and month; ADR-0013).
+Reconciliation status: **non_blocking** (both identities per source and month; ADR-0013).
 <!-- generated:results end -->
 
 Findings, each within one source with its period, artifact keys, sensitivity range and what the
