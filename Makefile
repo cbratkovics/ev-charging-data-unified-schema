@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture profile render-profile check-profile dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -16,6 +16,8 @@ help:
 	@echo "fixture       - land the hand-built fixture CSVs into tests/fixtures/landed/ (offline; dbt builds read them)"
 	@echo "profile       - profile data/raw/ into artifacts/profile/<run_id>.json, then render the docs"
 	@echo "check-profile - docs/PROFILE.md and the DATA_SOURCES inventory match the newest profile artifact"
+	@echo "check-contracts - docs/CONTRACTS.md matches the contract definitions"
+	@echo "release       - regenerate every published artifact in one run at one commit (network; clean tree required)"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
 	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
@@ -56,6 +58,22 @@ render-profile:
 
 check-profile:
 	$(PY) scripts/render_profile.py --check
+
+render-contracts:
+	$(PY) scripts/render_contracts.py
+
+check-contracts:
+	$(PY) scripts/render_contracts.py --check
+
+# The release run (ADR-0009 item 2): every published artifact from one commit. Steps are added
+# as the phases add artifacts (reconciliation, sensitivity, exports, findings).
+release:
+	@test -z "$$(git status --porcelain)" || (echo "release: working tree is not clean; commit first so every artifact records one code_commit" && exit 1)
+	$(MAKE) ingest
+	$(MAKE) profile
+	$(MAKE) render-contracts
+	$(MAKE) dbt-dev
+	@echo "release run complete at $$(git rev-parse --short HEAD); review and commit artifacts/ and docs/"
 
 dbt-deps:
 	$(DBT) deps $(DBT_FLAGS)

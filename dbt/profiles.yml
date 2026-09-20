@@ -15,3 +15,5 @@ ev_charging_data_unified_schema_dbt:
       # builds; <PREFIX>_DUCKDB_THREADS=1 makes a build reproducible (docs/REPRODUCIBILITY.md).
       settings:
         threads: "{{ env_var('EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_THREADS', '4') | int }}"
+        # timestamptz values render and export as UTC regardless of the machine's zone
+        TimeZone: UTC

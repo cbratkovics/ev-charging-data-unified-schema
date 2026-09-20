@@ -1,5 +1,342 @@
 version: 2
 
-# silver models are added from Phase 2 onwards; every model and column must carry a description
-# (scripts/check_dbt_descriptions.py).
-models: []
+# Silver = conformed sessions. One model per source keeps every bronze row and marks the
+# rejects; slv_sessions_unioned and slv_sessions_quarantined split on primary_reason, so
+# bronze = accepted + quarantined is checked per source and per file
+# (tests/silver/assert_rows_conserved_per_source_and_file.sql). Generated column blocks are
+# repeated per model on purpose: dbt's YAML does not splice lists.
+
+models:
+- name: slv_sessions__boulder
+  description: Boulder, CO sessions conformed to the unified contract, one row per bronze row, with quarantine reasons
+    on the rejects. Wall-clock America/Denver timestamps in two formats parsed and converted to UTC; durations computed
+    from UTC and compared with the published Total_Duration; dedup on (station name, start minute, end minute, energy)
+    preferring the latest delivery block, then the highest row id, then _row_hash.
+  data_tests:
+  - dbt_utils.equal_rowcount:
+      arguments:
+        compare_model: ref('brz_boulder')
+  columns:
+  - &id001
+    name: source
+    description: source short name
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - boulder
+          - cary
+          - dft_2017
+  - &id002
+    name: source_family
+    description: 'file family within the source: boulder, cary, or the DfT rapids / rapids_anomalies / fasts / fasts_anomalies'
+    data_tests:
+    - not_null
+  - &id003
+    name: source_session_id
+    description: publisher's session id where one is published (DfT ChargingEvent); null otherwise
+  - &id004
+    name: source_file
+    description: published file name the row came from
+    data_tests:
+    - not_null
+  - &id005
+    name: source_delivery_block
+    description: Boulder only; index of the concatenated delivery the row belongs to (0 = oldest)
+  - &id006
+    name: station_key
+    description: 'source-prefixed station identifier: boulder/<station name>, cary/<station name>, dft_2017/<CPID>,
+      or dft_2017/unknown/<Name> when CPID is null'
+    data_tests:
+    - not_null
+  - &id007
+    name: station_name_raw
+    description: the publisher's station identifier as landed (a name, or the CPID for DfT)
+  - &id008
+    name: site_key
+    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+  - &id009
+    name: port_id
+    description: connector id where published (DfT Connector); null otherwise
+  - &id010
+    name: capacity_grain
+    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - port
+          - unit
+          - site
+  - &id011
+    name: start_utc
+    description: session start as a UTC instant
+  - &id012
+    name: end_utc
+    description: session end as a UTC instant; null where the source publishes no end (Cary)
+  - &id013
+    name: start_local
+    description: session start in station-local wall-clock time (naive)
+  - &id014
+    name: end_local
+    description: session end in station-local wall-clock time; null for Cary
+  - &id015
+    name: start_tz
+    description: IANA zone of the station
+    data_tests:
+    - not_null
+  - &id016
+    name: is_dst_ambiguous
+    description: true when the local start falls in the repeated fall-back hour; resolved to the second occurrence
+      (ADR-0009)
+    data_tests:
+    - not_null
+  - &id017
+    name: energy_kwh
+    description: energy delivered, kWh
+  - &id018
+    name: charging_minutes
+    description: minutes actively charging, from the published hh:mm:ss (Cary, Boulder); null for DfT, never imputed
+  - &id019
+    name: connected_minutes
+    description: minutes plugged in, computed as end_utc minus start_utc (Boulder, DfT); null for Cary, never imputed
+  - &id020
+    name: connected_minutes_reported
+    description: the publisher's plug-in duration in minutes (Boulder Total_Duration; DfT PluginDuration with its
+      per-file unit applied); null for Cary
+  - &id021
+    name: duration_disagreement_minutes
+    description: connected_minutes minus connected_minutes_reported; the duration_disagrees flag fires above 2 minutes
+      (ADR-0005 a)
+  - &id022
+    name: idle_minutes
+    description: connected minus charging; Boulder only
+  - &id023
+    name: duration_availability
+    description: 'which durations this source publishes: both, charging_only, plug_in_only (ADR-0005 e)'
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - both
+          - charging_only
+          - plug_in_only
+  - &id024
+    name: publisher_excluded_rule
+    description: DfT rows meeting the publisher's exclusion rule (zero energy or plug-in of 3 minutes or less),
+      reproduced as a flag (ADR-0007); false elsewhere
+    data_tests:
+    - not_null
+  - &id025
+    name: implied_kw
+    description: energy over hours of charging (or connected where charging is not published); the implied_kw_over_ceiling
+      reason compares it with the source's ceiling
+  - &id026
+    name: natural_key_hash
+    description: md5 of the null-safe natural key (ADR-0009); unique among accepted rows
+    data_tests:
+    - not_null
+  - &id027
+    name: quality_flags
+    description: 'flags on the row: zero_energy, over_24h, duration_disagrees, dst_ambiguous, publisher_excluded_rule,
+      unknown_station'
+  - &id028
+    name: _row_hash
+    description: landing metadata; sha256 over the source columns of the bronze row
+    data_tests:
+    - not_null
+  - &id029
+    name: quarantine_reasons
+    description: every failing quarantine reason, in precedence order; empty on accepted rows
+  - &id030
+    name: primary_reason
+    description: the first failing reason by the fixed precedence (ADR-0009); null on accepted rows
+- name: slv_sessions__cary
+  description: Cary, NC sessions conformed to the unified contract, one row per bronze row. Timestamps are true
+    UTC; no end time is published so connected time is null; dedup on (station name, start second) keeps the larger
+    charging time, then _row_hash.
+  data_tests:
+  - dbt_utils.equal_rowcount:
+      arguments:
+        compare_model: ref('brz_cary')
+  columns:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+- name: slv_sessions__dft_2017
+  description: UK DfT 2017 events conformed to the unified contract, one row per bronze row across the four files.
+    NA tokens nulled, dates ISO or day-first per value, PluginDuration converted with its per-file unit, wall-clock
+    Europe/London converted to UTC, the publisher's exclusion rule reproduced as a flag, unknown/<Name> station
+    keys for null CPIDs; dedup on the null-safe (CPID, Connector, start minute, end minute, energy) preferring the
+    raw files, then _row_hash.
+  data_tests:
+  - dbt_utils.equal_rowcount:
+      arguments:
+        compare_model: ref('brz_dft_2017')
+  columns:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+- name: slv_sessions_unioned
+  description: The unified session contract (docs/BRIEF.md section 5a) over every source's accepted rows, one row
+    per session, with the one non-trivial-session rule gold and the findings use.
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - source
+        - natural_key_hash
+  columns:
+  - name: session_sk
+    description: surrogate key, md5 of source and the natural key hash
+    data_tests:
+    - unique
+    - not_null
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - name: is_non_trivial
+    description: energy above zero and the available duration (connected, else charging) above 3 minutes (ADR-0007
+      item 3); utilization and findings use non-trivial sessions only
+    data_tests:
+    - not_null
+- name: slv_sessions_quarantined
+  description: Every rejected bronze row with all of its failing reasons and one primary reason by the fixed precedence,
+    so counts by primary_reason sum to the quarantined total (ADR-0009).
+  columns:
+  - name: source
+    description: source short name
+    data_tests:
+    - not_null
+  - name: source_family
+    description: file family within the source
+  - name: source_file
+    description: published file name the row came from
+    data_tests:
+    - not_null
+  - name: station_key
+    description: source-prefixed station identifier as conformed
+  - name: start_local
+    description: parsed local start, if it parsed
+  - name: end_local
+    description: parsed local end, if it parsed
+  - name: energy_kwh
+    description: parsed energy, kWh
+  - name: charging_minutes
+    description: parsed charging minutes
+  - name: connected_minutes
+    description: computed connected minutes
+  - name: implied_kw
+    description: implied power used by the ceiling rule
+  - name: natural_key_hash
+    description: md5 of the null-safe natural key
+  - name: primary_reason
+    description: the first failing reason by the fixed precedence (ADR-0009)
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - blank_row
+          - unparseable_timestamp
+          - nonexistent_local_time
+          - exact_duplicate
+          - natural_key_duplicate
+          - end_sentinel_1970
+          - end_before_start
+          - negative_energy
+          - energy_sentinel
+          - charging_exceeds_connected
+          - implied_kw_over_ceiling
+  - name: quarantine_reasons
+    description: every failing reason, in precedence order
+    data_tests:
+    - not_null
+  - name: quality_flags
+    description: flags the row would have carried had it been accepted
+  - name: _row_hash
+    description: landing metadata; sha256 over the source columns of the bronze row
+    data_tests:
+    - not_null

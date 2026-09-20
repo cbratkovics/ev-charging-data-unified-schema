@@ -4,10 +4,11 @@ Public EV-charging session data from several operators, each published in a diff
 each under an explicit open licence, consolidated into one tested, documented dbt schema on DuckDB,
 and used to produce a small set of evidence-backed findings.
 
-**Status: Phase 2 of 8 (bronze, contracts, drift).** The sources are downloaded, profiled
-(`docs/PROFILE.md`, rendered from `artifacts/profile/`), landed as string parquet and copied into
-bronze; each landed file is checked against its source contract and the outcome is written to
-`artifacts/drift/`. Silver and gold do not exist yet. Every number that appears later will be
+**Status: Phase 3 of 8 (silver).** The sources are downloaded, profiled (`docs/PROFILE.md`),
+landed as string parquet, checked against their contracts (`docs/CONTRACTS.md`,
+`artifacts/drift/`), copied into bronze and conformed in silver to one session contract with a
+quarantine that keeps every failing reason; bronze = accepted + quarantined is tested per file.
+Gold does not exist yet. Every number that appears later will be
 read from a committed artifact under `artifacts/` that records the run id, code commit, input
 file hashes and metric definitions.
 
@@ -46,7 +47,7 @@ the source policy: only sources with an explicit, verbatim open licence are used
 
 ## Limitations
 
-- Only bronze exists; this section is rewritten as each phase lands.
+- Only bronze and silver exist; this section is rewritten as each phase lands.
 - Raw rows are not committed for any source (ADR-0002); reproducing the aggregates needs the live portals.
 - Port counts are inferred from observed concurrency, not from an inventory; availability is assumed 24 hours a day within a station's active window. The inference undercounts ports that exist but were never used concurrently (biasing utilization upward) and overcounts where overlapping records are data errors (biasing it downward). Both directions are known and neither is measured (ADR-0006).
 - The sources cover different years and countries (Cary 2012 to 2023, Boulder 2018 to 2023, UK DfT 2017); findings are within-operator unless the period mismatch is stated.

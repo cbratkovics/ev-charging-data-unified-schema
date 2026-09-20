@@ -1,0 +1,99 @@
+version: 2
+
+# dbt unit tests for the silver rules (docs/BRIEF.md § 6): duration parsing, DST conversion
+# with ambiguous and nonexistent local times, day-first dates and per-file units, dedup, and
+# the quarantine precedence. Inputs are bronze rows (every row lists the same columns; unlisted
+# bronze columns are null). Expected rows list the same columns for every row.
+unit_tests:
+  - name: boulder_parses_both_timestamp_formats_and_converts_wall_clock_to_utc
+    model: slv_sessions__boulder
+    given:
+      - input: ref('brz_boulder')
+        rows:
+          - { _row_hash: h1, _file_name: f.csv, station_name: S1, address: A, start_date_time: "1/9/2018 11:02", end_date_time: "1/9/2018 13:30", total_duration_hh_mm_ss: "2:28:00", charging_time_hh_mm_ss: "2:02:44", energy_kwh: "6.504", objectid: "0", objectid2: "1" }
+          - { _row_hash: h2, _file_name: f.csv, station_name: S1, address: A, start_date_time: "2023-08-31 08:15:30", end_date_time: "2023-08-31 09:00:00", total_duration_hh_mm_ss: "0:44:30", charging_time_hh_mm_ss: "0:00:00", energy_kwh: "0", objectid: "1", objectid2: "2" }
+    expect:
+      rows:
+        - { _row_hash: h1, start_local: "2018-01-09 11:02:00", start_utc: "2018-01-09 18:02:00+00:00", connected_minutes: 148.0, connected_minutes_reported: 148.0, charging_minutes: 122.73333333333333, duration_disagreement_minutes: 0.0, source_delivery_block: 0, energy_kwh: 6.504, primary_reason: null, quality_flags: [] }
+        - { _row_hash: h2, start_local: "2023-08-31 08:15:30", start_utc: "2023-08-31 14:15:30+00:00", connected_minutes: 44.5, connected_minutes_reported: 44.5, charging_minutes: 0.0, duration_disagreement_minutes: 0.0, source_delivery_block: 0, energy_kwh: 0.0, primary_reason: null, quality_flags: [zero_energy] }
+
+  - name: boulder_dst_spring_forward_adds_an_hour_and_nonexistent_time_is_quarantined
+    model: slv_sessions__boulder
+    given:
+      - input: ref('brz_boulder')
+        rows:
+          # 00:30 -> 03:30 wall clock across the 2018-03-11 gap is 120 elapsed minutes
+          - { _row_hash: h1, _file_name: f.csv, station_name: S1, start_date_time: "3/11/2018 0:30", end_date_time: "3/11/2018 3:30", total_duration_hh_mm_ss: "2:00:00", charging_time_hh_mm_ss: "1:30:00", energy_kwh: "5", objectid: "0", objectid2: "1" }
+          # 02:30 on the spring-forward day does not exist; ICU shifts it to 03:30, so the
+          # computed span shrinks to 30 minutes and other rules fire too; precedence keeps
+          # nonexistent_local_time primary
+          - { _row_hash: h2, _file_name: f.csv, station_name: S1, start_date_time: "3/11/2018 2:30", end_date_time: "3/11/2018 4:00", total_duration_hh_mm_ss: "1:30:00", charging_time_hh_mm_ss: "1:00:00", energy_kwh: "4", objectid: "1", objectid2: "2" }
+          # 01:30 on the fall-back day is ambiguous: kept, flagged, second occurrence (MST)
+          - { _row_hash: h3, _file_name: f.csv, station_name: S1, start_date_time: "11/5/2023 1:30", end_date_time: "11/5/2023 2:30", total_duration_hh_mm_ss: "1:00:00", charging_time_hh_mm_ss: "0:50:00", energy_kwh: "3", objectid: "2", objectid2: "3" }
+    expect:
+      rows:
+        - { _row_hash: h1, start_utc: "2018-03-11 07:30:00+00:00", connected_minutes: 120.0, duration_disagreement_minutes: 0.0, is_dst_ambiguous: false, primary_reason: null, quarantine_reasons: [], quality_flags: [] }
+        - { _row_hash: h2, start_utc: "2018-03-11 09:30:00+00:00", connected_minutes: 30.0, duration_disagreement_minutes: -60.0, is_dst_ambiguous: false, primary_reason: nonexistent_local_time, quarantine_reasons: [nonexistent_local_time, charging_exceeds_connected], quality_flags: [duration_disagrees] }
+        - { _row_hash: h3, start_utc: "2023-11-05 08:30:00+00:00", connected_minutes: 60.0, duration_disagreement_minutes: 0.0, is_dst_ambiguous: true, primary_reason: null, quarantine_reasons: [], quality_flags: [dst_ambiguous] }
+
+  - name: boulder_dedup_prefers_the_latest_delivery_then_row_id_and_records_all_reasons
+    model: slv_sessions__boulder
+    given:
+      - input: ref('brz_boulder')
+        rows:
+          # objectid restarts at 0 twice: three delivery blocks (0, 1, 2)
+          - { _row_hash: a, _file_name: f.csv, station_name: S1, start_date_time: "1/9/2018 11:02", end_date_time: "1/9/2018 13:30", total_duration_hh_mm_ss: "2:28:00", charging_time_hh_mm_ss: "2:02:44", energy_kwh: "6.5", objectid: "0", objectid2: "1" }
+          - { _row_hash: b, _file_name: f.csv, station_name: S1, start_date_time: "1/9/2018 11:02", end_date_time: "1/9/2018 13:30", total_duration_hh_mm_ss: "2:28:00", charging_time_hh_mm_ss: "2:02:44", energy_kwh: "6.500", objectid: "0", objectid2: "2" }
+          - { _row_hash: b, _file_name: f.csv, station_name: S1, start_date_time: "1/9/2018 11:02", end_date_time: "1/9/2018 13:30", total_duration_hh_mm_ss: "2:28:00", charging_time_hh_mm_ss: "2:02:44", energy_kwh: "6.500", objectid: "0", objectid2: "3" }
+          - { _row_hash: c, _file_name: f.csv, station_name: S1, start_date_time: "1/9/2018 15:00", end_date_time: "1/9/2018 14:00", total_duration_hh_mm_ss: "1:00:00", charging_time_hh_mm_ss: "0:30:00", energy_kwh: "-2", objectid: "1", objectid2: "4" }
+    expect:
+      rows:
+        # the copy of b in the latest block (2) survives; its twin in block 1 is an exact
+        # duplicate (same _row_hash) and also a natural-key duplicate; a (block 0, "6.5" vs
+        # "6.500" so a different _row_hash) is a natural-key duplicate only
+        - { _row_hash: a, source_delivery_block: 0, primary_reason: natural_key_duplicate, quarantine_reasons: [natural_key_duplicate] }
+        - { _row_hash: b, source_delivery_block: 1, primary_reason: exact_duplicate, quarantine_reasons: [exact_duplicate, natural_key_duplicate] }
+        - { _row_hash: b, source_delivery_block: 2, primary_reason: null, quarantine_reasons: [] }
+        - { _row_hash: c, source_delivery_block: 2, primary_reason: end_before_start, quarantine_reasons: [end_before_start, negative_energy, charging_exceeds_connected] }
+
+  - name: cary_dedup_keeps_the_larger_charging_time_and_flags_over_24h
+    model: slv_sessions__cary
+    given:
+      - input: ref('brz_cary')
+        rows:
+          - { _row_hash: a, _file_name: f.csv, station_name: S, start_date: "2022-07-01T14:05:00+00:00", charging_time_hh_mm_ss: "01:00:00", energy_kwh: "6.5" }
+          - { _row_hash: b, _file_name: f.csv, station_name: S, start_date: "2022-07-01T14:05:00+00:00", charging_time_hh_mm_ss: "00:00:00", energy_kwh: "0.0" }
+          - { _row_hash: c, _file_name: f.csv, station_name: S, start_date: "2022-12-15T13:12:00+00:00", charging_time_hh_mm_ss: "47:09:45", energy_kwh: "62.5" }
+    expect:
+      rows:
+        - { _row_hash: a, start_local: "2022-07-01 10:05:00", charging_minutes: 60.0, connected_minutes: null, primary_reason: null, quality_flags: [] }
+        - { _row_hash: b, start_local: "2022-07-01 10:05:00", charging_minutes: 0.0, connected_minutes: null, primary_reason: natural_key_duplicate, quality_flags: [zero_energy] }
+        - { _row_hash: c, start_local: "2022-12-15 08:12:00", charging_minutes: 2829.75, connected_minutes: null, primary_reason: null, quality_flags: [over_24h] }
+
+  - name: dft_day_first_dates_units_unknown_station_and_publisher_rule
+    model: slv_sessions__dft_2017
+    given:
+      - input: ref('brz_dft_2017')
+        rows:
+          - { _row_hash: r1, _file_name: dft_2017_local_authority_rapids_raw.csv, chargingevent: "1", cpid: "70902", connector: "1", startdate: "2017-12-27", starttime: "13:30:00", enddate: "2017-12-27", endtime: "14:31:00", energy: "22.7", pluginduration: "61", name: "Council" }
+          - { _row_hash: r2, _file_name: dft_2017_local_authority_rapids_incomplete_anomalies.csv, chargingevent: "2", cpid: "70900", connector: "NA", startdate: "22/12/2017", starttime: "11:35:00", enddate: "22/12/2017", endtime: "11:35:00", energy: "0", pluginduration: null, name: "Council" }
+          - { _row_hash: f1, _file_name: dft_2017_public_sector_fasts_raw.csv, chargingevent: "NA", cpid: "NA", connector: "NA", startdate: "2017-12-31", starttime: "22:50:00", enddate: "2018-01-01", endtime: "00:42:00", energy: "6.662", pluginduration: "1.86666666666667", name: "Body" }
+          - { _row_hash: f2, _file_name: dft_2017_public_sector_fasts_incomplete_anomalies.csv, chargingevent: "NA", cpid: "50817", connector: "2", startdate: "2017-01-05", starttime: "08:00:00", enddate: "1970-01-01", endtime: "00:59:00", energy: "2.5", pluginduration: "0.5", name: "Body" }
+    expect:
+      rows:
+        - { _row_hash: r1, source_family: rapids, station_key: dft_2017/70902, port_id: "1", capacity_grain: port, start_local: "2017-12-27 13:30:00", start_utc: "2017-12-27 13:30:00+00:00", connected_minutes: 61.0, connected_minutes_reported: 61.0, publisher_excluded_rule: false, primary_reason: null, quality_flags: [] }
+        - { _row_hash: r2, source_family: rapids_anomalies, station_key: dft_2017/70900, port_id: null, capacity_grain: unit, start_local: "2017-12-22 11:35:00", start_utc: "2017-12-22 11:35:00+00:00", connected_minutes: 0.0, connected_minutes_reported: null, publisher_excluded_rule: true, primary_reason: null, quality_flags: [zero_energy, publisher_excluded_rule] }
+        - { _row_hash: f1, source_family: fasts, station_key: dft_2017/unknown/Body, port_id: null, capacity_grain: unit, start_local: "2017-12-31 22:50:00", start_utc: "2017-12-31 22:50:00+00:00", connected_minutes: 112.0, connected_minutes_reported: 112.0000000000002, publisher_excluded_rule: false, primary_reason: null, quality_flags: [unknown_station] }
+        - { _row_hash: f2, source_family: fasts_anomalies, station_key: dft_2017/50817, port_id: "2", capacity_grain: port, start_local: "2017-01-05 08:00:00", start_utc: "2017-01-05 08:00:00+00:00", connected_minutes: -24726721.0, connected_minutes_reported: 30.0, publisher_excluded_rule: false, primary_reason: end_sentinel_1970, quality_flags: [duration_disagrees] }
+
+  - name: dft_dedup_prefers_the_raw_file_over_the_anomalies_file_null_safely
+    model: slv_sessions__dft_2017
+    given:
+      - input: ref('brz_dft_2017')
+        rows:
+          - { _row_hash: a, _file_name: dft_2017_local_authority_rapids_incomplete_anomalies.csv, cpid: "70900", connector: "NA", startdate: "10/06/2017", starttime: "23:50:00", enddate: "11/06/2017", endtime: "00:20:00", energy: "9.1", pluginduration: null, name: "Council" }
+          - { _row_hash: b, _file_name: dft_2017_local_authority_rapids_raw.csv, cpid: "70900", connector: "NA", startdate: "2017-06-10", starttime: "23:50:00", enddate: "2017-06-11", endtime: "00:20:00", energy: "9.1", pluginduration: "30", name: "Council" }
+    expect:
+      rows:
+        - { _row_hash: a, primary_reason: natural_key_duplicate }
+        - { _row_hash: b, primary_reason: null }

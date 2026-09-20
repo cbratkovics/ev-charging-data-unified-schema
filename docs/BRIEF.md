@@ -105,7 +105,8 @@ Paris, Caltech ACN-Data.
 
 ### Source contracts and schema drift
 
-- A declared expected schema per source (and per file family where files differ).
+- A declared expected schema per source (and per file family where files differ), rendered
+  into `docs/CONTRACTS.md` with a cross-family diff table and a `--check` in CI (ADR-0009).
 - On each run, compare actual columns and types per file against the contract and write
   `artifacts/drift/<run_id>.json`.
 - Policy: a new unknown column produces a warning; a missing or retyped required column
@@ -120,7 +121,9 @@ Paris, Caltech ACN-Data.
 - `slv_sessions__<source>`: types, timestamp parsing, and timezone handling. Keep both UTC and
   station-local timestamps. Boulder and DfT are wall-clock local (proven on DST transition
   dates); Cary is true UTC (proven by the seasonal raw-hour shift). Fall-back ambiguity resolves
-  to the first occurrence and is flagged.
+  to the second occurrence (standard time), which is what DuckDB's ICU conversion does, and is
+  flagged `is_dst_ambiguous`; a nonexistent spring-forward time is a quarantine reason
+  (ADR-0009).
 - **All durations are computed from UTC after conversion.** Where a source publishes a
   duration, keep it as `*_reported`, record the disagreement, flag above a 2-minute tolerance
   (ADR-0005 a).
@@ -128,7 +131,8 @@ Paris, Caltech ACN-Data.
   `charging_only`, Boulder `both`, DfT `plug_in_only`.
 - Units: energy in kWh, durations in minutes. Parse `HH:MM:SS` strings and numeric durations
   with their declared unit per file.
-- Deduplicate on a documented natural key, null-safe on every key column:
+- Deduplicate on a documented natural key, null-safe on every key column, with every
+  preference order ending in `_row_hash` so the survivor is deterministic (ADR-0009):
   - Boulder: (station name, start minute, end minute, energy), preferring the latest delivery
     block then the highest row id; a test asserts block 0 is a subset of block 1 (ADR-0005 b).
   - Cary: (station name, start second), keeping the larger charging time; conflicts are
@@ -142,9 +146,11 @@ Paris, Caltech ACN-Data.
   are kept and flagged in every source.
 - `slv_sessions_unioned`: every source conformed to one unified session contract (section
   5a).
-- `slv_sessions_quarantined`: rejected rows with reason codes: blank_row, exact_duplicate,
-  natural_key_duplicate, end_sentinel_1970, end_before_start, unparseable_timestamp,
-  negative_energy, energy_sentinel, charging_exceeds_connected, implied_kw_over_ceiling.
+- `slv_sessions_quarantined`: rejected rows with every failing reason in `quarantine_reasons[]`
+  and one `primary_reason` by the fixed precedence blank_row, unparseable_timestamp,
+  nonexistent_local_time, exact_duplicate, natural_key_duplicate, end_sentinel_1970,
+  end_before_start, negative_energy, energy_sentinel, charging_exceeds_connected,
+  implied_kw_over_ceiling (ADR-0009), so counts by primary reason sum to the total.
 - Never drop rows silently. Accepted + quarantined must equal bronze, per source and per file.
 
 ### 5a. Unified session contract
@@ -285,3 +291,4 @@ Next phase proposal: <one paragraph>
 | 2026-09-19 | 1 (re-approval) | Contract amendments: (a) durations from UTC with reported-value disagreement flags; (b) Boulder dedup prefers the latest delivery, subset test; (c) Cary UTC corroborated by the seasonal shift, dedup rule justified, conflicts reported; (d) `capacity_grain` on the station dimension; (e) duration availability declared per source, never imputed | ADR-0005 |
 | 2026-09-19 | 1 (re-approval) | Capacity denominator: (f) robust max at N = 5 from the days-at-level distribution; (g) active window excludes gaps beyond a per-source threshold from inter-session gaps; (h) sensitivity artifact; (i) stated limitations on inferred ports, 24-hour availability and both bias directions | ADR-0006 |
 | 2026-09-19 | 2 | Personal data confirmed none; DfT natural key approved, null-safe, `unknown/<Name>` share reported; publisher rule reproduced as a quality flag with mismatch reported; one non-trivial session rule at gold; port-count precedence (connector ids, else robust max N = 5, floored at 1, `low_evidence` flag); DfT implied-kW ceilings per family (rapids 55 kW, fasts 30 kW) | ADR-0007 |
+| 2026-09-20 | 3 | Per-family drift design kept, with a generated contract-diff document; a `make release` target that regenerates every artifact at one commit; nonexistent local times quarantined and ambiguous ones resolved to DuckDB's second occurrence, verified empirically and pinned by a test; the ICU extension verified statically linked; every failing quarantine reason kept plus one primary reason by fixed precedence; every dedup order ends in `_row_hash` | ADR-0009 |
