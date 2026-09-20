@@ -42,19 +42,42 @@ def cite(*keys: str) -> str:
     return "<!-- cite: " + "; ".join(f"{CITE}#{k}" for k in keys) + " -->"
 
 
+def population_table(pop: dict[str, Any]) -> list[str]:
+    rows = [
+        ("Landed rows (total)", pop["total"]),
+        ("Accepted, meets the stated rule", pop["accepted_meets_rule"]),
+        ("Accepted, does not meet the stated rule", pop["accepted_not_meeting_rule"]),
+    ]
+    for reason, cnt in pop["quarantined_by_primary_reason"].items():
+        if reason == "natural_key_duplicate":
+            for twin, k in sorted(pop["natural_key_duplicate_by_twin"].items()):
+                fam, status = twin.split("/")
+                rows.append((f"Quarantined, duplicate of a {status} row in `{fam}`", k))
+        else:
+            rows.append((f"Quarantined, {reason}", cnt))
+    acc = pop["accepted_meets_rule"] + pop["accepted_not_meeting_rule"]
+    q = sum(pop["quarantined_by_primary_reason"].values())
+    return [
+        "| Rows of the rapids anomalies file | Count |",
+        "|---|---|",
+        *[f"| {label} | {n(v)} |" for label, v in rows],
+        f"| **Sum of the parts** | **{n(acc + q)}** |",
+    ]
+
+
 def render(a: dict[str, Any]) -> str:
     p = a["periods"]
     idle = a["boulder_idle"]["production"]
     alts = {k: a["boulder_idle"][k] for k in sorted(a["boulder_idle"]) if k != "production"}
-    b_lo = min(v["blocking_idle_share_of_connected"] for v in alts.values())
-    b_hi = max(v["blocking_idle_share_of_connected"] for v in alts.values())
+    b_lo = min(v["full_occupancy_idle_share_of_connected"] for v in alts.values())
+    b_hi = max(v["full_occupancy_idle_share_of_connected"] for v in alts.values())
+    grp = a["boulder_idle_by_station_group"]
     hours = a["boulder_idle_by_hour_production"]
-    top_hours = sorted(hours, key=lambda r: -r["blocking_idle_minutes"])[:3]
+    top_hours = sorted(hours, key=lambda r: -r["full_occupancy_idle_minutes"])[:3]
     ur = a["utilization_ranges"]
     pr = a["dft_publisher_rule"]
-    decomp = pr["rapids_anomalies_not_meeting_rule"]
+    pop = a["dft_anomalies_population"]
     rapids = pr["by_family"]["rapids"]
-    ranom = pr["by_family"]["rapids_anomalies"]
     unknown = a["unknown_station"]["dft_2017"]
     lines = [
         "# Findings",
@@ -88,48 +111,59 @@ def render(a: dict[str, Any]) -> str:
         "",
         *[f"- {c}" for c in a["cannot_show"]],
         "",
-        "## 1. Boulder: idle-after-charge time is large; about a quarter of it blocks another driver",
+        "## 1. Boulder: idle-after-charge time is large; up to a quarter of it is idle at full occupancy",
         "",
         f"**Period.** Boulder, {p['boulder']['first_start_local'][:10]} to {p['boulder']['last_start_local'][:10]}, non-trivial sessions at known stations.",
         "",
         f"**What was found.** Over {n(idle['connected_minutes'])} connected minutes, {n(idle['idle_minutes'])} were idle after charging ended: "
         f"an idle share of {pct(idle['idle_share_of_connected'])}. "
         f"{cite('boulder_idle.production.connected_minutes', 'boulder_idle.production.idle_minutes', 'boulder_idle.production.idle_share_of_connected')} "
-        f"Of those idle minutes, {n(idle['blocking_idle_minutes'])} elapsed while every inferred port at the station was occupied: "
-        f"a blocking idle share of {pct(idle['blocking_idle_share_of_connected'])} of connected time, or {pct(idle['blocking_share_of_idle'])} of idle time, "
-        f"and every one of the {idle['stations']} stations has some. "
-        f"{cite('boulder_idle.production.blocking_idle_minutes', 'boulder_idle.production.blocking_idle_share_of_connected', 'boulder_idle.production.blocking_share_of_idle', 'boulder_idle.production.stations')} "
-        f"The blocking share of connected time ranges from {pct(b_lo)} to {pct(b_hi)} across the robust-max port definitions (N = 1 to 10). "
+        f"Of those idle minutes, up to {n(idle['full_occupancy_idle_minutes'])} elapsed while every inferred port at the station was occupied (idle at full occupancy): "
+        f"up to {pct(idle['full_occupancy_idle_share_of_connected'])} of connected time, or {pct(idle['full_occupancy_share_of_idle'])} of idle time. "
+        f"{cite('boulder_idle.production.full_occupancy_idle_minutes', 'boulder_idle.production.full_occupancy_idle_share_of_connected', 'boulder_idle.production.full_occupancy_share_of_idle')} "
+        f"This is an upper bound on displaced demand, for three reasons: ports are lower bounds, so a station with an uncounted port was not full; "
+        f"at a station with one inferred port every idle minute counts as full occupancy by definition; and no source records whether anyone was waiting. "
+        f"The bound ranges from {pct(b_lo)} to {pct(b_hi)} of connected time across the robust-max port definitions (N = 1 to 10). "
         + "<!-- cite: "
-        + "; ".join(f"{CITE}#boulder_idle.{k}.blocking_idle_share_of_connected" for k in alts)
+        + "; ".join(f"{CITE}#boulder_idle.{k}.full_occupancy_idle_share_of_connected" for k in alts)
         + " --> "
-        f"Blocking idle is a midday phenomenon: local hours {', '.join(str(h['hour']) for h in top_hours)} carry the most of it. "
+        f"Split by station group: at the {grp['single_port']['stations']} stations inferred to have one port, {pct(grp['single_port']['full_occupancy_share_of_idle'])} of idle time is at full occupancy (by definition); "
+        f"at the {grp['multi_port']['stations']} stations with more than one, {pct(grp['multi_port']['full_occupancy_share_of_idle'])} of idle time is, "
+        f"which is {pct(grp['multi_port']['full_occupancy_idle_share_of_connected'])} of their connected time. "
+        f"{cite('boulder_idle_by_station_group.single_port.stations', 'boulder_idle_by_station_group.single_port.full_occupancy_share_of_idle', 'boulder_idle_by_station_group.multi_port.stations', 'boulder_idle_by_station_group.multi_port.full_occupancy_share_of_idle', 'boulder_idle_by_station_group.multi_port.full_occupancy_idle_share_of_connected')} "
+        f"Every station records at least one such minute ({idle['stations_with_full_occupancy_idle']} of {idle['stations']}), which is automatic for the single-port group. "
+        f"{cite('boulder_idle.production.stations_with_full_occupancy_idle', 'boulder_idle.production.stations')} "
+        f"Idle at full occupancy is a midday phenomenon: local hours {', '.join(str(h['hour']) for h in top_hours)} carry the most of it. "
         + "<!-- cite: "
         + "; ".join(f"{CITE}#boulder_idle_by_hour_production[{h['hour']}].hour" for h in top_hours)
         + " -->",
         "",
         "**Why it matters.** The headline idle share is the number that usually gets quoted as recoverable capacity. "
-        "On this data it overstates the part a policy could recover by about four times: most idle minutes happen while another port at the same station is free, "
-        "so no driver was blocked by them. The blocking part is still substantial and happens at every station, at midday, when demand peaks.",
+        "On this data it overstates what a policy could recover by about four times, and even the smaller figure is a ceiling: most idle minutes happen while "
+        "another port at the same station is free, and the rest may or may not have kept anyone waiting.",
         "",
-        "**What I would tell the decision-maker.** Lead with the blocking share. An idle fee or a time limit could recover at most the blocking minutes, "
-        "and they cluster between late morning and mid-afternoon; a time-of-day rule would target most of the recoverable minutes without touching overnight idling, "
-        "which blocks nobody.",
+        '**What I would tell the decision-maker.** Quote the full-occupancy figure as "up to", never the headline. If an idle fee or a time limit is worth trying, '
+        "target the late-morning-to-mid-afternoon hours at the multi-port stations, where the measure carries information; overnight idle at a single-port station "
+        "displaces nobody the data can see.",
         "",
-        "**What would change my mind.** Evidence that ports are undercounted at the busy stations would lower the blocking share (the sensitivity range shows how far); "
-        "evidence of queues or turned-away drivers (not in the data) would raise the value of each blocking minute. "
-        "Charging is assumed to begin at session start; if drivers plug in and charging starts later, some 'idle' minutes were charging.",
+        "**What would change my mind.** Queue or turned-away-driver records would turn the ceiling into an estimate; an inventory of ports would remove the "
+        "lower-bound caveat and could lower the figure; evidence that charging starts later than plug-in would move minutes from idle to charging.",
         "",
         "## 2. UK DfT 2017: the published exclusion rule does not describe the published exclusions",
         "",
         "**Period.** Calendar 2017, one year, one funding programme.",
         "",
-        f"**What was found.** The publisher states one exclusion rule: zero energy or a plug-in of three minutes or less. "
-        f"Applying it to the accepted rows of the rapids anomalies file marks {n(ranom['meets_rule'])} of {n(ranom['accepted'])} rows; "
-        f"the rest do not meet the stated rule. {cite('dft_publisher_rule.by_family.rapids_anomalies.meets_rule', 'dft_publisher_rule.by_family.rapids_anomalies.accepted')} "
-        f"Of the anomalies rows that do not meet the rule, {n(decomp.get('same_event_in_fasts_raw', 0))} are the fast-charger events the revision moved to the fasts publication "
-        f"(they survive as duplicates of fasts rows) and {n(decomp.get('accepted_unexplained', 0))} are accepted here with no stated reason for their exclusion. "
-        f"{cite('dft_publisher_rule.rapids_anomalies_not_meeting_rule.same_event_in_fasts_raw', 'dft_publisher_rule.rapids_anomalies_not_meeting_rule.accepted_unexplained')} "
+        "**What was found.** The publisher states one exclusion rule: zero energy or a plug-in of three minutes or less. "
+        "Every landed row of the rapids anomalies file, accounted for once:",
+        "",
+        "<!-- generated:dft-anomalies start -->",
+        *population_table(pop),
+        "<!-- generated:dft-anomalies end -->",
+        "",
+        f"The {n(pop['accepted_not_meeting_rule'])} accepted rows that do not meet the stated rule are ordinary sessions the publisher excluded for reasons it did not state. "
+        f"{cite('dft_anomalies_population.accepted_not_meeting_rule')} "
+        f"The {n(pop['moved_to_fasts_raw'])} duplicates whose surviving twin is in the fasts raw file are the fast-charger events the revision moved between publications. "
+        f"{cite('dft_anomalies_population.moved_to_fasts_raw')} "
         f"In the other direction, {n(rapids['meets_rule'])} rows of the rapids raw file meet the exclusion rule yet were published as clean. "
         f"{cite('dft_publisher_rule.by_family.rapids.meets_rule')}",
         "",
@@ -157,8 +191,8 @@ def render(a: dict[str, Any]) -> str:
         if not r:
             continue
         lines.append(
-            f"- **{label} utilization** is {pct(r['production'], 2)} under the production port count (the larger of two lower bounds, so at or below every single definition), "
-            f"and ranges from {pct(r['min'], 2)} ({r['min_definition']}) to {pct(r['max'], 2)} ({r['max_definition']}) across the pure definitions. "
+            f"- **{label} utilization** is {pct(r['production'], 2)} under the production port count, "
+            f"and ranges from {pct(r['min'], 2)} ({r['min_definition']}) to {pct(r['max'], 2)} ({r['max_definition']}) across the definitions (production included). "
             f"{cite(f'utilization_ranges.{key}.production', f'utilization_ranges.{key}.min', f'utilization_ranges.{key}.max')}"
         )
     over = a["station_days_over_100pct_production"]

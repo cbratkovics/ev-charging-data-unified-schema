@@ -106,6 +106,15 @@ def ports_by_definition(levels: pd.DataFrame, stations: pd.DataFrame) -> dict[st
         )
     conn = stations.set_index("station_key")["connector_ids"]
     out["connector_ids"] = conn.where(conn > 0, out["robust_max_n5"]).astype(int)
+    # the production rule (ADR-0012): the larger of the two lower bounds, floored at 1
+    out["production"] = (
+        pd.concat(
+            [conn.reindex(out["robust_max_n5"].index).fillna(0), out["robust_max_n5"]], axis=1
+        )
+        .max(axis=1)
+        .clip(lower=1)
+        .astype(int)
+    )
     return out
 
 
@@ -222,7 +231,7 @@ def sensitivity(con: duckdb.DuckDBPyConnection, *, rid: str, code_commit: str) -
             "trailing_90d_max": "ports on each station-day = maximum concurrency over the trailing 90 days ending that day, floored at 1 (the retired Phase 1 proposal)",
             "connector_ids": "ports = distinct published connector ids where the unit has any, else robust_max_n5",
             "station_days_over_100pct": "available station-days whose daily measure minutes exceed the day's available port minutes: undercounted ports or overlapping data errors",
-            "production_definition": "dim_station.ports_inferred = max(connector_ids, robust_max_n5), floored at 1 (ADR-0012)",
+            "production": "ports = max(connector_ids, robust_max_n5), floored at 1: the rule dim_station applies (ADR-0012); included so every range contains the production value",
         },
         "dim_station": dim_check,
         "ports_by_definition": port_tables,

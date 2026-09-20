@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from ev_charging_data_unified_schema.findings import blocking_idle
+from ev_charging_data_unified_schema.findings import full_occupancy_idle
 
 
 def _sessions(rows):
@@ -29,15 +29,15 @@ def test_blocking_idle_counts_only_minutes_while_all_ports_are_busy() -> None:
             ("S", "2023-06-02 08:00:00", "2023-06-02 09:30:00", 30.0, "2023-06-02 01:00:00"),
         ]
     )
-    out = blocking_idle(df, pd.Series({"S": 2}))
+    out = full_occupancy_idle(df, pd.Series({"S": 2}))
     assert out["idle_minutes"] == 180.0 + 60.0
-    assert out["blocking_idle_minutes"] == 60.0
+    assert out["full_occupancy_idle_minutes"] == 60.0
     assert out["connected_minutes"] == 240.0 + 60.0 + 90.0
-    assert out["stations_with_blocking_idle"] == 1 and out["stations"] == 1
+    assert out["stations_with_full_occupancy_idle"] == 1 and out["stations"] == 1
     # hour profile: A's idle 09:00-12:00 UTC is local 02:00-05:00 (60 min in each of hours 2, 3, 4);
     # C's idle 08:30-09:30 UTC is local 01:30-02:30 (30 in hour 1, 30 in hour 2);
     # blocking 10:00-11:00 UTC is local hour 3
-    assert out["by_local_hour"]["3"]["blocking_idle_minutes"] == 60.0
+    assert out["by_local_hour"]["3"]["full_occupancy_idle_minutes"] == 60.0
     assert out["by_local_hour"]["1"]["idle_minutes"] == 30.0
     assert (
         out["by_local_hour"]["2"]["idle_minutes"] == 90.0
@@ -46,5 +46,5 @@ def test_blocking_idle_counts_only_minutes_while_all_ports_are_busy() -> None:
     assert sum(v["idle_minutes"] for v in out["by_local_hour"].values()) == 240.0
     # with one port, every idle minute of A while B is connected... B starts after A's charging ended,
     # and A alone occupies the single port: all of A's idle and C's idle are blocking
-    one = blocking_idle(df, pd.Series({"S": 1}))
-    assert one["blocking_idle_minutes"] == 240.0
+    one = full_occupancy_idle(df, pd.Series({"S": 1}))
+    assert one["full_occupancy_idle_minutes"] == 240.0

@@ -27,8 +27,10 @@ with sessions as (
         start_utc,
         start_local,
         end_local,
-        coalesce(end_utc, start_utc + to_minutes(cast(round(charging_minutes) as bigint))) as end_eff_utc,
-        coalesce(end_local, start_local + to_minutes(cast(round(charging_minutes) as bigint))) as end_eff_local,
+        -- effective end at second precision: rounding to whole minutes overlapped back-to-back
+        -- sessions at single-port stations and inflated the inferred ports (ADR-0014)
+        coalesce(end_utc, start_utc + to_seconds(cast(round(charging_minutes * 60) as bigint))) as end_eff_utc,
+        coalesce(end_local, start_local + to_seconds(cast(round(charging_minutes * 60) as bigint))) as end_eff_local,
         port_id
     from {{ ref('fct_charging_session') }}
     -- unknown-station keys (a null CPID under a funding body) stay in the session fact and its

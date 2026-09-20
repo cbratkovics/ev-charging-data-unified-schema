@@ -12,8 +12,8 @@ with sessions as (
         start_utc,
         cast(start_local as date) as start_date,
         charging_minutes,
-        cast(coalesce(end_local, start_local + to_minutes(cast(round(coalesce(charging_minutes, 0)) as bigint))) as date) as end_date,
-        coalesce(end_utc, start_utc + to_minutes(cast(round(coalesce(charging_minutes, 0)) as bigint))) as end_eff_utc
+        cast(coalesce(end_local, start_local + to_seconds(cast(round(coalesce(charging_minutes, 0) * 60) as bigint))) as date) as end_date,
+        coalesce(end_utc, start_utc + to_seconds(cast(round(coalesce(charging_minutes, 0) * 60) as bigint))) as end_eff_utc
     from {{ ref('fct_charging_session') }}
     where is_non_trivial and not contains(station_key, '/unknown/')
 ),

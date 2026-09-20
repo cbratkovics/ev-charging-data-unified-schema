@@ -65,13 +65,13 @@ sessions as (
         f.start_tz,
         case
             when f.charging_minutes is not null
-                then f.start_utc + to_minutes(cast(round(f.charging_minutes * 60) as bigint)) / 60
+                then f.start_utc + to_seconds(cast(round(f.charging_minutes * 60) as bigint))
         end as charging_end_utc,
         cast(f.start_local as date) as start_date,
         cast(
             coalesce(
                 f.end_local,
-                f.start_local + to_minutes(cast(round(coalesce(f.charging_minutes, 0)) as bigint))
+                f.start_local + to_seconds(cast(round(coalesce(f.charging_minutes, 0) * 60) as bigint))
             ) as date
         ) as last_date
     from {{ ref('fct_charging_session') }} as f

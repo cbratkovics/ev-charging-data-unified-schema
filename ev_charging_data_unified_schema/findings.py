@@ -24,8 +24,10 @@ def run_id(now: dt.datetime | None = None) -> str:
 # --- Boulder idle -------------------------------------------------------------------------------
 
 
-def blocking_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, Any]:
-    """Idle minutes accrued while every port at the station was occupied.
+def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, Any]:
+    """Idle minutes accrued while every inferred port at the station was occupied ("idle at full
+    occupancy"): an upper bound on displaced demand, because ports are lower bounds, every idle
+    minute at a single-port station counts by definition, and there is no queue data.
 
     ``sessions``: non-trivial Boulder sessions with start_utc, end_utc, charging_minutes,
     connected_minutes, start_local, station_key. ``ports``: station_key -> port count. Per
@@ -35,10 +37,10 @@ def blocking_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, Any]:
     Returns totals and an hour-of-day profile of idle and blocking-idle minutes (local hour in
     which the minutes elapsed).
     """
-    total_idle = total_blocking = total_connected = total_charging = 0.0
+    total_idle = total_full = total_connected = total_charging = 0.0
     by_hour_idle = np.zeros(24)
-    by_hour_blocking = np.zeros(24)
-    stations_with_blocking = 0
+    by_hour_full = np.zeros(24)
+    stations_with_full = 0
     for key, g in sessions.groupby("station_key"):
         n_ports = int(ports.get(key, 1))
         g = g.dropna(subset=["start_utc", "end_utc"])
@@ -90,11 +92,11 @@ def blocking_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, Any]:
             if len(idle_s)
             else np.array([])
         )
-        station_blocking = float(blocked.sum()) / 60 if len(blocked) else 0.0
+        station_full = float(blocked.sum()) / 60 if len(blocked) else 0.0
         total_idle += idle_total
-        total_blocking += station_blocking
-        if station_blocking > 0:
-            stations_with_blocking += 1
+        total_full += station_full
+        if station_full > 0:
+            stations_with_full += 1
         total_connected += float(g["connected_minutes"].sum())
         total_charging += float(g["charging_minutes"].sum())
         # hour profiles: explode intervals at local hour boundaries
@@ -112,25 +114,25 @@ def blocking_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, Any]:
                 s2 = np.maximum(idle_s[i_idx], bs[w_idx])
                 e2 = np.minimum(idle_e[i_idx], be[w_idx])
                 keep = e2 > s2
-                by_hour_blocking += _hour_profile(s2[keep] + offset_s, e2[keep] + offset_s)
+                by_hour_full += _hour_profile(s2[keep] + offset_s, e2[keep] + offset_s)
     return {
         "idle_minutes": round(total_idle, 3),
-        "blocking_idle_minutes": round(total_blocking, 3),
+        "full_occupancy_idle_minutes": round(total_full, 3),
         "connected_minutes": round(total_connected, 3),
         "charging_minutes": round(total_charging, 3),
         "idle_share_of_connected": (
             round(total_idle / total_connected, 6) if total_connected else None
         ),
-        "blocking_idle_share_of_connected": (
-            round(total_blocking / total_connected, 6) if total_connected else None
+        "full_occupancy_idle_share_of_connected": (
+            round(total_full / total_connected, 6) if total_connected else None
         ),
-        "blocking_share_of_idle": round(total_blocking / total_idle, 6) if total_idle else None,
-        "stations_with_blocking_idle": stations_with_blocking,
+        "full_occupancy_share_of_idle": round(total_full / total_idle, 6) if total_idle else None,
+        "stations_with_full_occupancy_idle": stations_with_full,
         "stations": int(sessions["station_key"].nunique()),
         "by_local_hour": {
             str(h): {
                 "idle_minutes": round(float(by_hour_idle[h]), 3),
-                "blocking_idle_minutes": round(float(by_hour_blocking[h]), 3),
+                "full_occupancy_idle_minutes": round(float(by_hour_full[h]), 3),
             }
             for h in range(24)
         },
@@ -164,6 +166,62 @@ def _hour_profile(start_s: np.ndarray, end_s: np.ndarray) -> np.ndarray:
     seg_e = np.minimum(end_s[idx], (hour + 1) * 3600)
     np.add.at(out, (hour % 24).astype(int), (seg_e - seg_s) / 60)
     return out
+
+
+# --- DfT anomalies population ---------------------------------------------------------------
+
+
+def anomalies_population(
+    con: duckdb.DuckDBPyConnection, family: str = "rapids_anomalies"
+) -> dict[str, Any]:
+    """Every landed row of the family: accepted (by publisher rule) + quarantined by primary
+    reason, with natural_key_duplicate split by the surviving twin's family and status. The
+    survivor of a natural key is the row of that key not flagged as a duplicate; it may itself be
+    quarantined for a value reason."""
+    base = con.execute(f"""
+        with a as (select * from silver.slv_sessions__dft_2017 where source_family = '{family}')
+        select count(*) as total,
+               count(*) filter (where primary_reason is null) as accepted,
+               count(*) filter (where primary_reason is null and publisher_excluded_rule) as accepted_meets_rule,
+               count(*) filter (where primary_reason is null and not publisher_excluded_rule) as accepted_not_meeting_rule,
+               count(*) filter (where primary_reason is not null) as quarantined
+        from a
+        """).df().iloc[0]
+    reasons = con.execute(
+        f"select primary_reason, count(*) as n from silver.slv_sessions__dft_2017 where source_family = '{family}' and primary_reason is not null group by 1 order by 2 desc"
+    ).df()
+    twins = con.execute(f"""
+        with d as (
+            select natural_key_hash from silver.slv_sessions__dft_2017
+            where source_family = '{family}' and primary_reason = 'natural_key_duplicate'
+        ),
+        surv as (
+            select natural_key_hash, source_family as twin_family,
+                   case when primary_reason is null then 'accepted' else 'quarantined' end as twin_status
+            from silver.slv_sessions__dft_2017
+            where not list_contains(quarantine_reasons, 'natural_key_duplicate')
+              and not list_contains(quarantine_reasons, 'exact_duplicate')
+        )
+        select coalesce(s.twin_family, '<none>') as twin_family, coalesce(s.twin_status, '<none>') as twin_status, count(*) as n
+        from d left join surv as s using (natural_key_hash) group by 1, 2 order by 3 desc
+        """).df()
+    dup_split = {
+        f"{r['twin_family']}/{r['twin_status']}": int(r["n"]) for r in twins.to_dict("records")
+    }
+    moved = sum(v for k, v in dup_split.items() if k.startswith("fasts/"))
+    return {
+        "family": family,
+        "total": int(base["total"]),
+        "accepted": int(base["accepted"]),
+        "accepted_meets_rule": int(base["accepted_meets_rule"]),
+        "accepted_not_meeting_rule": int(base["accepted_not_meeting_rule"]),
+        "quarantined": int(base["quarantined"]),
+        "quarantined_by_primary_reason": {
+            r["primary_reason"]: int(r["n"]) for r in reasons.to_dict("records")
+        },
+        "natural_key_duplicate_by_twin": dup_split,
+        "moved_to_fasts_raw": moved,
+    }
 
 
 # --- assembly -----------------------------------------------------------------------------------
@@ -201,7 +259,14 @@ def compute(
     prod_ports = _df(
         con, "select station_key, ports_inferred from gold.dim_station where source = 'boulder'"
     ).set_index("station_key")["ports_inferred"]
-    idle = {"production": blocking_idle(b, prod_ports)}
+    idle = {"production": full_occupancy_idle(b, prod_ports)}
+    # by station group: single-port stations count every idle minute as full occupancy by
+    # definition; the multi-port group is where the measure carries information
+    single = set(prod_ports[prod_ports == 1].index)
+    idle_by_group = {
+        "single_port": full_occupancy_idle(b[b["station_key"].isin(single)], prod_ports),
+        "multi_port": full_occupancy_idle(b[~b["station_key"].isin(single)], prod_ports),
+    }
     # alternative port counts from the sensitivity artifact's per-definition distributions are
     # source-wide; recompute per station with the same concurrency sweep the artifact used
     from ev_charging_data_unified_schema.sensitivity import concurrency_levels, ports_by_definition
@@ -212,7 +277,7 @@ def compute(
     levels, _ = concurrency_levels(b.assign(end_utc=b["end_utc"]))
     defs = ports_by_definition(levels, stations)
     for label in (f"robust_max_n{n}" for n in N_VALUES):
-        idle[label] = blocking_idle(b, defs[label])
+        idle[label] = full_occupancy_idle(b, defs[label])
     # by-hour headline profile: share of idle minutes and blocking idle minutes by local hour
     hour_rows = []
     for h in range(24):
@@ -256,7 +321,6 @@ def compute(
     )
     # DfT publisher rule (from the silver summary)
     pr = silver["publisher_rule"]
-    dft_decomp = pr["anomalies_not_meeting_rule"].get("rapids_anomalies", {})
     return {
         "artifact": "findings",
         "run_id": rid,
@@ -265,24 +329,22 @@ def compute(
         "inputs": {"sensitivity_run_id": sensitivity["run_id"], "silver_run_id": silver["run_id"]},
         "definitions": {
             "idle_share_of_connected": "1 - charging minutes / connected minutes over non-trivial Boulder sessions at known stations",
-            "blocking_idle_share_of_connected": "idle minutes that elapsed while every inferred port at the station was occupied, over connected minutes; computed from the connected-interval sweep per station with the port count of the named definition",
-            "blocking_share_of_idle": "blocking idle minutes over all idle minutes",
+            "full_occupancy_idle_share_of_connected": "idle minutes that elapsed while every inferred port at the station was occupied, over connected minutes; computed from the connected-interval sweep per station with the port count of the named definition",
+            "full_occupancy_share_of_idle": "blocking idle minutes over all idle minutes",
             "by_local_hour": "idle and blocking-idle minutes attributed to the local hour in which they elapsed",
             "utilization_range": "min and max of the sensitivity artifact's non-trivial-rule utilization across denominator definitions; production is the value under dim_station.ports_inferred",
             "period": "first and last local session start per source in the fact",
         },
         "periods": periods,
         "boulder_idle": idle,
+        "boulder_idle_by_station_group": idle_by_group,
+        "dft_anomalies_population": anomalies_population(con),
         "boulder_idle_by_hour_production": hour_rows,
         "utilization_ranges": ranges,
         "station_days_over_100pct_production": {
             r["source"]: int(r["n"]) for r in over100_prod.to_dict("records")
         },
-        "dft_publisher_rule": {
-            "by_family": pr["by_family"],
-            "rapids_anomalies_not_meeting_rule": dft_decomp,
-            "rapids_anomalies_total": silver["by_source"]["dft_2017"]["by_file"] if False else None,
-        },
+        "dft_publisher_rule": {"by_family": pr["by_family"]},
         "unknown_station": silver["unknown_station"],
         "cannot_show": [
             "no queue, arrival or turned-away-driver data exists in any source, so idle time is a ceiling on recoverable capacity, not demand",
