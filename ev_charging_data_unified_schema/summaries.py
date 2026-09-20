@@ -119,7 +119,7 @@ def silver_summary(
             left join (
                 select natural_key_hash, source_family from {SILVER}.slv_sessions__dft_2017
                 where source_family in ('rapids', 'fasts')
-                qualify row_number() over (partition by natural_key_hash order by source_family) = 1
+                qualify row_number() over (partition by natural_key_hash order by source_family, _row_hash) = 1
             ) as raw on n.natural_key_hash = raw.natural_key_hash
             left join {SILVER}.slv_sessions_quarantined as q
                 on q.source = 'dft_2017' and q.natural_key_hash = n.natural_key_hash and q.source_family = n.source_family
@@ -127,6 +127,25 @@ def silver_summary(
                 on u.source = 'dft_2017' and u.natural_key_hash = n.natural_key_hash and u.source_family = n.source_family
         )
         select source_family, bucket, count(*) as n from classified group by 1, 2 order by 1, 3 desc
+        """,
+    )
+    # station attributes chosen by the majority rule, and the stations where more than one
+    # candidate existed (ADR-0016)
+    attributes = _rows(
+        con,
+        """
+        select source, count(*) as stations,
+               count(*) filter (where multi_site_key) as multi_site_key,
+               count(*) filter (where multi_operator) as multi_operator
+        from gold.dim_station group by 1 order by 1
+        """,
+    )
+    # DfT funding-body names: distinct as landed versus after trim and whitespace collapse
+    names = _rows(
+        con,
+        f"""
+        select site_key as name, list(distinct site_key_raw order by site_key_raw) as raw_names
+        from {SILVER}.slv_sessions__dft_2017 where site_key is not null group by 1 order by 1
         """,
     )
     recon = reconciliation(con)
@@ -150,6 +169,17 @@ def silver_summary(
             "publisher_rule.meets_rule": "DfT accepted rows with energy 0 or plug-in of 3 minutes or less, the publisher's stated exclusion rule (ADR-0007 item 2)",
             "publisher_rule.anomalies_not_meeting_rule": "rows of the publisher's anomalies files that do not meet the rule, decomposed: quarantined here for a reason other than duplication (quarantined_<reason>); the same natural key present in a raw file (same_event_in_<family>: for rapids_anomalies these are the fast-charger events the revision moved to the fasts publication); accepted with no explanation (accepted_unexplained); other = a duplicate whose surviving twin is in the other anomalies family",
             "unknown_station": "DfT sessions whose CPID is null, keyed unknown/<Name> (ADR-0007 item 1)",
+            "station_attributes": "dim_station rows per source; multi_site_key / multi_operator count the stations whose non-trivial sessions carried more than one site or operator value, resolved by the majority rule (ADR-0016)",
+            "dft_operator_names": "distinct DfT funding-body names as landed (raw) and after trim and whitespace collapse (normalised); collapsed = raw - normalised; groups lists every normalised name with more than one raw spelling",
+        },
+        "station_attributes": {
+            r["source"]: {k: v for k, v in r.items() if k != "source"} for r in attributes
+        },
+        "dft_operator_names": {
+            "distinct_raw": sum(len(r["raw_names"]) for r in names),
+            "distinct_normalised": len(names),
+            "collapsed": sum(len(r["raw_names"]) - 1 for r in names),
+            "groups": {r["name"]: list(r["raw_names"]) for r in names if len(r["raw_names"]) > 1},
         },
         "by_source": {
             s: {

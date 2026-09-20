@@ -18,7 +18,7 @@ help:
 	@echo "profile       - profile data/raw/ into artifacts/profile/<run_id>.json, then render the docs"
 	@echo "check-profile - docs/PROFILE.md and the DATA_SOURCES inventory match the newest profile artifact"
 	@echo "check-contracts - docs/CONTRACTS.md matches the contract definitions"
-	@echo "release       - regenerate every published artifact in one run at one commit (network; clean tree required)"
+	@echo "release       - regenerate every published artifact in one run at one commit (network; clean tree required; single-threaded DuckDB)"
 	@echo "silver-summary - write artifacts/silver/<run_id>.json from the built dev warehouse"
 	@echo "sensitivity   - write artifacts/sensitivity/<run_id>.json (denominator sensitivity) from the built dev warehouse"
 	@echo "findings      - write artifacts/findings/<run_id>.json and render docs/FINDINGS.md"
@@ -103,13 +103,15 @@ check-contracts:
 	$(PY) scripts/render_contracts.py --check
 
 # The release run (ADR-0009 item 2): every published artifact from one commit. Steps are added
-# as the phases add artifacts (reconciliation, sensitivity, exports, findings).
+# as the phases add artifacts (reconciliation, sensitivity, exports, findings). Single-threaded
+# DuckDB so the exports are byte-identical across releases of the same inputs (ADR-0016).
+release: export EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_THREADS = 1
 release:
 	@test -z "$$(git status --porcelain)" || (echo "release: working tree is not clean; commit first so every artifact records one code_commit" && exit 1)
 	$(MAKE) ingest
 	$(MAKE) profile
 	$(MAKE) render-contracts
-	$(MAKE) dbt-dev
+	$(MAKE) dbt-dev DBT_BUILD_FLAGS=--full-refresh
 	$(PY) scripts/silver_summary.py
 	$(PY) scripts/sensitivity.py
 	$(PY) scripts/findings.py
@@ -126,9 +128,12 @@ dbt-deps:
 dbt-parse: dbt-deps
 	$(DBT) parse $(DBT_FLAGS)
 
+# DBT_BUILD_FLAGS=--full-refresh rebuilds the incremental session fact from silver; a release
+# always does, so a silver code change reaches gold without a re-delivery (ADR-0016).
+DBT_BUILD_FLAGS ?=
 dbt-dev: dbt-deps
 	mkdir -p .duckdb
-	$(DBT) build $(DBT_FLAGS) --target dev
+	$(DBT) build $(DBT_FLAGS) --target dev $(DBT_BUILD_FLAGS)
 
 # the offline warehouse build CI runs: fixture landed files, scratch DuckDB, always a full refresh
 dbt-fixture: dbt-deps fixture

@@ -38,18 +38,19 @@ def _sessions(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
         select station_key, source, start_utc, end_utc, start_local, end_local, energy_kwh,
                charging_minutes, connected_minutes, is_non_trivial, start_tz, port_id
         from gold.fct_charging_session
+        order by station_key, start_utc, session_sk
         """).df()
 
 
 def _stations(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     return con.execute(
-        "select station_key, source, station_tz, ports_inferred, ports_source, active_from, active_to, excluded_days, window_days, connector_ids from gold.dim_station"
+        "select station_key, source, station_tz, ports_inferred, ports_source, active_from, active_to, excluded_days, window_days, connector_ids from gold.dim_station order by station_key"
     ).df()
 
 
 def _station_days(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     return con.execute(
-        "select station_key, source, local_date, is_excluded_day, day_minutes, charging_minutes, connected_minutes from gold.fct_station_day"
+        "select station_key, source, local_date, is_excluded_day, day_minutes, charging_minutes, connected_minutes from gold.fct_station_day order by station_key, local_date"
     ).df()
 
 
@@ -72,7 +73,7 @@ def concurrency_levels(sessions: pd.DataFrame) -> pd.DataFrame:
                 ),
                 pd.DataFrame({"t": g["end_eff"], "d": -1, "date": pd.NaT}),
             ]
-        ).sort_values(["t", "d"])
+        ).sort_values(["t", "d"], kind="stable")
         ev["c"] = ev["d"].cumsum()
         starts = ev[ev["d"] == 1]
         for k in LEVELS:

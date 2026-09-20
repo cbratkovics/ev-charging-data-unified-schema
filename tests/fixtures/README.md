@@ -17,8 +17,13 @@ What each fixture exercises:
   midnight crossing in local time, a zero-energy row.
 - `boulder`: two delivery blocks (ObjectID restarts at 0), the ISO-format rows inside block 0,
   a spring-forward and a fall-back session, an energy value formatted `5.0` vs `5`, a
-  zero-charging row, a midnight crossing.
+  zero-charging row, a midnight crossing. Station ST3 carries two addresses: the minority address comes
+  first in the file and first alphabetically, so only the majority rule (ADR-0016) picks
+  `9 Fixture Ct`.
 - `dft_2017`: the four headers, `EnergySupplied` vs `Energy`, `PluginDuration` in minutes vs
   hours, ISO vs day-first dates, `NA` tokens, a null CPID, a text-variant connector, the 1970
   end sentinel, a row present in both the raw and the anomalies file, a DST-spanning session
-  in each of the two families, a row meeting the publisher's exclusion rule.
+  in each of the two families, a row meeting the publisher's exclusion rule. Charge point 70903
+  carries two funding bodies, the majority (`Fixture Council`) landed in three spellings that
+  normalisation collapses, the minority (`Zed Council`) first in the file: only the majority
+  rule after normalisation picks `dft_2017/Fixture Council`.

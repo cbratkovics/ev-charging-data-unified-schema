@@ -80,7 +80,7 @@ def render(a: dict[str, Any]) -> str:
     b_hi = max(v["full_occupancy_idle_share_of_connected"] for v in alts.values())
     grp = a["boulder_idle_by_station_group"]
     hours = a["boulder_idle_by_hour_production"]
-    top_hours = sorted(hours, key=lambda r: -r["full_occupancy_idle_minutes"])[:3]
+    top_hours = sorted(hours, key=lambda r: (-r["full_occupancy_idle_minutes"], r["hour"]))[:3]
     ur = a["utilization_ranges"]
     widest = max(ur, key=lambda k: ur[k]["relative_range"] or 0)
     pr = a["dft_publisher_rule"]

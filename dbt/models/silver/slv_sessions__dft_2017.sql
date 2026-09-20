@@ -2,8 +2,10 @@
 -- read from the file name; literal NA tokens are nulled here (bronze keeps them); dates are ISO
 -- or day-first per value; PluginDuration is minutes in the rapids raw file and hours in the
 -- fasts files (contract). Timestamps are wall-clock Europe/London. Rows with a null CPID get
--- the station key unknown/<Name> (ADR-0007). Dedup on the null-safe natural key prefers the
--- raw file over the anomalies file, then _row_hash (ADR-0009).
+-- the station key unknown/<Name> (ADR-0007). The funding-body Name is trimmed and its inner
+-- whitespace collapsed (six bodies were published both with and without a trailing space); the
+-- landed value is kept as site_key_raw (ADR-0016). Dedup on the null-safe natural key prefers
+-- the raw file over the anomalies file, then the file name, then _row_hash (ADR-0009).
 {{ config(materialized='table') }}
 
 {% set zone = 'Europe/London' %}
@@ -37,7 +39,8 @@ typed as (
         -- the connector id is its leading integer; the fasts anomalies file also publishes
         -- text variants such as '2 - 22kW Type 2 Socket Only' for the same connector
         nullif(regexp_extract(nullif(connector, 'NA'), '^\s*(\d+)', 1), '') as connector,
-        nullif(name, 'NA') as name,
+        nullif(name, 'NA') as name_raw,
+        nullif(regexp_replace(trim(nullif(name, 'NA')), '\s+', ' ', 'g'), '') as name,
         {{ parse_date_plus_time("nullif(startdate, 'NA')", "nullif(starttime, 'NA')") }} as start_local,
         {{ parse_date_plus_time("nullif(enddate, 'NA')", "nullif(endtime, 'NA')") }} as end_local,
         nullif(enddate, 'NA') like '1970-%' or nullif(enddate, 'NA') like '%/1970' as is_end_sentinel,
@@ -106,11 +109,13 @@ keyed as (
 ranked as (
     select
         *,
+        -- the same row can be landed from two files with one _row_hash (content only), so the
+        -- file name closes the order before the hash
         row_number() over (
-            partition by _row_hash order by family_rank asc, _row_hash asc
+            partition by _row_hash order by family_rank asc, _file_name asc, _row_hash asc
         ) as exact_dup_rank,
         row_number() over (
-            partition by natural_key_hash order by family_rank asc, _row_hash asc
+            partition by natural_key_hash order by family_rank asc, _file_name asc, _row_hash asc
         ) as natural_key_rank
     from keyed
 )
@@ -124,6 +129,7 @@ select
     'dft_2017/' || coalesce(cpid, 'unknown/' || coalesce(name, '<null>')) as station_key,
     cpid as station_name_raw,
     name as site_key,
+    name_raw as site_key_raw,
     connector as port_id,
     connector is not null as port_id_present,
     start_utc,

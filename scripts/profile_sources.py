@@ -213,7 +213,7 @@ def days_at_level(
     for key, g in df.groupby("k"):
         ev = pd.concat(
             [pd.DataFrame({"t": g["s"], "d": 1}), pd.DataFrame({"t": g["e"], "d": -1})]
-        ).sort_values(["t", "d"])
+        ).sort_values(["t", "d"], kind="stable")
         ev["c"] = ev["d"].cumsum()
         ev = ev[ev["d"] == 1]
         day = ev["t"].dt.normalize()
@@ -238,7 +238,11 @@ def robust_max_distribution(
 def inter_session_gaps(start: pd.Series, end: pd.Series, by: pd.Series) -> dict[str, Any]:
     """Per key, the gap in days between one session's end and the next session's start. The
     distribution calibrates the zero-session-gap threshold for the active window."""
-    df = pd.DataFrame({"s": start, "e": end, "k": by}).dropna().sort_values(["k", "s"])
+    df = (
+        pd.DataFrame({"s": start, "e": end, "k": by})
+        .dropna()
+        .sort_values(["k", "s", "e"], kind="stable")
+    )
     df["next_s"] = df.groupby("k")["s"].shift(-1)
     gap = (df["next_s"] - df["e"]).dt.total_seconds() / 86400
     gap = gap.dropna()
@@ -709,7 +713,14 @@ def profile_source(name: str, roles: dict[str, Any], raw_dir: Path) -> dict[str,
         answers["charge_points_per_site"] = {
             "sites": int(len(cps)),
             "distribution": hist(cps),
-            "top": {str(k): int(v) for k, v in cps.sort_values(ascending=False).head(8).items()},
+            # equal counts ordered by the site value so the cut at eight is reproducible
+            "top": {
+                str(k): int(v)
+                for k, v in cps.sort_index()
+                .sort_values(ascending=False, kind="stable")
+                .head(8)
+                .items()
+            },
         }
     if roles.get("location_layer"):
         import json

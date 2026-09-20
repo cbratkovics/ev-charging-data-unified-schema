@@ -11,6 +11,11 @@
 -- overlapping records are data errors; availability is assumed 24 hours within the active
 -- window (docs/BRIEF.md § 5, README limitations). Unknown-station keys (dft_2017/unknown/<Name>)
 -- are not stations and are excluded here and from fct_station_day (ADR-0007 item 1).
+-- Descriptive attributes (site_key, station_name_raw, source, station_tz) follow the majority
+-- rule (ADR-0016): the value carried by the most non-trivial sessions, ties broken by the value
+-- itself, nulls never competing; operator_key is derived from the chosen site exactly as the
+-- session fact derives it. multi_site_key / multi_operator flag stations whose sessions carried
+-- more than one value; every window and pick ends in a unique key so a rebuild is identical.
 {{ config(materialized='table') }}
 
 {% set robust_n = 5 %}
@@ -18,6 +23,7 @@
 
 with sessions as (
     select
+        session_sk,
         station_key,
         source,
         operator_key,
@@ -41,22 +47,39 @@ with sessions as (
 per_station as (
     select
         station_key,
-        any_value(source) as source,
-        any_value(operator_key) as operator_key,
-        any_value(site_key) as site_key,
-        any_value(station_name_raw) as station_name_raw,
-        any_value(start_tz) as station_tz,
         count(*) as non_trivial_sessions,
         count(distinct cast(start_local as date)) as active_days,
         min(cast(start_local as date)) as active_from,
         max(cast(end_eff_local as date)) as active_to,
-        count(distinct port_id) as connector_ids
+        count(distinct port_id) as connector_ids,
+        count(distinct site_key) as site_key_candidates,
+        count(distinct operator_key) as operator_candidates
     from sessions
     group by station_key
 ),
 
+-- the majority rule per attribute: most sessions, then the value itself; nulls do not compete
+{% for col in ['source', 'site_key', 'station_name_raw', 'start_tz'] %}
+pick_{{ col }} as (
+    select
+        station_key,
+        {{ col }}
+    from (
+        select
+            station_key,
+            {{ col }},
+            count(*) as n
+        from sessions
+        where {{ col }} is not null
+        group by station_key, {{ col }}
+    )
+    qualify row_number() over (partition by station_key order by n desc, {{ col }} asc) = 1
+),
+{% endfor %}
+
 events as (
     select
+        session_sk,
         station_key,
         start_utc as t,
         1 as d,
@@ -64,6 +87,7 @@ events as (
     from sessions
     union all
     select
+        session_sk,
         station_key,
         end_eff_utc as t,
         -1 as d,
@@ -78,7 +102,7 @@ running as (
         local_date,
         sum(d) over (
             partition by station_key
-            order by t asc, d asc
+            order by t asc, d asc, session_sk asc
             rows between unbounded preceding and current row
         ) as concurrency
     from events
@@ -123,11 +147,17 @@ data_as_of as (
 
 select
     p.station_key,
-    p.source,
-    p.operator_key,
-    p.site_key,
-    p.station_name_raw,
-    p.station_tz,
+    ps.source,
+    -- the same derivation as fct_charging_session.operator_key, applied to the chosen site
+    case when ps.source = 'dft_2017' then 'dft_2017/' || coalesce(pk.site_key, '<null>') else ps.source end
+        as operator_key,
+    pk.site_key,
+    pn.station_name_raw,
+    pt.start_tz as station_tz,
+    p.site_key_candidates > 1 as multi_site_key,
+    p.operator_candidates > 1 as multi_operator,
+    p.site_key_candidates,
+    p.operator_candidates,
     'unit' as capacity_grain,
     -- both counts are lower bounds on the true ports; the larger is the tighter bound (ADR-0012)
     cast(greatest(p.connector_ids, coalesce(r.robust_max_n5, 0), 1) as integer) as ports_inferred,
@@ -150,6 +180,10 @@ select
     coalesce(g.excluded_gaps, 0) as excluded_gaps,
     d.data_as_of_utc
 from per_station as p
+inner join pick_source as ps on p.station_key = ps.station_key
+left join pick_site_key as pk on p.station_key = pk.station_key
+left join pick_station_name_raw as pn on p.station_key = pn.station_key
+inner join pick_start_tz as pt on p.station_key = pt.station_key
 left join robust as r on p.station_key = r.station_key
 left join gaps as g on p.station_key = g.station_key
-left join data_as_of as d on p.source = d.source
+left join data_as_of as d on ps.source = d.source

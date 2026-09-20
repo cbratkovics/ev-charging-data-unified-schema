@@ -46,7 +46,7 @@ blocks as (
     select
         *,
         sum(case when delivery_row_id = 0 then 1 else 0 end)
-            over (order by file_row_id rows unbounded preceding)
+            over (order by file_row_id, _row_hash rows unbounded preceding)
         - 1 as delivery_block
     from typed
 ),
@@ -111,6 +111,7 @@ select
     'boulder/' || station_name as station_key,
     station_name as station_name_raw,
     address as site_key,
+    address as site_key_raw,
     cast(null as varchar) as port_id,
     false as port_id_present,
     start_utc,

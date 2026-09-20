@@ -51,3 +51,15 @@ def test_inputs_carry_hashes_and_the_fixture_exercises_the_rules(payload) -> Non
     assert payload["unknown_station"]["dft_2017"]["unknown_station_sessions"] >= 1
     assert "rapids_anomalies" in payload["publisher_rule"]["anomalies_not_meeting_rule"]
     assert Path(".").exists()
+
+
+def test_station_attribute_ambiguity_and_collapsed_names_are_reported(payload) -> None:
+    attrs = payload["station_attributes"]
+    assert attrs["boulder"]["multi_site_key"] == 1 and attrs["boulder"]["multi_operator"] == 0
+    assert attrs["dft_2017"]["multi_operator"] == 1
+    assert attrs["cary"]["multi_site_key"] == 0
+    names = payload["dft_operator_names"]
+    assert names["distinct_raw"] - names["distinct_normalised"] == names["collapsed"] == 2
+    assert names["groups"] == {
+        "Fixture Council": ["Fixture  Council", "Fixture Council", "Fixture Council "]
+    }

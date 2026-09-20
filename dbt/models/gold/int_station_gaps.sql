@@ -7,6 +7,7 @@
 
 with sessions as (
     select
+        session_sk,
         station_key,
         source,
         start_utc,
@@ -21,8 +22,8 @@ with sessions as (
 ordered as (
     select
         *,
-        lead(start_utc) over (partition by station_key order by start_utc, end_eff_utc) as next_start_utc,
-        lead(start_date) over (partition by station_key order by start_utc, end_eff_utc) as next_start_date
+        lead(start_utc) over (partition by station_key order by start_utc, end_eff_utc, session_sk) as next_start_utc,
+        lead(start_date) over (partition by station_key order by start_utc, end_eff_utc, session_sk) as next_start_date
     from sessions
 ),
 

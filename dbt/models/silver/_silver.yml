@@ -47,7 +47,9 @@ models:
   - name: station_name_raw
     description: the publisher's station identifier as landed (a name, or the CPID for DfT)
   - name: site_key
-    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+    description: 'site grouping: Boulder address, Cary address, DfT funding body (Name trimmed and inner whitespace collapsed, ADR-0016)'
+  - name: site_key_raw
+    description: the site grouping exactly as landed (the DfT Name before normalisation); equal to site_key for Boulder and Cary
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
@@ -165,7 +167,9 @@ models:
   - name: station_name_raw
     description: the publisher's station identifier as landed (a name, or the CPID for DfT)
   - name: site_key
-    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+    description: 'site grouping: Boulder address, Cary address, DfT funding body (Name trimmed and inner whitespace collapsed, ADR-0016)'
+  - name: site_key_raw
+    description: the site grouping exactly as landed (the DfT Name before normalisation); equal to site_key for Boulder and Cary
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
@@ -285,7 +289,9 @@ models:
   - name: station_name_raw
     description: the publisher's station identifier as landed (a name, or the CPID for DfT)
   - name: site_key
-    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+    description: 'site grouping: Boulder address, Cary address, DfT funding body (Name trimmed and inner whitespace collapsed, ADR-0016)'
+  - name: site_key_raw
+    description: the site grouping exactly as landed (the DfT Name before normalisation); equal to site_key for Boulder and Cary
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
@@ -409,7 +415,9 @@ models:
   - name: station_name_raw
     description: the publisher's station identifier as landed (a name, or the CPID for DfT)
   - name: site_key
-    description: 'site grouping: Boulder address, Cary address, DfT funding body'
+    description: 'site grouping: Boulder address, Cary address, DfT funding body (Name trimmed and inner whitespace collapsed, ADR-0016)'
+  - name: site_key_raw
+    description: the site grouping exactly as landed (the DfT Name before normalisation); equal to site_key for Boulder and Cary
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise

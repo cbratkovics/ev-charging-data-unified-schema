@@ -25,7 +25,8 @@ quarantined = bronze, per source, enforced by a test.
 incremental by source-level replace driven by the landed file hashes), `fct_station_day` (station
 × station-local date on a full spine, sessions crossing midnight split across days),
 `mart_monthly`, `dim_station` (ports inferred as the larger of two lower bounds, with the binding
-bound recorded), `dim_operator`, `dim_date`. Utilization is a ratio of summed numerator and
+bound recorded; site and operator by the majority of sessions, flagged when more than one value
+existed), `dim_operator`, `dim_date`. Utilization is a ratio of summed numerator and
 denominator at the requested rollup, never an average of daily percentages. `scripts/export.py`
 writes the station-day-and-above relations to `exports/` (the read contract); session-grain rows
 never leave the repository.
@@ -40,6 +41,9 @@ never leave the repository.
   conversion, day-first dates and units, dedup, the midnight split and DST-day minutes;
   **pytest** on the utilization rollup, the incremental merge under re-delivery and the
   number checker.
+- **Determinism**: two single-threaded builds of the same landed files are content-identical
+  and export byte-identical files; no first-seen pick and no ordering without a unique final key
+  exists in the project (ADR-0016).
 - **Claims**: every number in the rendered docs resolves to a committed artifact key
   (`scripts/check_doc_numbers.py`, run in CI); the findings are rendered from their own
   artifact.

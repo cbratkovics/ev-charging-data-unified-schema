@@ -22,6 +22,7 @@ select
     station_key,
     station_name_raw,
     site_key,
+    site_key_raw,
     port_id,
     port_id_present,
     start_utc,

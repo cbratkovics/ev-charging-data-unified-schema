@@ -252,7 +252,7 @@ def max_concurrency(start: pd.Series, end: pd.Series, by: pd.Series) -> dict[str
     for key, g in df.groupby("k"):
         ev = pd.concat(
             [pd.DataFrame({"t": g["s"], "d": 1}), pd.DataFrame({"t": g["e"], "d": -1})]
-        ).sort_values(["t", "d"])
+        ).sort_values(["t", "d"], kind="stable")
         out[str(key)] = int(ev["d"].cumsum().max())
     return out
 
@@ -268,7 +268,9 @@ def dst_transition_gaps(
     for day in transitions:
         dd = pd.Timestamp(day)
         mask = (start < dd + pd.Timedelta("2h")) & (end > dd + pd.Timedelta("1h"))
-        counts = gap[mask].round(0).value_counts().head(4)
+        # the four most common gaps; equal counts ordered by the gap value
+        vc = gap[mask].round(0).value_counts()
+        counts = vc.sort_index().sort_values(ascending=False, kind="stable").head(4)
         out[day] = {
             "sessions_spanning_window": int(mask.sum()),
             "gap_minutes_counts": {str(int(k)): int(v) for k, v in counts.items()},

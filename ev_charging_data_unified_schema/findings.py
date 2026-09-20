@@ -34,8 +34,9 @@ def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, A
     station, the connected intervals are swept; the windows where the running count reaches the
     port count are the blocking windows; each session's idle window [start + charging, end) is
     intersected with them (vectorised through the cumulative blocking time before any instant).
-    Returns totals and an hour-of-day profile of idle and blocking-idle minutes (local hour in
-    which the minutes elapsed).
+    Returns totals and an hour-of-day profile of idle and full-occupancy idle minutes (local
+    hour in which the minutes elapsed); each session's own UTC-to-local offset places its
+    minutes, so the profile does not depend on which session comes first.
     """
     total_idle = total_full = total_connected = total_charging = 0.0
     by_hour_idle = np.zeros(24)
@@ -63,11 +64,12 @@ def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, A
             .astype("datetime64[s]")
             .astype("int64")
         )
-        offset_s = int(
-            (
-                g["start_local"].iloc[0]
-                - g["start_utc"].iloc[0].tz_convert("UTC").tz_localize(None)
-            ).total_seconds()
+        # per-session local offset (DST differs across the history of one station)
+        offset_s = (
+            (g["start_local"] - g["start_utc"].dt.tz_convert("UTC").dt.tz_localize(None))
+            .dt.total_seconds()
+            .to_numpy()
+            .astype("int64")
         )
         # sweep
         t = np.concatenate([start, end])
@@ -85,7 +87,7 @@ def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, A
         idle_s = start + np.round(g["charging_minutes"].to_numpy() * 60).astype("int64")
         idle_e = end
         has_idle = idle_e > idle_s
-        idle_s, idle_e = idle_s[has_idle], idle_e[has_idle]
+        idle_s, idle_e, idle_off = idle_s[has_idle], idle_e[has_idle], offset_s[has_idle]
         idle_total = float((idle_e - idle_s).sum()) / 60
         blocked = (
             _blocked_before(idle_e, bs, be, cum) - _blocked_before(idle_s, bs, be, cum)
@@ -100,7 +102,7 @@ def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, A
         total_connected += float(g["connected_minutes"].sum())
         total_charging += float(g["charging_minutes"].sum())
         # hour profiles: explode intervals at local hour boundaries
-        by_hour_idle += _hour_profile(idle_s + offset_s, idle_e + offset_s)
+        by_hour_idle += _hour_profile(idle_s + idle_off, idle_e + idle_off)
         if len(bs):
             # intersect idle intervals with blocking windows: candidate pairs by searchsorted range
             lo = np.searchsorted(be, idle_s, side="right")  # first window ending after idle start
@@ -114,7 +116,8 @@ def full_occupancy_idle(sessions: pd.DataFrame, ports: pd.Series) -> dict[str, A
                 s2 = np.maximum(idle_s[i_idx], bs[w_idx])
                 e2 = np.minimum(idle_e[i_idx], be[w_idx])
                 keep = e2 > s2
-                by_hour_full += _hour_profile(s2[keep] + offset_s, e2[keep] + offset_s)
+                off2 = idle_off[i_idx][keep]
+                by_hour_full += _hour_profile(s2[keep] + off2, e2[keep] + off2)
     return {
         "idle_minutes": round(total_idle, 3),
         "full_occupancy_idle_minutes": round(total_full, 3),
@@ -256,10 +259,11 @@ def compute(
     # Boulder idle under the production port count and each robust-max N
     b = _df(
         con,
-        "select station_key, start_utc, end_utc, start_local, charging_minutes, connected_minutes from gold.fct_charging_session where source = 'boulder' and is_non_trivial and not contains(station_key, '/unknown/')",
+        "select station_key, start_utc, end_utc, start_local, charging_minutes, connected_minutes from gold.fct_charging_session where source = 'boulder' and is_non_trivial and not contains(station_key, '/unknown/') order by station_key, start_utc, session_sk",
     )
     prod_ports = _df(
-        con, "select station_key, ports_inferred from gold.dim_station where source = 'boulder'"
+        con,
+        "select station_key, ports_inferred from gold.dim_station where source = 'boulder' order by station_key",
     ).set_index("station_key")["ports_inferred"]
     idle = {"production": full_occupancy_idle(b, prod_ports)}
     # by station group: single-port stations count every idle minute as full occupancy by
@@ -274,7 +278,8 @@ def compute(
     from ev_charging_data_unified_schema.sensitivity import concurrency_levels, ports_by_definition
 
     stations = _df(
-        con, "select station_key, connector_ids from gold.dim_station where source = 'boulder'"
+        con,
+        "select station_key, connector_ids from gold.dim_station where source = 'boulder' order by station_key",
     )
     levels, _ = concurrency_levels(b.assign(end_utc=b["end_utc"]))
     defs = ports_by_definition(levels, stations)

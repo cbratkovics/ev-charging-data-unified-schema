@@ -5,7 +5,11 @@ the session fixture in tests/test_dbt_incremental.py (imported here).
 
 Cases:
 * two full builds of the same landed files are content-identical in every gold table and in
-  the snapshot, validity columns included;
+  the snapshot, validity columns included, and their exports are byte-identical for every
+  exported relation (ADR-0016);
+* station attributes follow the majority rule and ambiguity is flagged: the fixture gives one
+  Boulder station two addresses and one DfT charge point two funding bodies, with the minority
+  value first in the file and first alphabetically, so a first-seen or minimum pick fails;
 * landing the fixture sources in a different order gives the same gold;
 * a late re-delivery that changes an energy value, removes a session and re-delivers old
   sessions, applied incrementally, equals a full refresh on the new landed files, with the
@@ -28,6 +32,7 @@ import pytest
 
 from ev_charging_data_unified_schema import ingest
 from ev_charging_data_unified_schema.config import ENV_PREFIX, PROJECT, REPO_ROOT
+from ev_charging_data_unified_schema.exports import write_exports
 
 from .test_dbt_incremental import dbt_packages  # noqa: F401  (registers the session fixture)
 
@@ -125,19 +130,85 @@ def _fresh(tmp_path: Path, name: str) -> tuple[Path, Path]:
     return d / "w.duckdb", d / "landed"
 
 
-@pytest.mark.usefixtures("dbt_packages")
-def test_two_full_builds_are_content_identical_including_the_snapshot(tmp_path) -> None:
+@pytest.fixture(scope="module")
+def two_builds(tmp_path_factory, request) -> tuple[Path, Path]:
+    """Two independent full builds of the same landed fixture, shared by the tests below."""
+    request.getfixturevalue("dbt_packages")
+    tmp_path = tmp_path_factory.mktemp("two_builds")
     a_db, a_landed = _fresh(tmp_path, "a")
     b_db, b_landed = _fresh(tmp_path, "b")
     _land(RAW, a_landed, list(PROJECT.source_names))
     _land(RAW, b_landed, list(PROJECT.source_names))
     _build(a_db, a_landed, full_refresh=True)
     _build(b_db, b_landed, full_refresh=True)
+    return a_db, b_db
+
+
+def test_two_full_builds_are_content_identical_including_the_snapshot(two_builds) -> None:
+    a_db, b_db = two_builds
     assert _all_checksums(a_db) == _all_checksums(b_db)
     snap = _table(a_db, "snapshots.snp_station", ["station_key", "dbt_valid_from"])
     assert snap["dbt_valid_to"].isna().all() and len(snap) == len(
         _table(a_db, "gold.dim_station", ["station_key"])
     )
+
+
+def test_two_builds_export_byte_identical_files_for_every_relation(two_builds, tmp_path) -> None:
+    """The release claim (docs/REPRODUCIBILITY.md): exports of two builds of the same inputs are
+    byte-identical, dimensions and the monthly mart included, not only the facts."""
+    hashes = []
+    for label, db in zip(("a", "b"), two_builds, strict=True):
+        manifest = json.loads((db.parent / "target" / "manifest.json").read_text())
+        con = duckdb.connect(str(db), read_only=True)
+        try:
+            written = write_exports(
+                con, manifest, tmp_path / label, rid="export-test", code_commit="abc"
+            )
+        finally:
+            con.close()
+        hashes.append({name: f["sha256"] for name, f in written["files"].items()})
+    assert set(hashes[0]) >= {
+        "dim_station.parquet",
+        "dim_operator.parquet",
+        "mart_monthly.parquet",
+        "fct_station_day.parquet",
+        "dim_date.parquet",
+    }
+    assert hashes[0] == hashes[1]
+
+
+def test_station_attributes_follow_the_majority_rule_and_flag_ambiguity(two_builds) -> None:
+    a_db, _ = two_builds
+    dim = _table(a_db, "gold.dim_station", ["station_key"]).set_index("station_key")
+    st3 = dim.loc["boulder/BOULDER / FIXTURE ST3"]
+    assert st3["site_key"] == "9 Fixture Ct" and bool(st3["multi_site_key"])
+    assert st3["site_key_candidates"] == 2 and not bool(st3["multi_operator"])
+    assert not dim.loc["boulder/BOULDER / FIXTURE ST1", "multi_site_key"]
+    cp = dim.loc["dft_2017/70903"]
+    assert cp["site_key"] == "Fixture Council" and cp["operator_key"] == "dft_2017/Fixture Council"
+    assert bool(cp["multi_operator"]) and cp["operator_candidates"] == 2
+    assert cp["site_key_candidates"] == 2  # after normalisation: two bodies, not four spellings
+    # the landed spelling survives in silver; the fact and the mart use the station's operator
+    con = duckdb.connect(str(a_db), read_only=True)
+    try:
+        raw = con.execute(
+            "select list(distinct site_key_raw order by site_key_raw) from silver.slv_sessions__dft_2017 where station_key = 'dft_2017/70903'"
+        ).fetchone()[0]
+        ops = con.execute(
+            "select list(distinct operator_key order by operator_key) from gold.fct_charging_session where station_key = 'dft_2017/70903'"
+        ).fetchone()[0]
+        mart = con.execute(
+            "select list(distinct operator_key order by operator_key) from gold.mart_monthly where source = 'dft_2017' and year_month = '2017-11'"
+        ).fetchone()[0]
+        operators = {
+            r[0] for r in con.execute("select operator_key from gold.dim_operator").fetchall()
+        }
+    finally:
+        con.close()
+    assert raw == ["Fixture  Council", "Fixture Council", "Fixture Council ", "Zed Council"]
+    assert ops == ["dft_2017/Fixture Council", "dft_2017/Zed Council"]
+    assert "dft_2017/Zed Council" not in mart and "dft_2017/Fixture Council" in mart
+    assert "dft_2017/Zed Council" in operators and "dft_2017/Fixture Council " not in operators
 
 
 @pytest.mark.usefixtures("dbt_packages")

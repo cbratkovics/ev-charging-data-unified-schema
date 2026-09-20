@@ -83,6 +83,7 @@ select
     'cary/' || station_name as station_key,
     station_name as station_name_raw,
     address_1 as site_key,
+    address_1 as site_key_raw,
     cast(null as varchar) as port_id,
     false as port_id_present,
     start_utc,
