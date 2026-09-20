@@ -44,12 +44,15 @@ key and not that the numbers agree with each other. All three were real.
    total 48,619 = accepted 38,376 (meets the stated rule 20,699, does not 17,677)
    + quarantined 10,243, with the 10,183 duplicates split by the surviving twin's family and status.
    <!-- cite: artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.total; artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.accepted; artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.accepted_meets_rule; artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.accepted_not_meeting_rule; artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.quarantined; artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.quarantined_by_primary_reason.natural_key_duplicate -->
-   The two earlier figures were two different counts: 9,258 is the number of anomalies rows
-   whose natural key also appears in the fasts raw file, which the table now reproduces exactly
-   as 8,872 duplicates of an accepted fasts row plus 386 duplicates of a fasts row that was itself quarantined for
-   implied power; 8,975 came from an earlier bucket rule that looked only for a twin among the
-   accepted rows of the gold fact and so counted the 8,872 plus part of another family.
+   The two earlier figures were two different counts. 9,258 is the number of anomalies rows
+   whose natural key also appears in the fasts raw file, and the table reproduces it exactly.
+   <!-- cite: artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.moved_to_fasts_raw -->
+   It is 8,872 duplicates of an accepted fasts row plus 386 duplicates of a fasts row that was
+   itself quarantined for implied power.
    <!-- cite: artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.natural_key_duplicate_by_twin["fasts/accepted"]; artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.natural_key_duplicate_by_twin["fasts/quarantined"] -->
+   8,975 came from an earlier bucket rule that looked only for a twin among the accepted rows of
+   the gold fact, so it counted the accepted fasts twins plus part of another family and missed
+   the quarantined ones. <!-- scratch -->
    `moved_to_fasts_raw` is now defined as the sum of the two fasts rows, 9,258, and a test asserts every part of the table sums.
    <!-- cite: artifacts/findings/findings-20260920T022915Z.json#dft_anomalies_population.moved_to_fasts_raw -->
 4. **A coherence test for the findings artifact.** `tests/test_findings_artifact.py`: parts sum
