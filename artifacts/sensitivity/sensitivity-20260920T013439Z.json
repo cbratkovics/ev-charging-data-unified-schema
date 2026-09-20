@@ -1,0 +1,924 @@
+{
+  "artifact": "sensitivity",
+  "code_commit": "9f6684858cdeb8a2350f6d67b477a1806d437a34",
+  "definitions": {
+    "connector_ids": "ports = distinct published connector ids where the unit has any, else robust_max_n5",
+    "production_definition": "dim_station.ports_inferred = connector_ids where present else robust_max_n5 (ADR-0007 item 4)",
+    "robust_max_nN": "ports = highest concurrency level reached on at least N distinct local dates over the station's life, floored at 1",
+    "session_rule": "which sessions supply the concurrency evidence for the denominator: non_trivial_only (the production rule) or all_sessions",
+    "station_days_over_100pct": "available station-days whose daily measure minutes exceed the day's available port minutes: undercounted ports or overlapping data errors",
+    "trailing_90d_max": "ports on each station-day = maximum concurrency over the trailing 90 days ending that day, floored at 1 (the retired Phase 1 proposal)",
+    "utilization": "sum of the measure minutes over sum of (ports x day minutes) across the source's available station-days (ratio of sums; never an average of daily ratios); the measure minutes are those of fct_station_day, which uses non-trivial sessions"
+  },
+  "dim_station": {
+    "excluded_days_total": 28861,
+    "ports_inferred_distribution": {
+      "1": 409,
+      "2": 395,
+      "3": 104
+    },
+    "ports_source": {
+      "connector_ids": 264,
+      "floor": 46,
+      "observed_concurrency": 598
+    },
+    "stations": 908,
+    "window_days_total": 306091
+  },
+  "generated_at_utc": "2026-09-20T01:34:58+00:00",
+  "ports_by_definition": {
+    "connector_ids": {
+      "distribution": {
+        "1": 410,
+        "2": 394,
+        "3": 104
+      },
+      "stations": 908
+    },
+    "robust_max_n1": {
+      "distribution": {
+        "1": 360,
+        "2": 519,
+        "3": 26,
+        "4": 1,
+        "5": 2
+      },
+      "stations": 908
+    },
+    "robust_max_n10": {
+      "distribution": {
+        "1": 602,
+        "2": 304,
+        "3": 2
+      },
+      "stations": 908
+    },
+    "robust_max_n2": {
+      "distribution": {
+        "1": 424,
+        "2": 467,
+        "3": 17
+      },
+      "stations": 908
+    },
+    "robust_max_n3": {
+      "distribution": {
+        "1": 475,
+        "2": 423,
+        "3": 10
+      },
+      "stations": 908
+    },
+    "robust_max_n5": {
+      "distribution": {
+        "1": 526,
+        "2": 379,
+        "3": 3
+      },
+      "stations": 908
+    }
+  },
+  "results": [
+    {
+      "definition": "robust_max_n1",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.104843
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.057622
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.061474
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 112062,
+      "utilization": 0.091609
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.108872
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059837
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.06184
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 12,
+      "station_days_with_measure": 112062,
+      "utilization": 0.096547
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.109117
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059971
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.06184
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 136,
+      "station_days_with_measure": 112062,
+      "utilization": 0.10126
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 1,
+      "station_days_with_measure": 29295,
+      "utilization": 0.113601
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.062436
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.071208
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 175,
+      "station_days_with_measure": 112062,
+      "utilization": 0.106433
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 1,
+      "station_days_with_measure": 29295,
+      "utilization": 0.115567
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.063516
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.074442
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 253,
+      "station_days_with_measure": 112062,
+      "utilization": 0.114069
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 1,
+      "station_days_with_measure": 29295,
+      "utilization": 0.113601
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.062436
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.071208
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 224,
+      "station_days_with_measure": 112062,
+      "utilization": 0.087471
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 7,
+      "station_days_with_measure": 29295,
+      "utilization": 0.124385
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.068363
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.073498
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "connected",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 31,
+      "station_days_with_measure": 112062,
+      "utilization": 0.105573
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "charging",
+      "session_rule": "non_trivial_only",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.102941
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.056577
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.061474
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 112062,
+      "utilization": 0.090556
+    },
+    {
+      "definition": "robust_max_n1",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.108872
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059837
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.06184
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 12,
+      "station_days_with_measure": 112062,
+      "utilization": 0.09588
+    },
+    {
+      "definition": "robust_max_n2",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.109117
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059971
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.06184
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 133,
+      "station_days_with_measure": 112062,
+      "utilization": 0.100132
+    },
+    {
+      "definition": "robust_max_n3",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.109117
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059971
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.071208
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 169,
+      "station_days_with_measure": 112062,
+      "utilization": 0.105557
+    },
+    {
+      "definition": "robust_max_n5",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 1,
+      "station_days_with_measure": 29295,
+      "utilization": 0.114339
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.062842
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.074442
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 250,
+      "station_days_with_measure": 112062,
+      "utilization": 0.113507
+    },
+    {
+      "definition": "robust_max_n10",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.109117
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.059971
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.071208
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 218,
+      "station_days_with_measure": 112062,
+      "utilization": 0.087036
+    },
+    {
+      "definition": "connector_ids",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.121914
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "boulder",
+      "station_days": 44744,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 29295,
+      "utilization": 0.067005
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "cary",
+      "station_days": 10862,
+      "station_days_over_100pct": 0,
+      "station_days_with_measure": 6845,
+      "utilization": 0.073498
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "connected",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": 30,
+      "station_days_with_measure": 112062,
+      "utilization": 0.10447
+    },
+    {
+      "definition": "trailing_90d_max",
+      "flavour": "charging",
+      "session_rule": "all_sessions",
+      "source": "dft_2017",
+      "station_days": 221624,
+      "station_days_over_100pct": null,
+      "station_days_with_measure": 0,
+      "utilization": null
+    }
+  ],
+  "run_id": "sensitivity-20260920T013439Z"
+}
