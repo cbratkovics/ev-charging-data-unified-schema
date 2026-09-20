@@ -1,0 +1,4 @@
+ChargingEvent,CPID,Connector,StartDate,StartTime,EndDate,EndTime,EnergySupplied,Price,Area code,Name
+4087937,70900,1,22/12/2017,11:35:00,22/12/2017,11:35:00,0,0,E07000004,Fixture Council
+4087940,70900,2,10/06/2017,23:50:00,11/06/2017,00:20:00,9.1,1.5,E07000004,Fixture Council
+4087942,70901,NA,05/05/2017,09:00:00,NA,NA,NA,NA,NA,Fixture Council

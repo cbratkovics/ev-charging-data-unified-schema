@@ -1,0 +1,11 @@
+﻿Station_Name,Address,City,State_Province,Zip_Postal_Code,Start_Date___Time,Start_Time_Zone,End_Date___Time,End_Time_Zone,Total_Duration__hh_mm_ss_,Charging_Time__hh_mm_ss_,Energy__kWh_,GHG_Savings__kg_,Gasoline_Savings__gallons_,Port_Type,ObjectID,ObjectId2
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,1/9/2018 11:02,MDT,1/9/2018 13:30,MDT,2:28:00,2:02:44,6.504,2.732,0.816,Level 2,0,1
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,3/11/2018 0:30,MDT,3/11/2018 3:30,MDT,2:00:00,1:30:00,5.0,2.1,0.6,Level 2,1,2
+BOULDER / FIXTURE ST2,100 Fixture Rd,Boulder,Colorado,80301,6/2/2023 22:15,MDT,6/3/2023 1:45,MDT,3:30:00,3:00:00,18.0,7.5,2.2,Level 2,2,3
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,2023-08-31 08:15:30,MDT,2023-08-31 09:00:00,MDT,0:44:30,0:00:00,0,0,0,Level 2,3,4
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,1/9/2018 11:02,MDT,1/9/2018 13:30,MDT,2:28:00,2:02:44,6.504,2.732,0.816,Level 2,0,5
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,3/11/2018 0:30,MDT,3/11/2018 3:30,MDT,2:00:00,1:30:00,5,2.1,0.6,Level 2,1,6
+BOULDER / FIXTURE ST2,100 Fixture Rd,Boulder,Colorado,80301,6/2/2023 22:15,MDT,6/3/2023 1:45,MDT,3:30:00,3:00:00,18,7.5,2.2,Level 2,2,7
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,8/31/2023 8:15,MDT,8/31/2023 9:00,MDT,0:44:30,0:00:00,0,0,0,Level 2,3,8
+BOULDER / FIXTURE ST2,100 Fixture Rd,Boulder,Colorado,80301,11/5/2023 0:30,MST,11/5/2023 2:30,MST,3:00:00,2:50:00,15.2,6.4,1.9,Level 2,4,9
+BOULDER / FIXTURE ST1,100 Fixture Rd,Boulder,Colorado,80301,11/30/2023 23:27,MST,12/1/2023 9:02,MST,9:35:00,4:00:00,22.0,9.2,2.7,Level 2,5,10

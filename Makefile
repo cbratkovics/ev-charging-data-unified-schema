@@ -1,4 +1,4 @@
-.PHONY: help install test lint format profile render-profile check-profile dbt-deps dbt-parse dbt-dev dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture profile render-profile check-profile dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -12,7 +12,8 @@ help:
 	@echo "install       - create .venv and install the package + dev dependencies (pinned toolchain)"
 	@echo "test          - pytest (offline; runs on the fixture under tests/fixtures/)"
 	@echo "lint          - ruff + black --check"
-	@echo "ingest        - download the real sources into data/raw/ and land them as parquet (network)"
+	@echo "ingest        - download the real sources into data/raw/, land them as parquet, write the drift artifact (network)"
+	@echo "fixture       - land the hand-built fixture CSVs into tests/fixtures/landed/ (offline; dbt builds read them)"
 	@echo "profile       - profile data/raw/ into artifacts/profile/<run_id>.json, then render the docs"
 	@echo "check-profile - docs/PROFILE.md and the DATA_SOURCES inventory match the newest profile artifact"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
@@ -43,6 +44,9 @@ format:
 ingest:
 	$(PY) -m $(PKG).ingest
 
+fixture:
+	$(PY) -m $(PKG).ingest --no-download --raw-dir tests/fixtures/raw --landed-dir tests/fixtures/landed --drift-dir .dbt-state/fixture-drift
+
 profile:
 	$(PY) scripts/profile_sources.py
 	$(PY) scripts/render_profile.py
@@ -63,6 +67,11 @@ dbt-parse: dbt-deps
 dbt-dev: dbt-deps
 	mkdir -p .duckdb
 	$(DBT) build $(DBT_FLAGS) --target dev
+
+# the offline warehouse build CI runs: fixture landed files, scratch DuckDB
+dbt-fixture: dbt-deps fixture
+	mkdir -p .duckdb
+	EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb $(DBT) build $(DBT_FLAGS) --target dev --vars '{landed_dir: tests/fixtures/landed}'
 
 dbt-state:
 	mkdir -p .dbt-state

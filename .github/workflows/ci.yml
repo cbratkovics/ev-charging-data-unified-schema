@@ -47,5 +47,11 @@ jobs:
         run: python scripts/render_profile.py --check
       - name: dbt parse
         run: make dbt-parse DBT=dbt
+      - name: dbt build on the fixture (offline)
+        run: make dbt-fixture DBT=dbt PY=python
+      - name: dbt docs generate + every model, column and source described
+        run: |
+          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --vars '{landed_dir: tests/fixtures/landed}' --static
+          python scripts/check_dbt_descriptions.py
       - name: sqlfluff
         run: sqlfluff lint dbt/models dbt/tests dbt/macros dbt/snapshots

@@ -1,5 +1,66 @@
 version: 2
 
-# bronze models are added from Phase 2 onwards; every model and column must carry a description
-# (scripts/check_dbt_descriptions.py).
-models: []
+# Bronze = one model per source, a faithful string copy of the landed parquet. Column names are
+# the publisher's, normalised to lower snake_case (macro normalize_column_name); descriptions
+# repeat the source contract (ev_charging_data_unified_schema/data/contracts.py).
+models:
+  - name: brz_boulder
+    description: Boulder, CO charging transactions as landed, one row per published row across both concatenated deliveries; every value a string.
+    columns:
+      - { name: station_name, description: station display name; the only station identifier }
+      - { name: address, description: station street address (site key) }
+      - { name: city, description: station city }
+      - { name: state_province, description: station state }
+      - { name: zip_postal_code, description: station postal code }
+      - { name: start_date_time, description: session start, wall-clock local, in one of two formats (M/D/YYYY H:MM or ISO) }
+      - { name: start_time_zone, description: publisher's zone label (MDT / MST); not a per-row offset }
+      - { name: end_date_time, description: session end, wall-clock local, in one of two formats }
+      - { name: end_time_zone, description: publisher's zone label }
+      - { name: total_duration_hh_mm_ss, description: plug-in duration hh:mm:ss, hours unbounded }
+      - { name: charging_time_hh_mm_ss, description: charging duration hh:mm:ss }
+      - { name: energy_kwh, description: energy delivered, kWh, as published }
+      - { name: ghg_savings_kg, description: publisher's derived estimate; not used downstream }
+      - { name: gasoline_savings_gallons, description: publisher's derived estimate; not used downstream }
+      - { name: port_type, description: port class (Level 2 throughout) }
+      - { name: objectid, description: per-delivery row id; restarts at 0 at each delivery }
+      - { name: objectid2, description: row id over the whole file }
+      - { name: _source, description: landing metadata; source short name }
+      - { name: _file_name, description: landing metadata; published file name }
+      - { name: _retrieved_at, description: landing metadata; download time, ISO 8601 UTC }
+      - { name: _row_hash, description: landing metadata; sha256 over the source columns of the row }
+  - name: brz_cary
+    description: Cary, NC charging sessions as landed, one row per published row; every value a string.
+    columns:
+      - { name: start_date, description: session start, ISO 8601 with +00:00 (true UTC) }
+      - { name: station_name, description: station display name; the only station identifier }
+      - { name: charging_time_hh_mm_ss, description: charging duration hh:mm:ss }
+      - { name: energy_kwh, description: energy delivered, kWh, as published }
+      - { name: address_1, description: station street address }
+      - { name: address_2, description: station address line 2 }
+      - { name: city, description: station city }
+      - { name: state_province, description: station state }
+      - { name: zip_postal_code, description: station postal code }
+      - { name: _source, description: landing metadata; source short name }
+      - { name: _file_name, description: landing metadata; published file name }
+      - { name: _retrieved_at, description: landing metadata; download time, ISO 8601 UTC }
+      - { name: _row_hash, description: landing metadata; sha256 over the source columns of the row }
+  - name: brz_dft_2017
+    description: UK DfT 2017 charging events as landed from the four files (rapids raw, rapids anomalies, fasts raw, fasts anomalies), unioned by name so a column absent from a file is null there; every value a string, NA tokens kept as published.
+    columns:
+      - { name: publisher_row_index, description: unnamed leading index column of the fasts files; null for the rapids files }
+      - { name: chargingevent, description: publisher's event id; null or repeated in the fasts files }
+      - { name: cpid, description: charge-point id; null on some fasts rows; NA token as published }
+      - { name: connector, description: connector id 1..3, sometimes a text variant; NA token as published }
+      - { name: startdate, description: start date, ISO in three files and day-first in the rapids anomalies file }
+      - { name: starttime, description: start time of day hh:mm:ss }
+      - { name: enddate, description: end date; same formats as startdate; NA token in the rapids anomalies file }
+      - { name: endtime, description: end time of day hh:mm:ss; NA token in the rapids anomalies file }
+      - { name: energy, description: energy delivered, kWh, as published (aliased from EnergySupplied in the rapids files on landing) }
+      - { name: price, description: fee charged, rapids files only; NA token as published }
+      - { name: pluginduration, description: plug-in duration as published; minutes in the rapids raw file, hours in the fasts files, absent from the rapids anomalies file }
+      - { name: area_code, description: ONS area code of the funding body, rapids anomalies file only }
+      - { name: name, description: funding body (a council or public-sector organisation); the site key }
+      - { name: _source, description: landing metadata; source short name }
+      - { name: _file_name, description: landing metadata; published file name (decides the family) }
+      - { name: _retrieved_at, description: landing metadata; download time, ISO 8601 UTC }
+      - { name: _row_hash, description: landing metadata; sha256 over the source columns of the row }

@@ -4,8 +4,10 @@ Public EV-charging session data from several operators, each published in a diff
 each under an explicit open licence, consolidated into one tested, documented dbt schema on DuckDB,
 and used to produce a small set of evidence-backed findings.
 
-**Status: Phase 1 of 8 (sources acquired and profiled).** The session sources are downloaded and
-profiled (`docs/PROFILE.md`, rendered from `artifacts/profile/`). No warehouse model exists yet. Every number that appears later will be
+**Status: Phase 2 of 8 (bronze, contracts, drift).** The sources are downloaded, profiled
+(`docs/PROFILE.md`, rendered from `artifacts/profile/`), landed as string parquet and copied into
+bronze; each landed file is checked against its source contract and the outcome is written to
+`artifacts/drift/`. Silver and gold do not exist yet. Every number that appears later will be
 read from a committed artifact under `artifacts/` that records the run id, code commit, input
 file hashes and metric definitions.
 
@@ -24,10 +26,12 @@ SHA-256 per source once downloaded.
 ## Run locally
 
 ```bash
-make install     # uv venv + pinned toolchain (constraints.txt)
-make test        # pytest, offline, on the hand-built fixture under tests/fixtures/
-make dbt-parse   # dbt deps + parse
-make lint        # ruff + black
+make install      # uv venv + pinned toolchain (constraints.txt)
+make test         # pytest, offline, on the hand-built fixture under tests/fixtures/
+make dbt-fixture  # land the fixture and build the warehouse from it (offline)
+make ingest       # download the real sources, land them, write the drift artifact (network)
+make dbt-dev      # build the warehouse from the real landed data
+make lint         # ruff + black
 ```
 
 ## Design decisions
@@ -36,11 +40,13 @@ One file per decision under `docs/adr/`. `ADR-0001` records the origin of this r
 (rendered from a private prediction-pipeline template, stripped, not copier-tracked) and what
 was deleted beyond the build brief. `ADR-0002` records what is committed per source, by licence.
 `ADR-0003` records that user-level fields never reach silver, gold or exports. `ADR-0004` records
-the source policy: only sources with an explicit, verbatim open licence are used.
+the source policy: only sources with an explicit, verbatim open licence are used. `ADR-0005` to
+`ADR-0007` record the session contract, the capacity denominator and the Phase 2 amendments;
+`ADR-0008` the drift policy as built. `docs/BRIEF.md` is the amended build brief.
 
 ## Limitations
 
-- No warehouse model exists yet; this section is rewritten as each phase lands.
+- Only bronze exists; this section is rewritten as each phase lands.
 - Raw rows are not committed for any source (ADR-0002); reproducing the aggregates needs the live portals.
 - Port counts are inferred from observed concurrency, not from an inventory; availability is assumed 24 hours a day within a station's active window. The inference undercounts ports that exist but were never used concurrently (biasing utilization upward) and overcounts where overlapping records are data errors (biasing it downward). Both directions are known and neither is measured (ADR-0006).
 - The sources cover different years and countries (Cary 2012 to 2023, Boulder 2018 to 2023, UK DfT 2017); findings are within-operator unless the period mismatch is stated.

@@ -1,0 +1,5 @@
+"ChargingEvent","CPID","Connector","StartDate","StartTime","EndDate","EndTime","EnergySupplied","Price","PluginDuration","Name"
+"4096121","70902","1",2017-12-27,13:30:00,2017-12-27,14:31:00,22.7,0,61,"Fixture Council"
+"4087939","70900","NA",2017-03-26,00:30:00,2017-03-26,03:30:00,40.0,NA,120,"Fixture Council"
+"4087940","70900","2",2017-06-10,23:50:00,2017-06-11,00:20:00,9.1,1.5,30,"Fixture Council"
+"4087941","70901","1",2017-06-10,10:00:00,2017-06-10,10:02:00,0,0,2,"Fixture Council"

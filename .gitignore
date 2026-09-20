@@ -16,6 +16,7 @@ __pycache__/
 # where docs/DATA_SOURCES.md records a licence that permits it)
 data/raw/
 data/landed/
+tests/fixtures/landed/
 
 # dbt local warehouse, build outputs, slim-build state
 .duckdb/
