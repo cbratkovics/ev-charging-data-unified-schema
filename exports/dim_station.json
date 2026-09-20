@@ -2426,7 +2426,7 @@
  {
   "station_key":"dft_2017\/1536",
   "source":"dft_2017",
-  "operator_key":"dft_2017\/<null>",
+  "operator_key":"dft_2017\/Transport for London",
   "site_key":"Transport for London",
   "station_name_raw":"1536",
   "station_tz":"Europe\/London",
@@ -5186,7 +5186,7 @@
  {
   "station_key":"dft_2017\/2540",
   "source":"dft_2017",
-  "operator_key":"dft_2017\/<null>",
+  "operator_key":"dft_2017\/Transport for London",
   "site_key":"Transport for London",
   "station_name_raw":"2540",
   "station_tz":"Europe\/London",

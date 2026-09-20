@@ -108,7 +108,7 @@ Grain: station_key, local_date. Formats: parquet. Rows: 306,091.
 
 Monthly rollup at source x operator x calendar month (station-local dates): sums of the station-day measures and the counts needed to recompute any ratio; no ratio is stored (utilization is sum over sum at any rollup). Null measures stay null where the source lacks that duration type. Exported as Parquet and JSON.
 
-Grain: source, operator_key, year_month. Formats: parquet, json. Rows: 877.
+Grain: source, operator_key, year_month. Formats: parquet, json. Rows: 881.
 
 | Column | Type | Description |
 |---|---|---|

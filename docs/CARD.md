@@ -25,7 +25,7 @@ is inferred, bounded, and reported with its sensitivity instead of as a single f
 - Utilization by source (production port count; range across denominator definitions): boulder charging 6.2% (5.8% to 6.8%); boulder connected 11.4% (10.5% to 12.4%); cary charging 7.1% (6.1% to 7.4%); dft_2017 connected 8.7% (8.7% to 11.4%).
 - Reconciliation: every source reconciles exactly on rows and sessions; status **non_blocking**.
 - Rows: 440,575 landed, 357,606 accepted sessions, 82,969 quarantined with a primary reason each.
-_Keys: `artifacts/findings/findings-20260920T022915Z.json` boulder_idle.production, utilization_ranges; `artifacts/silver/silver-20260920T022854Z.json` status, by_source._
+_Keys: `artifacts/findings/findings-20260920T025549Z.json` boulder_idle.production, utilization_ranges; `artifacts/silver/silver-20260920T025526Z.json` status, by_source._
 <!-- generated:card end -->
 
 ## Stack
