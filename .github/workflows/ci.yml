@@ -62,10 +62,10 @@ jobs:
       - name: dbt build on the fixture (slim on pull requests when state is available; ADR-0015 item 3)
         run: |
           make dbt-deps DBT=dbt
-          make fixture PY=python
           # the fixture is served from data/landed with the default vars, so the state comparison
-          # runs with exactly the vars the production manifest was built with (ADR-0015 item 4)
-          rm -rf data/landed && cp -r tests/fixtures/landed data/landed
+          # runs with exactly the vars the production manifest was built with (ADR-0015 item 4);
+          # the target creates the git-ignored data/ directory, which a fresh checkout lacks
+          make fixture-landed PY=python
           mkdir -p .duckdb
           export EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb
           if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ steps.state.outputs.have_state }}" = "true" ]; then

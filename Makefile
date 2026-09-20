@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture silver-summary sensitivity findings render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture fixture-landed silver-summary sensitivity findings render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -14,6 +14,7 @@ help:
 	@echo "lint          - ruff + black --check"
 	@echo "ingest        - download the real sources into data/raw/, land them as parquet, write the drift artifact (network)"
 	@echo "fixture       - land the hand-built fixture CSVs into tests/fixtures/landed/ (offline; dbt builds read them)"
+	@echo "fixture-landed - copy the landed fixture into data/landed so a dbt build with the default vars reads it (what ci.yml runs)"
 	@echo "profile       - profile data/raw/ into artifacts/profile/<run_id>.json, then render the docs"
 	@echo "check-profile - docs/PROFILE.md and the DATA_SOURCES inventory match the newest profile artifact"
 	@echo "check-contracts - docs/CONTRACTS.md matches the contract definitions"
@@ -54,6 +55,14 @@ ingest:
 
 fixture:
 	$(PY) -m $(PKG).ingest --no-download --raw-dir tests/fixtures/raw --landed-dir tests/fixtures/landed --drift-dir .dbt-state/fixture-drift --retrieved-at 2026-01-01T00:00:00+00:00
+
+# ci.yml serves the fixture from data/landed with the default vars so the slim-CI state comparison
+# runs with the vars the production manifest was built with (ADR-0015 item 4). data/ is
+# git-ignored, so it must be created here: on a fresh checkout it does not exist.
+fixture-landed: fixture
+	mkdir -p data
+	rm -rf data/landed
+	cp -R tests/fixtures/landed data/landed
 
 profile:
 	$(PY) scripts/profile_sources.py
@@ -134,10 +143,12 @@ dbt-state:
 
 dbt-slim: dbt-deps
 	@test -f .dbt-state/manifest.json || (echo "no .dbt-state; run make dbt-dev && make dbt-state first" && exit 1)
+	mkdir -p .duckdb
 	$(DBT) build $(DBT_FLAGS) --target dev --select state:modified+ --defer --state $(CURDIR)/.dbt-state
 
 
 dbt-docs: dbt-deps
+	mkdir -p .duckdb
 	$(DBT) docs generate $(DBT_FLAGS) --target dev --static
 
 dbt-lint:

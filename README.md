@@ -83,6 +83,8 @@ make test         # pytest: contracts, drift, DST, dedup, idempotency, reconcili
 
 `make ingest && make dbt-dev` downloads the real sources (network) and builds from them;
 `make release` regenerates every artifact, export and rendered document at one commit.
+`scripts/smoke.sh` runs the offline sequence from a fresh clone in a temporary directory, so
+nothing that exists only on one machine can make it pass.
 
 ## Design decisions
 

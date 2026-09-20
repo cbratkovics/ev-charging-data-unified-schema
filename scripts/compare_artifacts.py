@@ -41,8 +41,10 @@ def main(argv: list[str] | None = None) -> int:
     title, body = issue_body(report)
     report["issue_title"] = title
     if a.report:
+        a.report.parent.mkdir(parents=True, exist_ok=True)
         a.report.write_text(json.dumps(report, indent=2, default=str) + "\n")
     if a.issue_body:
+        a.issue_body.parent.mkdir(parents=True, exist_ok=True)
         a.issue_body.write_text(body + "\n")
     print(
         f"status: {report['status']} ({len(report['input_changes'])} input change(s), {len(report['output_differences'])} output difference(s), reconciliation {report['reconciliation_status']})"
