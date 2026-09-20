@@ -1,7 +1,7 @@
 # Data sources
 
-Three public session sources and one reference registry, every one under an explicit open
-licence (docs/adr/0004-source-policy.md). Per source: the exact endpoints used, the licence
+Three public session sources, every one under an explicit open licence
+(docs/adr/0004-source-policy.md). Station-registry matching is not built (ROADMAP.md). Per source: the exact endpoints used, the licence
 **verbatim as published** with the URL it was read from, and what this repository commits
 (docs/adr/0002-source-redistribution.md). Retrieval time, size, row count and SHA-256 of every
 downloaded file are in the generated inventory at the end of this page; the full hashes are in
@@ -122,34 +122,6 @@ Experimental Statistics by the publisher.
 - Timezone: not stated by the publisher. Timestamps are treated as UK local wall-clock time
   (`Europe/London`); docs/PROFILE.md records the evidence.
 - Committed: nothing from the files (ADR-0002); inventory rows and profile aggregates.
-
-## Station registry — Alternative Fuel Stations API (US and Canada)
-
-- The brief's host `developer.nrel.gov` no longer resolves. The lab is now the National
-  Laboratory of the Rockies; the same API is at `https://developer.nlr.gov`.
-- Docs: <https://developer.nlr.gov/docs/transportation/alt-fuel-stations-v1/all/>.
-  Endpoint: `GET https://developer.nlr.gov/api/alt-fuel-stations/v1.{json|csv|geojson}?api_key=…&fuel_type=ELEC&state=…&status=all&access=all&limit=all`.
-  A `zip` filter works; a `city` filter returned nothing. Rate limit
-  (<https://developer.nlr.gov/docs/rate-limits/>): "Hourly Limit: 1,000 requests per hour" per key;
-  `DEMO_KEY` "30 requests per IP address per hour" and "50 requests per IP address per day";
-  headers `X-RateLimit-Limit` / `X-RateLimit-Remaining`; HTTP 429 on overage.
-- Response fields relevant here: `id` ("A unique identifier for this specific station"),
-  `station_name`, `street_address`, `city`, `state`, `zip`, `latitude`, `longitude`,
-  `ev_level1_evse_num`, `ev_level2_evse_num`, `ev_dc_fast_num`, `ev_connector_types[]`,
-  `ev_network`, `ev_network_ids {station, posts, ports}`, `ev_charging_units[]` (per unit:
-  `port_count`, `charging_level`, connector `power_kw`), `open_date`, `date_last_confirmed`,
-  `updated_at`, `status_code` (E / P / T), `access_code`, `facility_type`.
-- Terms, verbatim from <https://afdc.energy.gov/data_download> ("Data Download Terms and
-  Conditions"): "These data and software code ("Data") are provided by the National Laboratory of
-  the Rockies ("NLR"), which is operated by the Alliance for Energy Innovation, LLC ("Alliance"),
-  for the U.S. Department of Energy ("DOE"), and may be used for any purpose whatsoever." and "The
-  names DOE/NLR/Alliance shall not be used in any representation, advertising, publicity or other
-  manner whatsoever to endorse or promote any entity that adopts or uses the Data." followed by
-  an as-is warranty disclaimer, indemnification and limitation of liability.
-- Coverage: US and Canada only. The UK chargepoints are out of coverage and will carry an explicit
-  `out_of_coverage` status (Phase 5).
-- Status: the registry pull is deferred until `NREL_API_KEY` is set; the response shape above was
-  captured with `DEMO_KEY` on one record.
 
 ## Inventory of downloaded files
 

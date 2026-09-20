@@ -11,8 +11,9 @@ available days, with and without the non-trivial rule, plus the count of station
 * ``trailing_90d_max``: the Phase 1 proposal, the maximum concurrency over a trailing 90-day
   window ending on each station-day (a per-day denominator);
 * ``connector_ids``: distinct published connector ids (DfT units that have them; others fall
-  back to robust_max_n5 and are reported as such);
-* ``registry``: registry port counts for matched stations (Phase 5; absent until then).
+  back to robust_max_n5 and are reported as such).
+The production definition (dim_station.ports_inferred) is the larger of connector_ids and
+robust_max_n5, floored at 1 (ADR-0012); both pure definitions are kept here.
 """
 
 from __future__ import annotations
@@ -221,7 +222,7 @@ def sensitivity(con: duckdb.DuckDBPyConnection, *, rid: str, code_commit: str) -
             "trailing_90d_max": "ports on each station-day = maximum concurrency over the trailing 90 days ending that day, floored at 1 (the retired Phase 1 proposal)",
             "connector_ids": "ports = distinct published connector ids where the unit has any, else robust_max_n5",
             "station_days_over_100pct": "available station-days whose daily measure minutes exceed the day's available port minutes: undercounted ports or overlapping data errors",
-            "production_definition": "dim_station.ports_inferred = connector_ids where present else robust_max_n5 (ADR-0007 item 4)",
+            "production_definition": "dim_station.ports_inferred = max(connector_ids, robust_max_n5), floored at 1 (ADR-0012)",
         },
         "dim_station": dim_check,
         "ports_by_definition": port_tables,

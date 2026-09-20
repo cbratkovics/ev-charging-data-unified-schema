@@ -82,7 +82,7 @@ select
     station_name_raw,
     site_key,
     port_id,
-    capacity_grain,
+    port_id_present,
     start_utc,
     end_utc,
     start_local,

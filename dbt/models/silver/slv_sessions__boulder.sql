@@ -112,7 +112,7 @@ select
     station_name as station_name_raw,
     address as site_key,
     cast(null as varchar) as port_id,
-    'unit' as capacity_grain,
+    false as port_id_present,
     start_utc,
     end_utc,
     start_local,

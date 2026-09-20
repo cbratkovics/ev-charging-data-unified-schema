@@ -11,8 +11,8 @@ quarantine that keeps every failing reason (`artifacts/silver/`), and built into
 fact with source-level incremental replace, a station dimension with inferred ports and active
 windows, an SCD2 snapshot, and a station-day fact on a full spine with the midnight split.
 Utilization is a ratio of sums; its sensitivity to the capacity denominator is a committed
-artifact (`artifacts/sensitivity/`). Registry matching, reconciliation, findings and exports
-are not built yet. Every number that appears later will be
+artifact (`artifacts/sensitivity/`). Reconciliation, findings and exports are not built yet; station-registry matching is not
+built (ROADMAP.md). Every number that appears later will be
 read from a committed artifact under `artifacts/` that records the run id, code commit, input
 file hashes and metric definitions.
 
@@ -23,7 +23,6 @@ file hashes and metric definitions.
 | Boulder, CO | city charging transactions | 2018-01 to 2023-11 | CC0 (item metadata) |
 | Cary, NC | town-owned station sessions | 2012-04 to 2023-01 | CC0 1.0 (dataset metadata) |
 | UK Department for Transport, 2017 | funded local-authority rapid and public-sector fast chargepoints | 2017 | Open Government Licence v3.0 |
-| Station registry | US / Canada reference dimension | n/a | "may be used for any purpose whatsoever" |
 
 `docs/DATA_SOURCES.md` records the exact URL, licence text, retrieval time, row count and
 SHA-256 per source once downloaded.
@@ -52,7 +51,9 @@ the source policy: only sources with an explicit, verbatim open licence are used
 
 ## Limitations
 
-- Registry matching, reconciliation, findings and exports do not exist yet; this section is rewritten as each phase lands.
+- Reconciliation, findings and exports do not exist yet; this section is rewritten as each phase lands.
+- Port counts are lower bounds: the larger of the published connector-id count and the observed-concurrency robust max (ADR-0012); no station inventory or registry is used.
+- DfT rows with no charge-point id are kept in session and energy totals under an unknown-station key but carry no capacity; their share is reported in the silver summary artifact (`unknown_station`).
 - Utilization figures are not clipped at 100%; station-days above 100% are reported per denominator definition as a diagnostic of undercounted ports (ADR-0010 f).
 - Energy and charging minutes of a session crossing midnight are allocated over a charging window assumed to begin at session start (ADR-0011 item 5); the sources do not publish when charging actually happened.
 - Raw rows are not committed for any source (ADR-0002); reproducing the aggregates needs the live portals.

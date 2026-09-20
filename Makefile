@@ -96,10 +96,10 @@ dbt-dev: dbt-deps
 	mkdir -p .duckdb
 	$(DBT) build $(DBT_FLAGS) --target dev
 
-# the offline warehouse build CI runs: fixture landed files, scratch DuckDB
+# the offline warehouse build CI runs: fixture landed files, scratch DuckDB, always a full refresh
 dbt-fixture: dbt-deps fixture
 	mkdir -p .duckdb
-	EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb $(DBT) build $(DBT_FLAGS) --target dev --vars '{landed_dir: tests/fixtures/landed}'
+	EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb $(DBT) build $(DBT_FLAGS) --target dev --vars '{landed_dir: tests/fixtures/landed}' --full-refresh
 
 dbt-state:
 	mkdir -p .dbt-state

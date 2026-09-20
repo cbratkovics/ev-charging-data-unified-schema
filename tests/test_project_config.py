@@ -30,7 +30,7 @@ def test_only_the_env_example_is_tracked() -> None:
     ).stdout.split()
     env_files = [p for p in tracked if p.split("/")[-1].startswith(".env")]
     assert env_files == [".env.example"]
-    assert "NREL_API_KEY=" in (REPO_ROOT / ".env.example").read_text(encoding="utf-8")
+    assert "no secret" in (REPO_ROOT / ".env.example").read_text(encoding="utf-8").lower()
 
 
 def test_source_names_are_unique_and_snake_case() -> None:

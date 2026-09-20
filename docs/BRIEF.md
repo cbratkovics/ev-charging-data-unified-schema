@@ -54,8 +54,8 @@ copier-tracked (ADR-0001). Conventions kept: bronze / silver / gold with `brz_`,
    employer, or any employer-derived table names, schemas, vendor names, thresholds, or
    business rules. All logic must be derived from the public data and documented reasoning in
    this repo.
-7. **No secrets in the tree.** The registry API key is read from the `NREL_API_KEY` environment
-   variable. `.env.example` is provided; `.env*` is git-ignored.
+7. **No secrets in the tree.** The project reads no secret; `.env.example` says so and
+   `.env*` is git-ignored.
 8. **Personal data.** User-level fields (user ids, driver postal codes, vehicle details) are
    landed in bronze and never selected by silver, so they cannot reach gold or exports
    (ADR-0003). None of the approved sources carries any.
@@ -74,14 +74,14 @@ copier-tracked (ADR-0001). Conventions kept: bronze / silver / gold with `brz_`,
 ## 4. Data sources
 
 Approved (ADR-0004). Endpoints, verbatim licences and retrieval records are in
-`docs/DATA_SOURCES.md`; profiles in `docs/PROFILE.md`.
+`docs/DATA_SOURCES.md`; profiles in `docs/PROFILE.md`. Station-registry matching was cut
+(ADR-0012; design in `ROADMAP.md`).
 
 | # | Source | Licence (verbatim source) | Period | Notes |
 |---|---|---|---|---|
 | 1 | Boulder, CO charging transactions (ArcGIS Hub item) | "CC0 License" linked to CC0 1.0, in the item metadata | 2018-01 to 2023-11 | One CSV holding two concatenated deliveries; wall-clock local timestamps in two formats; charging and total (plug-in) durations |
 | 2 | Cary, NC town-owned station sessions (Opendatasoft) | `"license": "CC0 1.0 Universal"` in the dataset metadata | 2012-04 to 2023-01 | True UTC timestamps; charging duration only, no end time; station names only |
 | 3 | UK Department for Transport, Electric Chargepoint Analysis 2017: Local Authority Rapids (revised) and Public Sector Fasts raw data, plus the two published incomplete-or-anomalous files | "All content is available under the Open Government Licence v3.0, except where otherwise stated" on both publication pages | 2017 | Four files with differing headers, date formats and duration units; plug-in duration only; connector ids on 44% of rows; wall-clock local timestamps |
-| 4 | Station registry (reference dimension): Alternative Fuel Stations API, now at `developer.nlr.gov` | "may be used for any purpose whatsoever" (AFDC data download terms) | n/a | US and Canada only; the UK chargepoints are `out_of_coverage`. Pull deferred until `NREL_API_KEY` is set |
 
 Removed after Phase 1 (ADR-0004): Palo Alto, CA (no dataset-level licence; portal unreachable)
 and Dundee, UK (licence unstated on every item). Deferred to `ROADMAP.md`: Perth & Kinross,
@@ -157,7 +157,7 @@ Paris, Caltech ACN-Data.
 
 One row per session: `session_sk`, `source`, `source_family`, `source_session_id`,
 `source_file`, `source_delivery_block`, `station_key`, `station_name_raw`, `site_key`,
-`port_id`, `capacity_grain` (port | unit | site), `start_utc`, `end_utc`, `start_local`,
+`port_id`, `port_id_present`, `start_utc`, `end_utc`, `start_local`,
 `end_local`, `start_tz`, `is_dst_ambiguous`, `energy_kwh`, `charging_minutes`,
 `connected_minutes`, `connected_minutes_reported`, `duration_disagreement_minutes`,
 `idle_minutes`, `duration_availability`, `is_non_trivial`, `quality_flags[]`, `_row_hash`.
@@ -186,35 +186,27 @@ publisher-rule decomposition per source and file (ADR-0010 b, c).
   rollups never mix grains (ADR-0005 d). Where a source lacks a duration type the measure is
   null, never zero, and rollups do not treat null as zero (ADR-0010 g).
 - `dim_station` (with `capacity_grain`, `ports_inferred`, `ports_source`, `low_evidence`,
-  `active_from`, `active_to`, `excluded_days`, `registry_match_status`), `dim_operator`,
-  `dim_date`.
+  `active_from`, `active_to`, `excluded_days`), `dim_operator`, `dim_date`.
 - An **SCD2 snapshot** on station attributes.
 - Utilization is a **ratio recomputed from summed numerator and denominator at whatever rollup
   is requested**, never an average of daily percentages; a singular test shows the two differ.
   Two flavours where the data allows: charging-time and connected-time utilization; their
   difference is idle-after-charge time.
-- **Capacity denominator** (ADR-0006, ADR-0007): port count precedence is connector ids where
-  present, else the robust max of observed concurrency (the highest level reached on at least
-  N = 5 distinct days over the station's active life), floored at 1; stations with fewer than
-  N active days carry `low_evidence`. Registry counts stay side by side, never blended. The
+- **Capacity denominator** (ADR-0006, ADR-0007, ADR-0012): `ports_inferred` is the larger of
+  the published connector-id count and the robust max of observed concurrency (the highest
+  level reached on at least N = 5 distinct days over the station's active life), floored at 1;
+  both are lower bounds and `ports_source` names the binding one; stations with fewer than N
+  active days carry `low_evidence`. The
   active window runs from first to last observed session minus zero-session gaps longer than
   the source's threshold (Boulder 30 days, DfT 90 days, Cary 30 days), with excluded days
   reported separately. A sensitivity artifact (`artifacts/sensitivity/<run_id>.json`) reports
-  utilization under robust max at N in {1, 2, 3, 5, 10}, the original trailing-90-day rule,
-  connector-id counts and registry counts; findings state how sensitive each conclusion is.
+  utilization under robust max at N in {1, 2, 3, 5, 10}, the original trailing-90-day rule
+  and connector-id counts; findings state how sensitive each conclusion is.
   Utilization is not clipped at 100%; station-days above 100% are counted per denominator as a
   diagnostic of undercounted ports (ADR-0010 f).
   Model docs and the README state that port counts are inferred, availability is assumed 24
   hours, and both bias directions are known.
 - One **versioned model** only if a genuine contract change arises; otherwise skip and say so.
-
-### Station registry matching (Phase 5, cuttable)
-
-Match US stations to the registry: normalize names and addresses; exact match; fuzzy match with
-`rapidfuzz` on the remainder; weighted score; confidence tiers; a review file for low-confidence
-and suspicious matches; an explicit `out_of_coverage` status for the UK chargepoints. Keep
-method, score and tier on every mapping row. A match rate is coverage, not accuracy; hand-review
-a small random sample and report what was found.
 
 ### Reconciliation artifact
 
@@ -273,7 +265,7 @@ is the stable read contract. No frontend or API is built.
 | 2. Bronze, contracts, drift | Loaders, manifest, bronze models, source contracts, drift artifact and policy | The drift artifact is committed and the policy branches are tested. |
 | 3. Silver | Per-source conforming, union, quarantine, dbt unit tests | The row-conservation test passes on real data. |
 | 4. Gold | Facts, dims, snapshot, midnight split, capacity, utilization, sensitivity artifact, incremental model, idempotency tests | Idempotency and ratio-of-sums tests pass. |
-| 5. Registry matching | As specified. Cut to `ROADMAP.md` if phases 1–4 ran long; ask the owner | Mapping table, review file, and sampled-review note exist. |
+| 5. Registry matching | **Cut** (ADR-0012); design in `ROADMAP.md` | n/a |
 | 6. Reconciliation and findings | Reconciliation artifact, classification, `FINDINGS.md`, number checker | Every number in the docs resolves to an artifact key. |
 | 7. CI and exports | The workflows, Pages docs, `exports/` contract | Workflows pass locally where possible, and the owner TODO is written. |
 | 8. Documentation | README (problem, sources table, lineage, design decisions linking ADRs, results table citing artifact keys, how to run, limitations, independence statement), `ARCHITECTURE.md`, `REPRODUCIBILITY.md`, `ROADMAP.md`, `docs/CARD.md` (title, two-sentence summary, four or five "what this demonstrates" bullets, the stack, no number without an artifact key) | Docs complete and the number checker passes. |
@@ -304,3 +296,4 @@ Next phase proposal: <one paragraph>
 | 2026-09-20 | 3 | Per-family drift design kept, with a generated contract-diff document; a `make release` target that regenerates every artifact at one commit; nonexistent local times quarantined and ambiguous ones resolved to DuckDB's second occurrence, verified empirically and pinned by a test; the ICU extension verified statically linked; every failing quarantine reason kept plus one primary reason by fixed precedence; every dedup order ends in `_row_hash` | ADR-0009 |
 | 2026-09-20 | 3 (re-approval) / 4 | (a) charging tolerance from per-row timestamp precision with a within-tolerance flag and idle clamped at zero; (b) committed silver summary artifact; (c) decomposition of anomalies rows not meeting the publisher rule; (d) delivery-driven incremental merge; (e) local-time available minutes on DST days; (f) unclipped utilization with over-100% diagnostics; (g) null never zero for absent durations. Fall-back resolution kept as DuckDB's; reported-duration disambiguation to ROADMAP | ADR-0010 |
 | 2026-09-20 | 4 | Source-level replace instead of a merge, no event-time lookback, change detection by file hashes on fact rows; only the session fact is incremental; a station x local-date spine with rows for zero-session days; allocation over the charging window where charging time exists, else the connected window; deterministic snapshot validity via data_as_of_utc | ADR-0011 |
+| 2026-09-20 | 4 (re-approval) / 5 | Ports = the larger of the connector-id count and the robust max (both lower bounds), `ports_source` = the binding bound; the fact's `capacity_grain` renamed `port_id_present` so the grain has one meaning on `dim_station`; unknown-station share reported in reconciliation and README; Phase 5 registry matching cut and every trace of the feature removed, design kept in `ROADMAP.md` | ADR-0012 |

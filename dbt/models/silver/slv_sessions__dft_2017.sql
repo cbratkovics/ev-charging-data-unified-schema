@@ -125,7 +125,7 @@ select
     cpid as station_name_raw,
     name as site_key,
     connector as port_id,
-    case when connector is not null then 'port' else 'unit' end as capacity_grain,
+    connector is not null as port_id_present,
     start_utc,
     end_utc,
     start_local,

@@ -9,7 +9,7 @@ Environment variables (all optional, prefix ``EV_CHARGING_DATA_UNIFIED_SCHEMA_``
 * ``RAW_DIR`` / ``LANDED_DIR`` / ``ARTIFACTS_DIR`` — override the data directories.
 * ``DUCKDB_PATH`` / ``DUCKDB_THREADS`` — read by ``dbt/profiles.yml``.
 
-``NREL_API_KEY`` (no prefix) is the station-registry key; see ``.env.example``.
+No secret is read anywhere; ``.env.example`` documents that.
 """
 
 from __future__ import annotations
@@ -39,15 +39,13 @@ META_COLUMNS: tuple[str, ...] = ("_source", "_file_name", "_retrieved_at", "_row
 @dataclass(frozen=True)
 class SourceSpec:
     """One session source. The download endpoints, licence and schema are recorded in
-    docs/DATA_SOURCES.md once verified (Phase 1); this is only the registry of names."""
+    docs/DATA_SOURCES.md; this is only the list of names."""
 
     name: str
     display_name: str
     country: str
     timezone: str
     """IANA zone of the stations (station-local time)."""
-    registry_coverage: bool
-    """False where the station registry (US / Canada) cannot cover the stations."""
     licence: str
     """Short licence label; the verbatim text and its URL live in docs/DATA_SOURCES.md. Only
     sources with an explicit open licence are admitted (docs/adr/0004-source-policy.md)."""
@@ -93,10 +91,10 @@ PROJECT = ProjectConfig(
         "dbt schema on DuckDB."
     ),
     sources=(
-        SourceSpec("boulder", "Boulder, CO", "US", "America/Denver", True, "CC0-1.0"),
-        SourceSpec("cary", "Cary, NC", "US", "America/New_York", True, "CC0-1.0"),
+        SourceSpec("boulder", "Boulder, CO", "US", "America/Denver", "CC0-1.0"),
+        SourceSpec("cary", "Cary, NC", "US", "America/New_York", "CC0-1.0"),
         SourceSpec(
-            "dft_2017", "UK DfT chargepoint analysis 2017", "GB", "Europe/London", False, "OGL-3.0"
+            "dft_2017", "UK DfT chargepoint analysis 2017", "GB", "Europe/London", "OGL-3.0"
         ),
     ),
     dbt_project_name="ev_charging_data_unified_schema_dbt",

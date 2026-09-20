@@ -25,7 +25,7 @@ commit only aggregates and hashes. Phase 1 recorded each source's licence exactl
 2. *UK DfT (OGL v3.0):* the raw CSV files may be committed under the licence's attribution
    requirement; they are treated exactly like (1): not committed, manifest and aggregates only.
    The attribution statement the licence asks for appears in docs/DATA_SOURCES.md and the README.
-3. *Station registry:* the terms permit any use. Registry pulls are committed as aggregates
+3. *Station registry (matching not built; moved to ROADMAP.md by ADR-0012):* the terms permit any use. Registry pulls are committed as aggregates
    and the matching table (Phase 5); the raw pull is cached, not committed, for the same size
    reason as (1). The endorsement restriction is respected by never naming DOE, NLR or the
    Alliance as endorsing this project.

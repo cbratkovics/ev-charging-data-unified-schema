@@ -51,16 +51,11 @@ models:
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
-  - name: capacity_grain
-    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+  - name: port_id_present
+    description: true when the row identifies a connector (DfT rows with a Connector id); the capacity grain itself
+      lives on dim_station only
     data_tests:
     - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - port
-          - unit
-          - site
   - name: start_utc
     description: session start as a UTC instant
   - name: end_utc
@@ -174,16 +169,11 @@ models:
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
-  - name: capacity_grain
-    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+  - name: port_id_present
+    description: true when the row identifies a connector (DfT rows with a Connector id); the capacity grain itself
+      lives on dim_station only
     data_tests:
     - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - port
-          - unit
-          - site
   - name: start_utc
     description: session start as a UTC instant
   - name: end_utc
@@ -299,16 +289,11 @@ models:
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
-  - name: capacity_grain
-    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+  - name: port_id_present
+    description: true when the row identifies a connector (DfT rows with a Connector id); the capacity grain itself
+      lives on dim_station only
     data_tests:
     - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - port
-          - unit
-          - site
   - name: start_utc
     description: session start as a UTC instant
   - name: end_utc
@@ -428,16 +413,11 @@ models:
   - name: port_id
     description: connector id where published (DfT Connector, reduced to its leading integer so the text variants
       of the fasts anomalies file count as the same connector); null otherwise
-  - name: capacity_grain
-    description: 'grain the station key identifies: port when a connector id exists, else unit (ADR-0005 d)'
+  - name: port_id_present
+    description: true when the row identifies a connector (DfT rows with a Connector id); the capacity grain itself
+      lives on dim_station only
     data_tests:
     - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - port
-          - unit
-          - site
   - name: start_utc
     description: session start as a UTC instant
   - name: end_utc

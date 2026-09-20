@@ -58,7 +58,7 @@ models:
     data_tests:
     - unique
     - not_null
-    constraints: &id001
+    constraints:
     - type: not_null
   - name: source
     data_type: varchar
@@ -71,7 +71,8 @@ models:
           - boulder
           - cary
           - dft_2017
-    constraints: *id001
+    constraints:
+    - type: not_null
   - name: source_family
     data_type: varchar
     description: file family within the source
@@ -117,18 +118,12 @@ models:
   - name: port_id
     data_type: varchar
     description: connector id where published (DfT Connector)
-  - name: capacity_grain
-    data_type: varchar
-    description: what this row's station identifier resolves to (port when a connector id exists, else unit); the
-      station dimension's grain is unit
+  - name: port_id_present
+    data_type: boolean
+    description: true when the row identifies a connector (DfT rows with a Connector id); the capacity grain lives
+      on dim_station
     data_tests:
     - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - port
-          - unit
-          - site
   - name: start_utc
     data_type: timestamp with time zone
     description: session start as a UTC instant
@@ -229,7 +224,8 @@ models:
     data_tests:
     - unique
     - not_null
-    constraints: *id001
+    constraints:
+    - type: not_null
   - name: operator_name
     data_type: varchar
     description: display name
@@ -303,9 +299,10 @@ models:
     - not_null
 - name: dim_station
   description: 'One row per station key (a unit) with inferred capacity, active window and excluded days (ADR-0006,
-    ADR-0007 item 4, ADR-0011 item 7). Port counts are inferred from connector ids or observed concurrency, not
-    inventoried: they undercount ports never used concurrently and overcount where overlapping records are data
-    errors; availability is assumed 24 hours a day within the active window. Full rebuild.'
+    ADR-0007 item 4, ADR-0011 item 7). Port counts are inferred as the larger of the connector-id count and the
+    observed-concurrency robust max, not inventoried: they undercount ports never used concurrently and overcount
+    where overlapping records are data errors; availability is assumed 24 hours a day within the active window.
+    Full rebuild.'
   config:
     contract:
       enforced: true
@@ -320,7 +317,8 @@ models:
     data_tests:
     - unique
     - not_null
-    constraints: *id001
+    constraints:
+    - type: not_null
   - name: source
     data_type: varchar
     description: source short name
@@ -357,13 +355,14 @@ models:
           - unit
   - name: ports_inferred
     data_type: integer
-    description: 'ports in service: distinct connector ids where any exist, else the robust max of observed concurrency
-      at N = 5 over non-trivial sessions, floored at 1 (ADR-0007 item 4)'
+    description: 'ports in service: the larger of the distinct published connector ids and the robust max of observed
+      concurrency at N = 5 over non-trivial sessions, floored at 1; both are lower bounds on the true count (ADR-0012)'
     data_tests:
     - not_null
   - name: ports_source
     data_type: varchar
-    description: where ports_inferred came from
+    description: 'which lower bound was binding: connector_ids, observed_concurrency, or floor when neither reached
+      1'
     data_tests:
     - not_null
     - accepted_values:
@@ -428,21 +427,6 @@ models:
     description: number of such gaps
     data_tests:
     - not_null
-  - name: registry_match_status
-    data_type: varchar
-    description: 'station-registry status (Phase 5): out_of_coverage for the UK, unmatched until matched'
-    data_tests:
-    - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - out_of_coverage
-          - unmatched
-          - matched
-  - name: ports_registry
-    data_type: integer
-    description: port count from the station registry where matched (Phase 5); side by side with ports_inferred,
-      never blended
   - name: data_as_of_utc
     data_type: timestamp with time zone
     description: latest retrieval time of the source's landed files; drives the snapshot's validity stamps (ADR-0011
@@ -461,7 +445,8 @@ models:
     data_tests:
     - unique
     - not_null
-    constraints: *id001
+    constraints:
+    - type: not_null
   - name: year
     data_type: integer
     description: year

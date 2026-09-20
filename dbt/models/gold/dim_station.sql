@@ -2,10 +2,11 @@
 -- ADR-0007 item 4, ADR-0011 item 7). Full rebuild every run because every attribute depends
 -- on the whole history. The station key is a unit (a Boulder or Cary station name, a DfT
 -- charge-point id); port-level keys are not built, so capacity_grain is 'unit' throughout and
--- ports_inferred counts the ports of that unit. Ports: distinct connector ids where the unit
--- publishes any, else the robust max of observed concurrency (highest level reached on at
--- least 5 distinct local dates, over non-trivial sessions; the charging window stands in for
--- the connected window where the source has no end time), floored at 1. Port counts are
+-- ports_inferred counts the ports of that unit. Ports: the larger of the distinct published
+-- connector ids and the robust max of observed concurrency (highest level reached on at least
+-- 5 distinct local dates, over non-trivial sessions; the charging window stands in for the
+-- connected window where the source has no end time), floored at 1; both are lower bounds on
+-- the true count and ports_source names the one that was binding (ADR-0012). Port counts are
 -- inferred, not inventoried: they undercount ports never used concurrently and overcount where
 -- overlapping records are data errors; availability is assumed 24 hours within the active
 -- window (docs/BRIEF.md § 5, README limitations). Unknown-station keys (dft_2017/unknown/<Name>)
@@ -126,16 +127,12 @@ select
     p.station_name_raw,
     p.station_tz,
     'unit' as capacity_grain,
-    cast(
-        case
-            when p.connector_ids > 0 then p.connector_ids
-            else greatest(coalesce(r.robust_max_n5, 0), 1)
-        end as integer
-    ) as ports_inferred,
+    -- both counts are lower bounds on the true ports; the larger is the tighter bound (ADR-0012)
+    cast(greatest(p.connector_ids, coalesce(r.robust_max_n5, 0), 1) as integer) as ports_inferred,
     case
-        when p.connector_ids > 0 then 'connector_ids'
-        when coalesce(r.robust_max_n5, 0) >= 1 then 'observed_concurrency'
-        else 'floor'
+        when greatest(p.connector_ids, coalesce(r.robust_max_n5, 0)) < 1 then 'floor'
+        when p.connector_ids >= coalesce(r.robust_max_n5, 0) then 'connector_ids'
+        else 'observed_concurrency'
     end as ports_source,
     {{ robust_n }} as ports_inferred_n,
     r.robust_max_n5,
@@ -149,8 +146,6 @@ select
     cast(p.active_to - p.active_from as integer) + 1 as window_days,
     cast(coalesce(g.excluded_days, 0) as bigint) as excluded_days,
     coalesce(g.excluded_gaps, 0) as excluded_gaps,
-    case p.source when 'dft_2017' then 'out_of_coverage' else 'unmatched' end as registry_match_status,
-    cast(null as integer) as ports_registry,
     d.data_as_of_utc
 from per_station as p
 left join robust as r on p.station_key = r.station_key

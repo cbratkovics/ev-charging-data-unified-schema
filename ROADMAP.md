@@ -8,6 +8,18 @@ Ideas outside the v1 brief. Nothing here is built; nothing here is promised.
 - Paris charging sessions.
 - Caltech ACN-Data.
 
+## Station-registry matching (cut from v1)
+
+Matching US stations to the Alternative Fuel Stations registry (US and Canada; API now at
+`developer.nlr.gov`, terms "may be used for any purpose whatsoever") was Phase 5 of the brief and
+was cut: no key was available and the phases before it ran long. The design, if picked up:
+normalise names and addresses; exact match first; fuzzy match with `rapidfuzz` on the remainder;
+weighted score; confidence tiers; a review file for low-confidence and suspicious matches; an
+explicit out-of-coverage status for the UK chargepoints; method, score and tier on every mapping
+row; a match rate reported as coverage, not accuracy, with a hand-reviewed random sample.
+Registry port counts would join the sensitivity artifact as a fourth denominator definition,
+side by side with the inferred ones, never blended.
+
 ## Deferred capabilities
 
 - Disambiguating fall-back local times with the publisher's reported duration: where a source

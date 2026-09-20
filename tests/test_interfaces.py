@@ -1,5 +1,5 @@
 """The SourceLoader seam is a runtime-checkable protocol; a minimal implementation satisfies
-it and the registry of sources in config agrees with what dbt declares."""
+it and the list of sources in config agrees with what dbt declares."""
 
 from __future__ import annotations
 
@@ -35,8 +35,3 @@ def test_every_configured_source_is_a_declared_dbt_source_table() -> None:
     landed = next(s for s in src["sources"] if s["name"] == "landed")
     # the manifest table is landing metadata, not a session source
     assert {t["name"] for t in landed["tables"]} - {"manifest"} == set(PROJECT.source_names)
-
-
-def test_registry_coverage_flags_are_by_country() -> None:
-    for s in PROJECT.sources:
-        assert s.registry_coverage == (s.country in {"US", "CA"}), s.name
