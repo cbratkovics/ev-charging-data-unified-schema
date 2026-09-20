@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture silver-summary sensitivity findings render-docs check-numbers prune-artifacts profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-export dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture silver-summary sensitivity findings render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -27,7 +27,8 @@ help:
 	@echo "dbt-dev       - dbt deps + build the warehouse locally (.duckdb/dev.duckdb)"
 	@echo "dbt-state     - save the last dev build as slim-build state in .dbt-state/"
 	@echo "dbt-slim      - build only state:modified+ against .dbt-state, deferring the rest"
-	@echo "dbt-export    - export gold models to exports/ (parquet + json)"
+	@echo "export        - write exports/ (parquet, json for small relations, manifest with hashes, SCHEMA.md) from the built dev warehouse"
+	@echo "compare       - compare fresh artifacts in FRESH_DIR with the committed latest ones (exit 0 ok, 2 upstream changed, 3 regression)"
 	@echo "dbt-docs      - generate the static dbt docs site into dbt/target"
 	@echo "dbt-lint      - sqlfluff over the dbt project"
 	@echo "check-docs    - every dbt model, column, source and exposure has a description"
@@ -79,6 +80,13 @@ render-docs:
 prune-artifacts:
 	$(PY) scripts/prune_artifacts.py
 
+export: dbt-docs
+	$(PY) scripts/export.py
+
+FRESH_DIR ?= fresh
+compare:
+	$(PY) scripts/compare_artifacts.py --fresh-dir $(FRESH_DIR)
+
 render-contracts:
 	$(PY) scripts/render_contracts.py
 
@@ -96,6 +104,7 @@ release:
 	$(PY) scripts/silver_summary.py
 	$(PY) scripts/sensitivity.py
 	$(PY) scripts/findings.py
+	$(MAKE) export
 	$(PY) scripts/render_docs.py
 	$(PY) scripts/prune_artifacts.py
 	$(PY) scripts/check_doc_numbers.py
@@ -127,9 +136,6 @@ dbt-slim: dbt-deps
 	@test -f .dbt-state/manifest.json || (echo "no .dbt-state; run make dbt-dev && make dbt-state first" && exit 1)
 	$(DBT) build $(DBT_FLAGS) --target dev --select state:modified+ --defer --state $(CURDIR)/.dbt-state
 
-dbt-export:
-	mkdir -p exports
-	GITHUB_SHA=$${GITHUB_SHA:-$$(git rev-parse HEAD 2>/dev/null || echo '')} $(DBT) run-operation export_gold $(DBT_FLAGS) --target dev
 
 dbt-docs: dbt-deps
 	$(DBT) docs generate $(DBT_FLAGS) --target dev --static

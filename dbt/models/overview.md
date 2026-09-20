@@ -20,9 +20,12 @@ session contract (`slv_sessions_unioned`) and the rejected rows with reason code
 **Snapshot** (`snp_station`) — SCD2 history of station attributes.
 
 **Gold** — contracted facts and dimensions: `fct_charging_session` (one row per session,
-incremental with a lookback), `fct_station_day` (station × station-local date, sessions crossing
-midnight split across days), `dim_station`, `dim_operator`, `dim_date`. Utilisation is a ratio of
-summed numerator and denominator at the requested rollup, never an average of daily percentages.
+incremental by source-level replace), `fct_station_day` (station × station-local date on a full
+spine, sessions crossing midnight split across days), `mart_monthly`, `dim_station`,
+`dim_operator`, `dim_date`. Utilisation is a ratio of summed numerator and denominator at the
+requested rollup, never an average of daily percentages. `scripts/export.py` writes the
+station-day-and-above relations to `exports/` (the read contract); session-grain rows never leave
+the repository.
 
 ## How trust is established
 

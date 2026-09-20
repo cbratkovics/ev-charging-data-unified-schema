@@ -10,6 +10,8 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: false
   columns:
   - name: manifest_key
     data_type: varchar
@@ -47,6 +49,8 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: false
   constraints:
   - type: primary_key
     columns:
@@ -217,6 +221,9 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: true
+      export_json: true
   columns:
   - name: operator_key
     data_type: varchar
@@ -261,6 +268,8 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: false
   columns:
   - name: station_key
     data_type: varchar
@@ -306,6 +315,9 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: true
+      export_json: true
   constraints:
   - type: primary_key
     columns:
@@ -438,6 +450,9 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: true
+      export_json: true
   columns:
   - name: date_key
     data_type: date
@@ -488,6 +503,9 @@ models:
   config:
     contract:
       enforced: true
+    meta:
+      export: true
+      export_json: false
   data_tests:
   - dbt_utils.unique_combination_of_columns:
       arguments:
@@ -582,3 +600,88 @@ models:
   - name: idle_minutes
     data_type: double
     description: connected minus charging, clamped at zero, where both exist (Boulder)
+- name: mart_monthly
+  description: 'Monthly rollup at source x operator x calendar month (station-local dates): sums of the station-day
+    measures and the counts needed to recompute any ratio; no ratio is stored (utilization is sum over sum at any
+    rollup). Null measures stay null where the source lacks that duration type. Exported as Parquet and JSON.'
+  config:
+    contract:
+      enforced: true
+    meta:
+      export: true
+      export_json: true
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - source
+        - operator_key
+        - year_month
+  columns:
+  - name: source
+    data_type: varchar
+    description: source short name
+    data_tests:
+    - not_null
+  - name: operator_key
+    data_type: varchar
+    description: operator
+    data_tests:
+    - not_null
+  - name: year_month
+    data_type: varchar
+    description: YYYY-MM of the station-local date
+    data_tests:
+    - not_null
+  - name: station_days
+    data_type: bigint
+    description: station-day rows in the month (spine rows, excluded days included)
+    data_tests:
+    - not_null
+  - name: excluded_station_days
+    data_type: bigint
+    description: station-days inside a zero-session gap (availability 0)
+    data_tests:
+    - not_null
+  - name: stations
+    data_type: bigint
+    description: distinct stations with a row in the month
+    data_tests:
+    - not_null
+  - name: sessions
+    data_type: hugeint
+    description: non-trivial sessions starting in the month
+    data_tests:
+    - not_null
+  - name: trivial_sessions
+    data_type: hugeint
+    description: trivial sessions starting in the month
+    data_tests:
+    - not_null
+  - name: energy_kwh
+    data_type: double
+    description: energy allocated to the month's station-days (non-trivial sessions)
+  - name: charging_minutes
+    data_type: double
+    description: charging minutes allocated; null where the source has no charging time
+  - name: connected_minutes
+    data_type: double
+    description: connected minutes allocated; null where the source has no end time
+  - name: idle_minutes
+    data_type: double
+    description: idle minutes (connected minus charging, clamped) where both exist
+  - name: available_port_minutes
+    data_type: double
+    description: sum of ports_inferred x day minutes over available station-days
+    data_tests:
+    - not_null
+  - name: charging_pieces
+    data_type: hugeint
+    description: session pieces contributing charging minutes
+    data_tests:
+    - not_null
+  - name: connected_pieces
+    data_type: hugeint
+    description: session pieces contributing connected minutes
+    data_tests:
+    - not_null

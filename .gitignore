@@ -26,8 +26,10 @@ dbt/dbt_packages/
 dbt/logs/
 dbt/.user.yml
 
-# Committed on purpose: run artifacts (drift, reconciliation, findings inputs) and exports.
+# Committed on purpose: run artifacts and the exports/ read contract (aggregates only, ADR-0015).
 !artifacts/**
 !exports/**
+fresh/
+site/
 # A global ~/.gitignore that ignores `*.sql` would hide the dbt project; re-include it.
 !dbt/**/*.sql

@@ -254,14 +254,22 @@ is the stable read contract. No frontend or API is built.
 ## 7. CI (GitHub Actions, $0)
 
 - `ci.yml` on push and PR: lint (ruff, sqlfluff), description check, pytest and `dbt build` on
-  the fixture, rendered-profile check, README-number check.
-- `full-build.yml`, manual and weekly: download the real sources with `actions/cache` keyed on
-  the manifest hashes; full `dbt build`; drift, reconciliation and sensitivity artifacts;
-  regenerate the findings; publish dbt docs to GitHub Pages; upload `manifest.json` as the
-  production state.
-- Slim CI on PRs: `dbt build --select state:modified+ --defer --state <dir>` against the latest
-  production manifest.
-- The owner sets secrets and enables Pages; the owner TODO lists those steps.
+  the fixture, the rendered-doc checks (profile, contracts, findings, README blocks), the
+  number checker. On pull requests, when the published docs site serves `manifest.json`, the
+  build is state-selected against it (`+state:modified+`) with no deferral (a local DuckDB file
+  has no shared warehouse to defer to; ADR-0015); otherwise the full fixture build.
+- `full-build.yml`, manual and monthly, never commits: restores the sources from `actions/cache`
+  keyed on the input hashes in the committed latest silver artifact, refreshes them with
+  conditional requests, runs the full `dbt build`, regenerates the artifacts into a scratch
+  directory, compares them with the committed ones (upstream changed: informational issue with
+  the file and row-count deltas; identical inputs but outputs beyond tolerance, or blocking
+  reconciliation: regression issue and a failed run), uploads the fresh artifacts, publishes
+  dbt docs and `manifest.json` to GitHub Pages. Releases are owner-run (`make release`).
+- `exports/`: aggregates only (station-day grain and above), Parquet for every relation, JSON
+  only for small ones, a 5 MB per-file ceiling, manifest with hashes, schema document with the
+  OGL and source attribution (ADR-0015).
+- The owner creates the remote, makes the repository public, enables Pages and runs the first
+  full build; `docs/OWNER_TODO.md` lists the steps. No secrets are required.
 
 ## 8. Phases and definitions of done
 
@@ -274,7 +282,7 @@ is the stable read contract. No frontend or API is built.
 | 4. Gold | Facts, dims, snapshot, midnight split, capacity, utilization, sensitivity artifact, incremental model, idempotency tests | Idempotency and ratio-of-sums tests pass. |
 | 5. Registry matching | **Cut** (ADR-0012); design in `ROADMAP.md` | n/a |
 | 6. Reconciliation and findings | Reconciliation artifact, classification, `FINDINGS.md`, number checker | Every number in the docs resolves to an artifact key. |
-| 7. CI and exports | The workflows, Pages docs, `exports/` contract | Workflows pass locally where possible, and the owner TODO is written. |
+| 7. CI and exports | The workflows, Pages docs, `exports/` contract | Workflows pass locally where possible (the make targets they call), and the owner TODO is written. |
 | 8. Documentation | README (problem, sources table, lineage, design decisions linking ADRs, results table citing artifact keys, how to run, limitations, independence statement), `ARCHITECTURE.md`, `REPRODUCIBILITY.md`, `ROADMAP.md`, `docs/CARD.md` (title, two-sentence summary, four or five "what this demonstrates" bullets, the stack, no number without an artifact key) | Docs complete and the number checker passes. |
 
 ## 9. Checkpoint format
@@ -306,3 +314,4 @@ Next phase proposal: <one paragraph>
 | 2026-09-20 | 4 (re-approval) / 5 | Ports = the larger of the connector-id count and the robust max (both lower bounds), `ports_source` = the binding bound; the fact's `capacity_grain` renamed `port_id_present` so the grain has one meaning on `dim_station`; unknown-station share reported in reconciliation and README; Phase 5 registry matching cut and every trace of the feature removed, design kept in `ROADMAP.md` | ADR-0012 |
 | 2026-09-20 | 6 | Two reconciliation identities in the silver summary (raw = fact + quarantined; fact = counted + trivial + unknown) with the moved DfT events as a breakdown inside natural_key_duplicate; living docs cite latest.json, ADRs cite point-in-time artifacts, release prunes uncited artifacts; number blocks rendered between markers with HTML-comment citations in prose; Boulder blocking idle by hour; every finding states what the data cannot show | ADR-0013 |
 | 2026-09-20 | 6 (review) | Three coherence defects fixed: second-precision session ends in the gold SQL (Cary ports), the production definition inside every sensitivity range, one summing population table for the DfT anomalies file; coherence tests on the artifacts; "blocking idle" renamed idle at full occupancy, framed as an upper bound and split by single- and multi-port stations | ADR-0014 |
+| 2026-09-20 | 7 | Scheduled build never commits and opens issues (upstream changed vs regression), monthly plus manual; cache key from the committed silver artifact's input hashes; slim CI by state selection without deferral; exports aggregates only with Parquet everywhere, JSON for small relations and a 5 MB ceiling; owner TODO covers the remote, the public repository, Pages, the first run and the labels | ADR-0015 |

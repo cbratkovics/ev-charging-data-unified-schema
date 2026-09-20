@@ -49,13 +49,36 @@ jobs:
         run: make check-numbers PY=python
       - name: dbt parse
         run: make dbt-parse DBT=dbt
-      - name: dbt build on the fixture (offline)
-        run: make dbt-fixture DBT=dbt PY=python
-      - name: Tests (offline; the fixture warehouse is built above)
+      - name: Slim CI state (manifest.json from the published dbt docs site), if reachable
+        id: state
+        run: |
+          mkdir -p .dbt-state
+          url="$(python -m $PKG.config pages_url)manifest.json"
+          if curl -fsSL --max-time 20 -o .dbt-state/manifest.json "$url"; then
+            echo "have_state=true" >> "$GITHUB_OUTPUT"; echo "production manifest downloaded from $url"
+          else
+            echo "have_state=false" >> "$GITHUB_OUTPUT"; echo "no production manifest at $url; full fixture build"
+          fi
+      - name: dbt build on the fixture (slim on pull requests when state is available; ADR-0015 item 3)
+        run: |
+          make dbt-deps DBT=dbt
+          make fixture PY=python
+          # the fixture is served from data/landed with the default vars, so the state comparison
+          # runs with exactly the vars the production manifest was built with (ADR-0015 item 4)
+          rm -rf data/landed && cp -r tests/fixtures/landed data/landed
+          mkdir -p .duckdb
+          export EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ steps.state.outputs.have_state }}" = "true" ]; then
+            echo "slim build: modified models and their ancestors, state-selected against the published manifest (no deferral: a local DuckDB file has no shared warehouse to defer to)"
+            dbt build --project-dir dbt --profiles-dir dbt --target dev --full-refresh --select "+state:modified+" --state "$PWD/.dbt-state"
+          else
+            dbt build --project-dir dbt --profiles-dir dbt --target dev --full-refresh
+          fi
+      - name: Tests (offline; the fixture warehouse is built above; includes the exports contract)
         run: python -m pytest tests
       - name: dbt docs generate + every model, column and source described
         run: |
-          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --vars '{landed_dir: tests/fixtures/landed}' --static
+          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --static
           python scripts/check_dbt_descriptions.py
       - name: sqlfluff
         run: sqlfluff lint dbt/models dbt/tests dbt/macros dbt/snapshots

@@ -1,0 +1,538 @@
+[
+ {
+  "operator_key":"boulder",
+  "operator_name":"City of Boulder, CO",
+  "source":"boulder",
+  "parent_operator_key":null,
+  "country":"US",
+  "timezone":"America\/Denver"
+ },
+ {
+  "operator_key":"cary",
+  "operator_name":"Town of Cary, NC",
+  "source":"cary",
+  "parent_operator_key":null,
+  "country":"US",
+  "timezone":"America\/New_York"
+ },
+ {
+  "operator_key":"dft_2017",
+  "operator_name":"UK Department for Transport (publisher of the 2017 chargepoint analysis)",
+  "source":"dft_2017",
+  "parent_operator_key":null,
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/<null>",
+  "operator_name":"<null>",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Aylesbury Vale District Council",
+  "operator_name":"Aylesbury Vale District Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Basingstoke and Deane Borough Council",
+  "operator_name":"Basingstoke and Deane Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Bristol City Council",
+  "operator_name":"Bristol City Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Cheshire East Borough Council",
+  "operator_name":"Cheshire East Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Cheshire East Borough Council ",
+  "operator_name":"Cheshire East Borough Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/City of Bradford Metropolitan District Council",
+  "operator_name":"City of Bradford Metropolitan District Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/City of York Council",
+  "operator_name":"City of York Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Cornwall Council",
+  "operator_name":"Cornwall Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Cotswold District Council",
+  "operator_name":"Cotswold District Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Croydon Council",
+  "operator_name":"Croydon Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Cumbria County Council",
+  "operator_name":"Cumbria County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Dartford Borough Council",
+  "operator_name":"Dartford Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Defence Science and Technology Laboratory",
+  "operator_name":"Defence Science and Technology Laboratory",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Department for Regional Development Northern Ireland",
+  "operator_name":"Department for Regional Development Northern Ireland",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Derbyshire Community Health Services NHS Trust",
+  "operator_name":"Derbyshire Community Health Services NHS Trust",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Driver and Vehicle Licensing Agency",
+  "operator_name":"Driver and Vehicle Licensing Agency",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Dudley Metropolitan Borough Council",
+  "operator_name":"Dudley Metropolitan Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Durham County Council",
+  "operator_name":"Durham County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Essex County Council",
+  "operator_name":"Essex County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Exeter City Council",
+  "operator_name":"Exeter City Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/First Great Western (now GWR)",
+  "operator_name":"First Great Western (now GWR)",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Greater Anglia Trains",
+  "operator_name":"Greater Anglia Trains",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Greenwich",
+  "operator_name":"Greenwich",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Hackney Borough Council",
+  "operator_name":"Hackney Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Hackney Borough Council ",
+  "operator_name":"Hackney Borough Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Hampshire County Council",
+  "operator_name":"Hampshire County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Hampshire County Council ",
+  "operator_name":"Hampshire County Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Hyndburn Borough Council",
+  "operator_name":"Hyndburn Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Hyndburn Borough Council ",
+  "operator_name":"Hyndburn Borough Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Kent County Council",
+  "operator_name":"Kent County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/King's Lynn and West Norfolk",
+  "operator_name":"King's Lynn and West Norfolk",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Lancashire Borough Council",
+  "operator_name":"Lancashire Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Leeds City Council",
+  "operator_name":"Leeds City Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Lewes District Council ",
+  "operator_name":"Lewes District Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/London Fire and Emergency Planning Authority",
+  "operator_name":"London Fire and Emergency Planning Authority",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Merseytravel",
+  "operator_name":"Merseytravel",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Milton Keynes Council",
+  "operator_name":"Milton Keynes Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/North Hertfordshire Council",
+  "operator_name":"North Hertfordshire Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Northern Rail",
+  "operator_name":"Northern Rail",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Northumberland County Council",
+  "operator_name":"Northumberland County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Oxford City Council",
+  "operator_name":"Oxford City Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Plymouth City Council",
+  "operator_name":"Plymouth City Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Poole Borough Council",
+  "operator_name":"Poole Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Poole Borough Council ",
+  "operator_name":"Poole Borough Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Royal Borough of Greenwich",
+  "operator_name":"Royal Borough of Greenwich",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Royal Bournemouth and Christchurch Hospitals NHS Foundation Trust",
+  "operator_name":"Royal Bournemouth and Christchurch Hospitals NHS Foundation Trust",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Slough Borough Council",
+  "operator_name":"Slough Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Slough Borough Council ",
+  "operator_name":"Slough Borough Council ",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/South East Coast Ambulance NHS Foundation Trust",
+  "operator_name":"South East Coast Ambulance NHS Foundation Trust",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/South East EV (Rapid Charger) Network",
+  "operator_name":"South East EV (Rapid Charger) Network",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/South Tyneside Borough Council",
+  "operator_name":"South Tyneside Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Southern Health NHS Foundation Trust",
+  "operator_name":"Southern Health NHS Foundation Trust",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Stockton-on-Tees Borough Council",
+  "operator_name":"Stockton-on-Tees Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Sunderland City Council",
+  "operator_name":"Sunderland City Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/The Open University",
+  "operator_name":"The Open University",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Transport Scotland",
+  "operator_name":"Transport Scotland",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Transport for London",
+  "operator_name":"Transport for London",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/University of Leeds",
+  "operator_name":"University of Leeds",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/West Berkshire Council",
+  "operator_name":"West Berkshire Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/West Yorkshire Combined Authority (WYCA)",
+  "operator_name":"West Yorkshire Combined Authority (WYCA)",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Wiltshire Council",
+  "operator_name":"Wiltshire Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Wokingham Borough Council",
+  "operator_name":"Wokingham Borough Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ },
+ {
+  "operator_key":"dft_2017\/Worcestershire County Council",
+  "operator_name":"Worcestershire County Council",
+  "source":"dft_2017",
+  "parent_operator_key":"dft_2017",
+  "country":"GB",
+  "timezone":"Europe\/London"
+ }
+]

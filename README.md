@@ -14,7 +14,7 @@ Utilization is a ratio of sums; its sensitivity to the capacity denominator is a
 artifact (`artifacts/sensitivity/`). Two reconciliation identities are checked per source and
 month in the silver summary artifact (`artifacts/silver/`), and the findings
 (`docs/FINDINGS.md`) are rendered from their own artifact. Exports, CI workflows and the
-portfolio card are not built yet.
+portfolio card are described in `docs/OWNER_TODO.md`; the exports read contract is `exports/SCHEMA.md`.
 
 ## Sources
 
@@ -56,6 +56,8 @@ make ingest       # download the real sources, land them, write the drift artifa
 make dbt-dev      # build the warehouse from the real landed data
 make silver-summary sensitivity   # write the silver (with reconciliation) and sensitivity artifacts
 make findings     # write the findings artifact and render docs/FINDINGS.md
+make export       # write exports/ (aggregates only) from the built warehouse
+make release      # everything above in one run at one commit (network; clean tree required)
 make check-numbers # every measured number in README, FINDINGS, CARD and the ADRs resolves to an artifact key
 make lint         # ruff + black
 ```
