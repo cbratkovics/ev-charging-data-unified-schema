@@ -181,7 +181,6 @@ def reconciliation(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
                 q_by_reason[r["primary_reason"]]["kwh"] += f(r["kwh"])
             q_rows = sum(v["rows"] for v in q_by_reason.values())
             q_kwh = sum(v["kwh"] for v in q_by_reason.values())
-            counted_sessions = sum(r["counted_sessions"] for r in sel(fact))
             counted_kwh_start = sum(f(r["counted_kwh_by_start_month"]) for r in sel(fact))
             trivial_sessions = sum(r["trivial_sessions"] for r in sel(fact))
             trivial_kwh = sum(f(r["trivial_kwh"]) for r in sel(fact))
