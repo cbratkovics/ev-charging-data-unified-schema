@@ -1,0 +1,198 @@
+{
+  "artifact": "drift",
+  "code_commit": "baf72ca24c302a3290db21bab85062d4bc00d30e",
+  "files": [
+    {
+      "columns_seen": [
+        "Station_Name",
+        "Address",
+        "City",
+        "State_Province",
+        "Zip_Postal_Code",
+        "Start_Date___Time",
+        "Start_Time_Zone",
+        "End_Date___Time",
+        "End_Time_Zone",
+        "Total_Duration__hh_mm_ss_",
+        "Charging_Time__hh_mm_ss_",
+        "Energy__kWh_",
+        "GHG_Savings__kg_",
+        "Gasoline_Savings__gallons_",
+        "Port_Type",
+        "ObjectID",
+        "ObjectId2"
+      ],
+      "family": "transactions",
+      "file_name": "Electric_Vehicle_Charging_Station_Data.csv",
+      "findings": [],
+      "outcome": "ok",
+      "reason_codes": [],
+      "rows": 148136,
+      "source": "boulder"
+    },
+    {
+      "columns_seen": [
+        "start_date",
+        "station_name",
+        "charging_time_hh_mm_ss",
+        "energy_kwh",
+        "address_1",
+        "address_2",
+        "city",
+        "state_province",
+        "zip_postal_code"
+      ],
+      "family": "sessions",
+      "file_name": "electric-vehicle-charging-stations.csv",
+      "findings": [],
+      "outcome": "ok",
+      "reason_codes": [],
+      "rows": 20142,
+      "source": "cary"
+    },
+    {
+      "columns_seen": [
+        "ChargingEvent",
+        "CPID",
+        "Connector",
+        "StartDate",
+        "StartTime",
+        "EndDate",
+        "EndTime",
+        "Energy",
+        "Price",
+        "PluginDuration",
+        "Name"
+      ],
+      "family": "rapids",
+      "file_name": "dft_2017_local_authority_rapids_raw.csv",
+      "findings": [
+        {
+          "code": "aliased",
+          "column": "EnergySupplied",
+          "detail": "renamed to 'Energy' per the contract alias map",
+          "severity": "info"
+        }
+      ],
+      "outcome": "info",
+      "reason_codes": [],
+      "rows": 108746,
+      "source": "dft_2017"
+    },
+    {
+      "columns_seen": [
+        "ChargingEvent",
+        "CPID",
+        "Connector",
+        "StartDate",
+        "StartTime",
+        "EndDate",
+        "EndTime",
+        "Energy",
+        "Price",
+        "Area code",
+        "Name"
+      ],
+      "family": "rapids_anomalies",
+      "file_name": "dft_2017_local_authority_rapids_incomplete_anomalies.csv",
+      "findings": [
+        {
+          "code": "aliased",
+          "column": "EnergySupplied",
+          "detail": "renamed to 'Energy' per the contract alias map",
+          "severity": "info"
+        }
+      ],
+      "outcome": "info",
+      "reason_codes": [],
+      "rows": 48619,
+      "source": "dft_2017"
+    },
+    {
+      "columns_seen": [
+        "publisher_row_index",
+        "ChargingEvent",
+        "CPID",
+        "Connector",
+        "StartDate",
+        "StartTime",
+        "EndDate",
+        "EndTime",
+        "Energy",
+        "Name",
+        "PluginDuration"
+      ],
+      "family": "fasts",
+      "file_name": "dft_2017_public_sector_fasts_raw.csv",
+      "findings": [],
+      "outcome": "ok",
+      "reason_codes": [],
+      "rows": 103326,
+      "source": "dft_2017"
+    },
+    {
+      "columns_seen": [
+        "publisher_row_index",
+        "ChargingEvent",
+        "CPID",
+        "Connector",
+        "StartDate",
+        "StartTime",
+        "EndDate",
+        "EndTime",
+        "Energy",
+        "Name",
+        "PluginDuration"
+      ],
+      "family": "fasts_anomalies",
+      "file_name": "dft_2017_public_sector_fasts_incomplete_anomalies.csv",
+      "findings": [],
+      "outcome": "ok",
+      "reason_codes": [],
+      "rows": 11606,
+      "source": "dft_2017"
+    }
+  ],
+  "generated_at_utc": "2026-09-20T00:21:24+00:00",
+  "ingest": {
+    "download": true,
+    "landed_dir": "/Users/christopherbratkovics/Desktop/portfolio_projects/ev-charging-data-unified-schema/data/landed",
+    "raw_dir": "/Users/christopherbratkovics/Desktop/portfolio_projects/ev-charging-data-unified-schema/data/raw",
+    "sources": {
+      "boulder": {
+        "files_landed": 0,
+        "files_seen": 1,
+        "quarantined": []
+      },
+      "cary": {
+        "files_landed": 0,
+        "files_seen": 1,
+        "quarantined": []
+      },
+      "dft_2017": {
+        "files_landed": 0,
+        "files_seen": 4,
+        "quarantined": []
+      }
+    }
+  },
+  "policy": {
+    "missing_optional": "info",
+    "missing_required": "quarantine: file landed under _quarantined/, bronze does not read it, run continues",
+    "renamed_column": "aliased on landing per the contract alias map, recorded as info",
+    "retyped_optional": "warn",
+    "retyped_required": "quarantine: as missing_required",
+    "unknown_column": "warn: landed, carried through bronze"
+  },
+  "run_id": "ingest-20260920T002122Z",
+  "summary": {
+    "by_outcome": {
+      "info": 2,
+      "ok": 4,
+      "quarantine": 0,
+      "warn": 0
+    },
+    "files": 6,
+    "quarantined_files": []
+  }
+}
