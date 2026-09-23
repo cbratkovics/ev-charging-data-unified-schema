@@ -5,12 +5,26 @@
 · [Findings](docs/FINDINGS.md)
 · [Portfolio card](docs/CARD.md)
 
-**The problem.** Three public operators publish EV-charging session logs in three shapes: one
+**The problem.** Three public sources publish EV-charging session logs in three shapes: one
 file holding two overlapping deliveries with mixed timestamp formats, one export with true UTC
 timestamps but no end time, and one national publication split across four files whose headers,
 date formats and duration units differ. None publishes port counts, so the denominator of every
 utilization figure has to be inferred. The job was to conform all of it into one tested schema on
 DuckDB, prove that nothing was lost between raw and gold, and say only what the data supports.
+
+**What changed.** Source contracts, reason-coded quarantine and bronze / silver / gold dbt models
+produce a consistent session grain while accounting for rejected rows. Idempotent source-level
+replacement makes a corrected or redelivered file converge to the same result as a full refresh.
+
+**What the analysis required.** Utilization is a ratio of summed charging or connected minutes to
+summed available port minutes—not an average of percentages. Because no source publishes inventory,
+port capacity is an inferred lower bound; the denominator definition changes the result and is
+therefore reported as a sensitivity range.
+
+**What the evidence changed.** A large post-charge idle share did not justify calling all of that
+time recoverable demand. Restricting the question to idle time coinciding with inferred full
+occupancy produced a much smaller upper bound, and the absence of queue data narrowed the
+responsible recommendation to targeted investigation rather than a system-wide intervention.
 
 **What was built.**
 
@@ -48,6 +62,8 @@ flowchart TB
 
 <!-- generated:results start -->
 _Rendered by `scripts/render_docs.py` from `artifacts/findings/findings-20260920T194023Z.json` and `artifacts/silver/silver-20260920T194003Z.json`; a ratio of summed minutes over summed available port minutes, never an average of daily percentages; ports are inferred lower bounds, so these are upper bounds on utilization._
+
+**Boulder, 2018-01-01 to 2023-11-30.** 45.1% of connected time was idle after charging, but only **up to 12.4% of connected time** was idle while every inferred port was occupied. The first measures plug-in time after charging ended; the second asks when that idle time coincided with inferred full occupancy. Neither measures a queue, and even the smaller figure does not show that a driver was waiting.
 
 | Source | Period | Utilization (production port count) | Range across denominator definitions |
 |---|---|---|---|
