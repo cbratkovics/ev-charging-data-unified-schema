@@ -67,6 +67,17 @@ def results_block(
             else "_No findings artifact yet._"
         ),
         "",
+        (
+            f"**Boulder, {periods['boulder']['first_start_local'][:10]} to "
+            f"{periods['boulder']['last_start_local'][:10]}.** "
+            f"{pct(findings['boulder_idle']['production']['idle_share_of_connected'])} of connected time was idle after charging, "
+            f"but only **up to {pct(findings['boulder_idle']['production']['full_occupancy_idle_share_of_connected'])} of connected time** "
+            "was idle while every inferred port was occupied. The first measures plug-in time after charging ended; the second asks when that idle time "
+            "coincided with inferred full occupancy. Neither measures a queue, and even the smaller figure does not show that a driver was waiting."
+            if findings
+            else ""
+        ),
+        "",
         *rows,
         "",
         f"Reconciliation status (both identities, every source and month): **{silver.get('status', 'n/a')}**. "
@@ -81,12 +92,18 @@ def card_block(silver: dict[str, Any], findings: dict[str, Any] | None) -> str:
         return "_No findings artifact yet._"
     labels = {"connected": "connected-time", "charging": "charging-time"}
     idle = findings["boulder_idle"]["production"]
+    period = findings["periods"]["boulder"]
     rows = [
-        f"- {source_label('boulder')}: {pct(idle['idle_share_of_connected'])} of connected time is idle after charging; up to "
-        f"{pct(idle['full_occupancy_idle_share_of_connected'])} of connected time is idle while every inferred port was occupied.",
-        "- Utilization by source (production port count; range across denominator definitions): "
+        f"- {source_label('boulder')}, {period['first_start_local'][:10]} to {period['last_start_local'][:10]}: "
+        f"{pct(idle['idle_share_of_connected'])} of connected time was idle after charging, but **up to "
+        f"{pct(idle['full_occupancy_idle_share_of_connected'])} of connected time** was idle while every inferred port was occupied. "
+        "These answer different questions: post-charge plug-in time versus its overlap with inferred full occupancy. "
+        "Neither observes a queue, so even the smaller figure does not prove a driver was waiting.",
+        "- Within-source utilization only (different operators, places and periods; production port count; range across denominator definitions): "
         + "; ".join(
-            f"{source_label(k.split('__')[0])} {labels[k.split('__')[1]]} {pct(r['production'])} ({pct(r['min'])} to {pct(r['max'])})"
+            f"{source_label(k.split('__')[0])}, "
+            f"{findings['periods'][k.split('__')[0]]['first_start_local'][:10]} to {findings['periods'][k.split('__')[0]]['last_start_local'][:10]}, "
+            f"{labels[k.split('__')[1]]} {pct(r['production'])} ({pct(r['min'])} to {pct(r['max'])})"
             for k, r in sorted(findings["utilization_ranges"].items())
         )
         + ".",

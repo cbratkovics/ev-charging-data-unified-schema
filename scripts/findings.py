@@ -119,8 +119,11 @@ def render(a: dict[str, Any]) -> str:
         "",
         *[f"- {c}" for c in a["cannot_show"]],
         "",
-        f"## 1. Boulder: idle-after-charge time is large; up to {pct(idle['full_occupancy_share_of_idle'], 0)} of it is idle at full occupancy "
-        + cite("boulder_idle.production.full_occupancy_share_of_idle"),
+        f"## 1. Boulder: {pct(idle['idle_share_of_connected'])} idle after charging, but only up to {pct(idle['full_occupancy_idle_share_of_connected'])} idle at inferred full occupancy "
+        + cite(
+            "boulder_idle.production.idle_share_of_connected",
+            "boulder_idle.production.full_occupancy_idle_share_of_connected",
+        ),
         "",
         f"**Period.** Boulder, {p['boulder']['first_start_local'][:10]} to {p['boulder']['last_start_local'][:10]}, non-trivial sessions at known stations.",
         "",
@@ -147,14 +150,15 @@ def render(a: dict[str, Any]) -> str:
         + "; ".join(f"{CITE}#boulder_idle_by_hour_production[{h['hour']}].hour" for h in top_hours)
         + " -->",
         "",
-        "**Why it matters.** The headline idle share is the number that usually gets quoted as recoverable capacity. "
-        f"On this data it is {idle['idle_to_full_occupancy_ratio']:.1f} times the full-occupancy figure, and even the smaller figure is a ceiling: most idle minutes happen while "
+        "**Why it matters.** These measures answer different questions. The headline idle share measures connected time after charging ended; "
+        "the full-occupancy share asks when that idle time coincided with every inferred port being occupied. The headline is often quoted as recoverable capacity, but "
+        f"on this data it is {idle['idle_to_full_occupancy_ratio']:.1f} times the full-occupancy figure, and even the smaller figure is a ceiling: most idle minutes happen while "
         "another port at the same station is free, and the rest may or may not have kept anyone waiting. "
         f"{cite('boulder_idle.production.idle_to_full_occupancy_ratio')}",
         "",
-        '**What I would tell the decision-maker.** Quote the full-occupancy figure as "up to", never the headline. If an idle fee or a time limit is worth trying, '
-        "target the late-morning-to-mid-afternoon hours at the multi-port stations, where the measure carries information; overnight idle at a single-port station "
-        "displaces nobody the data can see.",
+        '**What I would tell the decision-maker.** Do not recommend a system-wide idle fee from the headline idle share. Quote the full-occupancy figure as "up to", '
+        "and use it only to prioritize late-morning-to-mid-afternoon investigation at multi-port stations. Validate actual port inventory and collect queue or "
+        "turned-away-driver evidence before claiming constrained demand or choosing an intervention.",
         "",
         "**What would change my mind.** Queue or turned-away-driver records would turn the ceiling into an estimate; an inventory of ports would remove the "
         "lower-bound caveat and could lower the figure; evidence that charging starts later than plug-in would move minutes from idle to charging.",
