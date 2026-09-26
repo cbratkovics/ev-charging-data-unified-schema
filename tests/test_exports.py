@@ -36,16 +36,21 @@ def _check_dir(out: Path) -> dict:
         assert f["sha256"] == sha256_of(path), name
         if f["format"] == "json":
             assert f["relation"] != "fct_station_day", "JSON is for small relations only"
-    assert (out / "SCHEMA.md").exists() and "Open Government Licence" in (
-        out / "SCHEMA.md"
-    ).read_text()
+    schema = (out / "SCHEMA.md").read_text()
+    assert "Open Government Licence" in schema
+    assert "decision_lab/" in schema and "no session rows" in schema
+    assert "Every warehouse relation export listed below is recorded" in schema
+    assert "outside the warehouse `exports/manifest.json`" in schema
+    assert "`scripts/build_decision_records.py --check`" in schema
+    assert "canonical artifact and public payload bytes are equal" in schema
     return manifest
 
 
 def test_committed_exports_satisfy_the_contract() -> None:
     if not (EXPORTS_DIR / "manifest.json").exists():
         pytest.skip("no exports committed yet")
-    _check_dir(EXPORTS_DIR)
+    manifest = _check_dir(EXPORTS_DIR)
+    assert not any(name.startswith("decision_lab/") for name in manifest["files"])
 
 
 def test_two_exports_of_the_same_warehouse_are_byte_identical(tmp_path) -> None:

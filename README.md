@@ -3,6 +3,7 @@
 [![ci](https://github.com/cbratkovics/ev-charging-data-unified-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/cbratkovics/ev-charging-data-unified-schema/actions/workflows/ci.yml)
 · [dbt docs](https://cbratkovics.github.io/ev-charging-data-unified-schema/)
 · [Findings](docs/FINDINGS.md)
+· [Decision record contract](docs/DECISION_RECORDS.md)
 · [Portfolio card](docs/CARD.md)
 
 **The problem.** Three public sources publish EV-charging session logs in three shapes: one
@@ -37,6 +38,8 @@ responsible recommendation to targeted investigation rather than a system-wide i
 - Committed artifacts for profiling, drift, reconciliation, denominator sensitivity and findings,
   with a number checker that fails CI when a documented figure has no artifact key.
 - An `exports/` read contract of aggregates only.
+- A versioned Boulder decision record that pins aggregate evidence and separates a reviewed
+  recommendation from unobserved action and unmeasured outcome.
 
 | Source | What it is | Period | Licence |
 |---|---|---|---|
