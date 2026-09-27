@@ -5,6 +5,10 @@ decision system. It asks whether historical Boulder post-charge idle observation
 operational intervention. The supported conclusion is narrower: investigate the possible
 constraint and verify physical inventory and queue evidence before choosing an intervention.
 
+The planned static `/lab/` presentation, validation boundary, packaging, and local commands are
+documented in [DECISION_LAB.md](DECISION_LAB.md). This route is not described as live until an
+owner deploys and verifies the combined Pages artifact.
+
 ## Contract and grain
 
 `schema_version` **1.0.0** has one parent record per decision case, evidence identity, and policy

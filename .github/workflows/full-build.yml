@@ -26,6 +26,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     env:
       PKG: ev_charging_data_unified_schema
@@ -88,7 +89,10 @@ jobs:
       - name: dbt docs (static site plus manifest.json as the production state)
         run: |
           dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --static
-          mkdir -p site && cp dbt/target/static_index.html site/index.html && cp dbt/target/manifest.json site/manifest.json
+          mkdir -p site
+          cp dbt/target/static_index.html site/index.html
+          cp dbt/target/manifest.json site/manifest.json
+          python scripts/build_lab.py --output site
       - name: Upload the fresh artifacts and the exports
         uses: actions/upload-artifact@v4
         with:

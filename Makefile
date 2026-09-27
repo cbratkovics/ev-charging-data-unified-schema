@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture fixture-landed silver-summary sensitivity findings decision-records render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture fixture-landed silver-summary sensitivity findings decision-records render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest lab-build lab-serve lab-test
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -35,6 +35,9 @@ help:
 	@echo "dbt-lint      - sqlfluff over the dbt project"
 	@echo "check-docs    - every dbt model, column, source and exposure has a description"
 	@echo "check-numbers - every number in README / docs resolves to an artifact key"
+	@echo "lab-build     - validate and stage the static Decision Lab in site/lab"
+	@echo "lab-serve     - serve only the staged site on loopback port 8000"
+	@echo "lab-test      - run Decision Lab JS unit and Playwright browser tests"
 
 install:
 	uv venv --python 3.12 .venv
@@ -171,3 +174,13 @@ check-numbers:
 	$(PY) scripts/findings.py --check
 	$(PY) scripts/render_docs.py --check
 	$(PY) scripts/build_decision_records.py --check
+
+lab-build:
+	$(PY) scripts/build_lab.py --output site
+
+lab-serve: lab-build
+	$(PY) -m http.server 8000 --bind 127.0.0.1 --directory site
+
+lab-test: lab-build
+	npm test
+	npm run test:browser

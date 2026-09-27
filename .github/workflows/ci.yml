@@ -29,6 +29,10 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             constraints.txt
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
       - name: Install (from pyproject, pinned by constraints.txt)
         run: |
           python -m pip install --upgrade pip
@@ -48,6 +52,11 @@ jobs:
         run: python scripts/render_contracts.py --check
       - name: Every measured number in the docs resolves to an artifact key; rendered blocks are current
         run: make check-numbers PY=python
+      - name: Decision Lab unit and assembly tests
+        run: |
+          npm ci
+          node --test tests/lab-contract.test.js
+          python -m pytest tests/test_lab_build.py
       - name: dbt parse
         run: make dbt-parse DBT=dbt
       - name: Build complete fixture warehouse
@@ -68,5 +77,13 @@ jobs:
         run: |
           dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --static
           python scripts/check_dbt_descriptions.py
+      - name: Stage combined fixture-docs preview and run browser boundary tests
+        run: |
+          mkdir -p site
+          cp dbt/target/static_index.html site/index.html
+          cp dbt/target/manifest.json site/manifest.json
+          python scripts/build_lab.py --output site
+          npx playwright install --with-deps chromium
+          npm run test:browser
       - name: sqlfluff
         run: sqlfluff lint dbt/models dbt/tests dbt/macros dbt/snapshots
