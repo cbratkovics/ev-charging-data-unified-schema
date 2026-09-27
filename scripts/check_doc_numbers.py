@@ -16,7 +16,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ev_charging_data_unified_schema.citations import check_document  # noqa: E402
 from ev_charging_data_unified_schema.config import REPO_ROOT  # noqa: E402
 
-DEFAULT = ["README.md", "docs/FINDINGS.md", "docs/CARD.md", "docs/adr"]
+DEFAULT = [
+    "README.md",
+    "docs/FINDINGS.md",
+    "docs/CARD.md",
+    "docs/DECISION_RECORDS.md",
+    "docs/adr",
+]
 
 
 def main(argv: list[str] | None = None) -> int:

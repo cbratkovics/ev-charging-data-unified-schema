@@ -1,6 +1,6 @@
 # exports/ — the read contract
 
-_Written by `scripts/export.py` from the gold layer; do not edit by hand. Every file is listed in `manifest.json` with its row count, byte size and sha256. Rows are sorted by the grain key, so two builds of the same inputs produce identical bytes._
+_Written by `scripts/export.py`; do not edit by hand. Every warehouse relation export listed below is recorded in `manifest.json` with its row count, byte size and sha256. Rows are sorted by the grain key, so two builds of the same warehouse inputs produce identical bytes._
 
 Grain: station-day and above only; no session-grain rows are exported (ADR-0015).
 
@@ -15,6 +15,10 @@ Contains public sector information licensed under the Open Government Licence v3
 | UK Department for Transport, 2017 | Open Government Licence v3.0 | both publication pages on gov.uk |
 
 Utilization is never stored: compute it as a ratio of sums (a measure's minutes over `available_port_minutes`) at whatever rollup you need.
+
+## `decision_lab/`
+
+A separate aggregate-only JSON decision-record contract built from pinned findings artifacts, not a dbt relation. Files under `exports/decision_lab/` are outside the warehouse `exports/manifest.json`. `latest.json` resolves the current immutable record file. `scripts/build_decision_records.py --check` validates the record and its pinned evidence and verifies that the canonical artifact and public payload bytes are equal. The record contains supported capacity observations, provenance, recommendation, and explicit action/outcome status; it contains no session rows. See `docs/DECISION_RECORDS.md`.
 
 ## `dim_date`
 

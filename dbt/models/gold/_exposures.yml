@@ -1,4 +1,18 @@
 version: 2
 
-# The exports/ read contract (Phase 7) is declared here as an exposure once gold exists.
-exposures: []
+exposures:
+  - name: ev_charging_decision_lab_record
+    label: EV Charging Decision Lab record
+    type: application
+    maturity: low
+    description: >
+      Experimental aggregate-only read contract for the Boulder post-charge-idle retrospective.
+      The dbt dependencies provide conformed sessions and inferred station capacity. An external
+      Python step, ev_charging_data_unified_schema.findings.full_occupancy_idle, consumes those
+      relations and writes the pinned findings artifact used by the record; dbt does not execute
+      or test that Python interval calculation.
+    depends_on:
+      - ref('fct_charging_session')
+      - ref('dim_station')
+    owner:
+      name: cbratkovics

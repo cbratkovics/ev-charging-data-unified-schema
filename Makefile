@@ -1,4 +1,4 @@
-.PHONY: help install test lint format fixture fixture-landed silver-summary sensitivity findings render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest
+.PHONY: help install test lint format fixture fixture-landed silver-summary sensitivity findings decision-records render-docs check-numbers prune-artifacts export compare profile render-profile check-profile render-contracts check-contracts release dbt-deps dbt-parse dbt-dev dbt-fixture dbt-state dbt-slim dbt-docs dbt-lint check-docs check-numbers ingest
 
 PY ?= .venv/bin/python
 PKG = ev_charging_data_unified_schema
@@ -22,6 +22,7 @@ help:
 	@echo "silver-summary - write artifacts/silver/<run_id>.json from the built dev warehouse"
 	@echo "sensitivity   - write artifacts/sensitivity/<run_id>.json (denominator sensitivity) from the built dev warehouse"
 	@echo "findings      - write artifacts/findings/<run_id>.json and render docs/FINDINGS.md"
+	@echo "decision-records - build the immutable Boulder decision record from committed artifacts"
 	@echo "render-docs   - render the generated blocks of README.md and docs/CARD.md from the artifacts"
 	@echo "prune-artifacts - keep only the latest artifact per kind plus those cited by an ADR"
 	@echo "dbt-parse     - dbt deps + parse (no warehouse needed)"
@@ -82,6 +83,9 @@ sensitivity:
 
 findings:
 	$(PY) scripts/findings.py
+
+decision-records:
+	$(PY) scripts/build_decision_records.py
 
 render-docs:
 	$(PY) scripts/render_docs.py
@@ -166,3 +170,4 @@ check-numbers:
 	$(PY) scripts/check_doc_numbers.py
 	$(PY) scripts/findings.py --check
 	$(PY) scripts/render_docs.py --check
+	$(PY) scripts/build_decision_records.py --check

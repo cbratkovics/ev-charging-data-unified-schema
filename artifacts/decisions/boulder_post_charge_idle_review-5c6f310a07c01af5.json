@@ -1,0 +1,449 @@
+{
+  "action": {
+    "observed_action": null,
+    "reason": "The historical artifacts contain no operator-action observation.",
+    "status": "not_observed"
+  },
+  "alternatives_reviewed": [
+    {
+      "interpretation": "system_wide_idle_fee_is_justified",
+      "reason": "Idle overlap is not queue or displaced-demand evidence.",
+      "supported": false
+    },
+    {
+      "interpretation": "a_queue_existed",
+      "reason": "The source contains no queue, arrival, or turned-away-driver observations.",
+      "supported": false
+    },
+    {
+      "interpretation": "targeted_investigation_before_intervention",
+      "reason": "The conditional full-occupancy subset identifies a narrower question while retaining the evidence gaps.",
+      "supported": true
+    }
+  ],
+  "analytical_conclusion": "The evidence narrows all post-charge idle time to the subset coinciding with inferred full occupancy and supports investigation, not a claimed queue or intervention effect.",
+  "created_at_utc": "2026-09-26T20:39:53.882074Z",
+  "decision_id": "boulder_post_charge_idle_review",
+  "evidence": {
+    "artifacts": {
+      "findings": {
+        "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
+        "keys": [
+          "periods.boulder",
+          "boulder_idle.production",
+          "boulder_idle.robust_max_n*"
+        ],
+        "path": "artifacts/findings/findings-20260920T194023Z.json",
+        "run_id": "findings-20260920T194023Z",
+        "sha256": "a57e4c9442d736437c1026f634e1a915455d8db2ee34869781efd0b3129860e7"
+      },
+      "sensitivity": {
+        "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
+        "keys": [
+          "definitions.production",
+          "definitions.robust_max_nN"
+        ],
+        "path": "artifacts/sensitivity/sensitivity-20260920T194004Z.json",
+        "run_id": "sensitivity-20260920T194004Z",
+        "sha256": "9bba3727f62238c9c916ff04befbaee3fd847ed7445aa8b9fe770bf00f2c4910"
+      },
+      "silver": {
+        "code_commit": "685fe7afbef7635d829a612bc40f58d00ffe55f5",
+        "keys": [
+          "inputs.boulder/Electric_Vehicle_Charging_Station_Data.csv"
+        ],
+        "path": "artifacts/silver/silver-20260920T194003Z.json",
+        "run_id": "silver-20260920T194003Z",
+        "sha256": "a20e68b6d1d425491fec60d828a82614c4c1776e2f1140af4dfec0eaddbb2e20"
+      }
+    },
+    "builder": {
+      "contract_version": "1.0.0",
+      "metric_definition_version": "full_occupancy_idle_v1",
+      "path": "ev_charging_data_unified_schema/decision_records.py",
+      "policy_version": "boulder_idle_investigation_v1",
+      "repository_base_commit": "77aa3b617d345b98f7b06f00e2f1e1376ee54eb2",
+      "repository_base_commit_semantics": "HEAD when the record builder ran; contract_version identifies the builder contract and this field does not claim the uncommitted builder code existed in that commit."
+    },
+    "observed_source_period": {
+      "first_session_start_local": "2018-01-01 17:49:00",
+      "last_session_start_local": "2023-11-30 23:27:00",
+      "semantics": "Bounds are the first and last local session starts in the fact, not record creation or evidence availability dates."
+    },
+    "source_retrieval": {
+      "retrieved_at_utc": "2026-09-19T23:10:30+00:00",
+      "semantics": "Retrieval records when this source snapshot was obtained; it does not prove availability to a historical decision-maker during the observed period.",
+      "source_file_sha256": "f1f620bb616fa6c0f9382c214c90d491fd1ac085373ffd37643008ae6fe6869a"
+    },
+    "transformations": [
+      {
+        "id": "model.ev_charging_data_unified_schema_dbt.fct_charging_session",
+        "kind": "dbt_node"
+      },
+      {
+        "id": "model.ev_charging_data_unified_schema_dbt.dim_station",
+        "kind": "dbt_node"
+      },
+      {
+        "executed_by_dbt": false,
+        "id": "ev_charging_data_unified_schema.findings.full_occupancy_idle",
+        "kind": "external_python_function"
+      }
+    ]
+  },
+  "extension": {
+    "rule": "A future version may append observed action or outcome evidence; it must create a new immutable record and must not overwrite this evidence and recommendation."
+  },
+  "observations": [
+    {
+      "capacity_assumption": "ports = max(connector_ids, robust_max_n5), floored at 1: the rule dim_station applies (ADR-0012); included so every range contains the production value",
+      "capacity_definition_id": "production",
+      "evidence_key": "boulder_idle.production",
+      "evidence_object": "findings",
+      "measures": {
+        "connected_minutes": {
+          "evidence_key": "boulder_idle.production.connected_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 14742434.0
+        },
+        "full_occupancy_idle_minutes": {
+          "evidence_key": "boulder_idle.production.full_occupancy_idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 1834371.8
+        },
+        "idle_minutes": {
+          "evidence_key": "boulder_idle.production.idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 6643228.883
+        }
+      },
+      "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+      "ratios": {
+        "full_occupancy_idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.124428,
+          "zero_denominator": "null"
+        },
+        "full_occupancy_share_of_idle": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "idle_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.276127,
+          "zero_denominator": "null"
+        },
+        "idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "idle_minutes",
+          "unit": "ratio",
+          "value": 0.45062,
+          "zero_denominator": "null"
+        }
+      },
+      "single_port_limitation": "At an inferred single-port station, every idle minute counts as full-occupancy idle by definition."
+    },
+    {
+      "capacity_assumption": "ports = highest concurrency level reached on at least 1 distinct local dates over the station's life, floored at 1",
+      "capacity_definition_id": "robust_max_n1",
+      "evidence_key": "boulder_idle.robust_max_n1",
+      "evidence_object": "findings",
+      "measures": {
+        "connected_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n1.connected_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 14742434.0
+        },
+        "full_occupancy_idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n1.full_occupancy_idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 1713810.6
+        },
+        "idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n1.idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 6643228.883
+        }
+      },
+      "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+      "ratios": {
+        "full_occupancy_idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.11625,
+          "zero_denominator": "null"
+        },
+        "full_occupancy_share_of_idle": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "idle_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.257979,
+          "zero_denominator": "null"
+        },
+        "idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "idle_minutes",
+          "unit": "ratio",
+          "value": 0.45062,
+          "zero_denominator": "null"
+        }
+      },
+      "single_port_limitation": "At an inferred single-port station, every idle minute counts as full-occupancy idle by definition."
+    },
+    {
+      "capacity_assumption": "ports = highest concurrency level reached on at least 2 distinct local dates over the station's life, floored at 1",
+      "capacity_definition_id": "robust_max_n2",
+      "evidence_key": "boulder_idle.robust_max_n2",
+      "evidence_object": "findings",
+      "measures": {
+        "connected_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n2.connected_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 14742434.0
+        },
+        "full_occupancy_idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n2.full_occupancy_idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 1795264.45
+        },
+        "idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n2.idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 6643228.883
+        }
+      },
+      "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+      "ratios": {
+        "full_occupancy_idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.121775,
+          "zero_denominator": "null"
+        },
+        "full_occupancy_share_of_idle": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "idle_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.27024,
+          "zero_denominator": "null"
+        },
+        "idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "idle_minutes",
+          "unit": "ratio",
+          "value": 0.45062,
+          "zero_denominator": "null"
+        }
+      },
+      "single_port_limitation": "At an inferred single-port station, every idle minute counts as full-occupancy idle by definition."
+    },
+    {
+      "capacity_assumption": "ports = highest concurrency level reached on at least 3 distinct local dates over the station's life, floored at 1",
+      "capacity_definition_id": "robust_max_n3",
+      "evidence_key": "boulder_idle.robust_max_n3",
+      "evidence_object": "findings",
+      "measures": {
+        "connected_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n3.connected_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 14742434.0
+        },
+        "full_occupancy_idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n3.full_occupancy_idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 1795439.5
+        },
+        "idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n3.idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 6643228.883
+        }
+      },
+      "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+      "ratios": {
+        "full_occupancy_idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.121787,
+          "zero_denominator": "null"
+        },
+        "full_occupancy_share_of_idle": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "idle_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.270266,
+          "zero_denominator": "null"
+        },
+        "idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "idle_minutes",
+          "unit": "ratio",
+          "value": 0.45062,
+          "zero_denominator": "null"
+        }
+      },
+      "single_port_limitation": "At an inferred single-port station, every idle minute counts as full-occupancy idle by definition."
+    },
+    {
+      "capacity_assumption": "ports = highest concurrency level reached on at least 5 distinct local dates over the station's life, floored at 1",
+      "capacity_definition_id": "robust_max_n5",
+      "evidence_key": "boulder_idle.robust_max_n5",
+      "evidence_object": "findings",
+      "measures": {
+        "connected_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n5.connected_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 14742434.0
+        },
+        "full_occupancy_idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n5.full_occupancy_idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 1834371.8
+        },
+        "idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n5.idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 6643228.883
+        }
+      },
+      "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+      "ratios": {
+        "full_occupancy_idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.124428,
+          "zero_denominator": "null"
+        },
+        "full_occupancy_share_of_idle": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "idle_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.276127,
+          "zero_denominator": "null"
+        },
+        "idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "idle_minutes",
+          "unit": "ratio",
+          "value": 0.45062,
+          "zero_denominator": "null"
+        }
+      },
+      "single_port_limitation": "At an inferred single-port station, every idle minute counts as full-occupancy idle by definition."
+    },
+    {
+      "capacity_assumption": "ports = highest concurrency level reached on at least 10 distinct local dates over the station's life, floored at 1",
+      "capacity_definition_id": "robust_max_n10",
+      "evidence_key": "boulder_idle.robust_max_n10",
+      "evidence_object": "findings",
+      "measures": {
+        "connected_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n10.connected_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 14742434.0
+        },
+        "full_occupancy_idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n10.full_occupancy_idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 1840713.1
+        },
+        "idle_minutes": {
+          "evidence_key": "boulder_idle.robust_max_n10.idle_minutes",
+          "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+          "unit": "minutes",
+          "value": 6643228.883
+        }
+      },
+      "population_scope": "boulder_non_trivial_sessions_at_known_stations",
+      "ratios": {
+        "full_occupancy_idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.124858,
+          "zero_denominator": "null"
+        },
+        "full_occupancy_share_of_idle": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "idle_minutes",
+          "numerator_metric_id": "full_occupancy_idle_minutes",
+          "unit": "ratio",
+          "value": 0.277081,
+          "zero_denominator": "null"
+        },
+        "idle_share_of_connected": {
+          "aggregation": "ratio_of_summed_components_not_average_of_ratios",
+          "denominator_metric_id": "connected_minutes",
+          "numerator_metric_id": "idle_minutes",
+          "unit": "ratio",
+          "value": 0.45062,
+          "zero_denominator": "null"
+        }
+      },
+      "single_port_limitation": "At an inferred single-port station, every idle minute counts as full-occupancy idle by definition."
+    }
+  ],
+  "outcome": {
+    "measured_effect": null,
+    "reason": "No intervention and no real-world operational effect were measured; zero would be an invented value.",
+    "status": "not_measured"
+  },
+  "population": {
+    "scope": "non-trivial sessions at known stations",
+    "session_count_in_source_fact": 77826,
+    "source": "boulder"
+  },
+  "question": "For the historical Boulder observations, does recorded post-charge idle time support an operational intervention, or only a narrower investigation?",
+  "recommendation": {
+    "policy_version": "boulder_idle_investigation_v1",
+    "stable_across_supported_capacity_definitions": true,
+    "status": "targeted_investigation",
+    "text": "Investigate the potential constraint and verify physical inventory and queue evidence before selecting an intervention."
+  },
+  "record_type": "retrospective_analysis",
+  "record_version": "boulder_post_charge_idle_review-5c6f310a07c01af5",
+  "schema_version": "1.0.0",
+  "sensitivity_interpretation": {
+    "is_calibrated_probability": false,
+    "is_confidence_interval": false,
+    "statement": "The alternatives change inferred capacity for the same sessions; they do not quantify statistical uncertainty or observe queues.",
+    "type": "model_choice_sensitivity"
+  }
+}

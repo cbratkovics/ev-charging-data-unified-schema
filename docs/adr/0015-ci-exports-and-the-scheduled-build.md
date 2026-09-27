@@ -154,3 +154,18 @@ it cannot reach the refresh path, which needs a cache and a publisher. The rule 
 change to `acquire.py` or to the landing loop ships with a stubbed-fetcher test of the
 restored-cache case, and the drift artifact of every full build is read, not just the compare
 status.
+
+**Amendment (2026-09-27): fixture CI always builds the complete warehouse.** A pull-request run
+downloaded the published production manifest and selected `+state:modified+` against a fresh local
+DuckDB file. For a metadata-only change, dbt selected no nodes and returned success. Pytest could
+still build its own isolated scratch databases, but the shared `.duckdb/fixture.duckdb` remained
+empty; the later docs catalog therefore contained none of the project models, and the strict
+description checker correctly rejected every absent model.
+
+The production manifest is comparison metadata, not a restored warehouse. CI now lands the small
+committed fixture and unconditionally runs a full-refresh build of every enabled fixture model into
+`.duckdb/fixture.duckdb` before pytest. Docs generation uses that same database and the matching
+target manifest/catalog. State selection remains available through the local `dbt-slim` target and
+the full-source publishing workflow is unchanged; it is not appropriate for the required fixture
+prerequisite on a clean runner. A workflow contract test prevents the complete build from becoming
+conditional or state-selected again.
