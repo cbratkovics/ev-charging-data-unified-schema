@@ -40,4 +40,8 @@ export function validateRecord(record,pointer) {
 export const formatPercent = value => value === null ? "Unavailable — denominator is zero" : `${(value*100).toFixed(1)}%`;
 export const formatExact = value => { if (typeof value !== "number" || !Number.isFinite(value)) throw new Error("Cannot format a missing measurement"); return String(value); };
 export const formatMinutes = value => new Intl.NumberFormat("en-US",{maximumFractionDigits:3}).format(value);
+export const formatStatus = value => {
+  const words=value.replaceAll("_"," ");
+  return words[0].toUpperCase()+words.slice(1);
+};
 export async function sha256Hex(bytes) { const digest=await crypto.subtle.digest("SHA-256",bytes); return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join(""); }

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {formatExact,formatPercent,safeRecordFilename,validatePointer,validateRecord} from "../apps/decision-lab/assets/contract.js";
+import {formatExact,formatPercent,formatStatus,safeRecordFilename,validatePointer,validateRecord} from "../apps/decision-lab/assets/contract.js";
 import fs from "node:fs";
 const pointer=JSON.parse(fs.readFileSync("exports/decision_lab/latest.json"));
 const original=JSON.parse(fs.readFileSync(`exports/decision_lab/${pointer.path}`));
@@ -17,6 +17,11 @@ test("snapshot acceptance values and all methods remain artifact supplied",()=>{
 test("null ratios are explicit while ordinary numeric zero remains zero",()=>{
   assert.equal(formatPercent(null),"Unavailable — denominator is zero");
   assert.equal(formatExact(0),"0"); assert.throws(()=>formatExact(undefined),/missing/);
+});
+test("record statuses use sentence case",()=>{
+  assert.equal(formatStatus("not_observed"),"Not observed");
+  assert.equal(formatStatus("not_measured"),"Not measured");
+  assert.equal(formatStatus("targeted_investigation"),"Targeted investigation");
 });
 test("semantic null states reject missing, falsy, and wrong statuses",()=>{
   for(const value of [undefined,"",0,false]){const r=clone();if(value===undefined)delete r.action.observed_action;else r.action.observed_action=value;assert.throws(()=>validateRecord(r,pointer),/Action/)}
