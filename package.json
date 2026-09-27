@@ -1,0 +1,14 @@
+{
+  "name": "ev-charging-decision-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=22 <25" },
+  "scripts": {
+    "test": "node --test tests/lab-contract.test.js",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1"
+  }
+}

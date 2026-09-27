@@ -31,5 +31,7 @@ dbt/.user.yml
 !exports/**
 fresh/
 site/
+playwright-report/
+test-results/
 # A global ~/.gitignore that ignores `*.sql` would hide the dbt project; re-include it.
 !dbt/**/*.sql

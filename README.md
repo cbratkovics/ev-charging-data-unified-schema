@@ -4,6 +4,7 @@
 · [dbt docs](https://cbratkovics.github.io/ev-charging-data-unified-schema/)
 · [Findings](docs/FINDINGS.md)
 · [Decision record contract](docs/DECISION_RECORDS.md)
+· [Decision Lab interface](docs/DECISION_LAB.md)
 · [Portfolio card](docs/CARD.md)
 
 **The problem.** Three public sources publish EV-charging session logs in three shapes: one
