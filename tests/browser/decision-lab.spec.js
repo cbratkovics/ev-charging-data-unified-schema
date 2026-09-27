@@ -23,8 +23,8 @@ test("open inspector updates with selection and returns focus with Escape",async
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(button).toBeFocused();
-  await expect(page.getByText("Not observed",{exact:true})).toBeVisible();
-  await expect(page.getByText("Not measured",{exact:true})).toBeVisible();
+  await expect(page.locator("#action-status")).toHaveText("Not observed");
+  await expect(page.locator("#outcome-status")).toHaveText("Not measured");
 });
 test("download preserves immutable bytes and filename",async({page})=>{const downloadPromise=page.waitForEvent("download");await page.getByRole("button",{name:"Download decision record"}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toBe(pointer.path);expect(fs.readFileSync(await download.path())).toEqual(recordBytes)});
 test("repository prefix and root docs work without a rewrite",async({page,request})=>{await page.goto("/ev-charging-data-unified-schema/lab/");await expect(page.locator("#capacity")).toHaveValue("production");expect((await request.get("/ev-charging-data-unified-schema/lab/assets/app.js")).ok()).toBeTruthy();expect((await request.get("/ev-charging-data-unified-schema/lab/data/latest.json")).ok()).toBeTruthy();expect((await request.get("/ev-charging-data-unified-schema/")).ok()).toBeTruthy()});
