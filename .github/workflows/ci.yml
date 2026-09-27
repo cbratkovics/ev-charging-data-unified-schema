@@ -1,8 +1,9 @@
 name: ci
 
 # Offline CI on every push and pull request: lint, the pytest suite on the committed fixture,
-# and a dbt parse. No network, no secrets, no paid service. The full build over the real sources
-# lives in full-build.yml (Phase 7) and the dbt build / slim CI / Pages steps return there.
+# and a complete fixture build. No secrets or paid service. The full build over the real sources
+# lives in full-build.yml; CI always materializes the small fixture warehouse from scratch because
+# a production state manifest is comparison metadata, not a warehouse that local docs can query.
 
 on:
   push:
@@ -49,36 +50,23 @@ jobs:
         run: make check-numbers PY=python
       - name: dbt parse
         run: make dbt-parse DBT=dbt
-      - name: Slim CI state (manifest.json from the published dbt docs site), if reachable
-        id: state
-        run: |
-          mkdir -p .dbt-state
-          url="$(python -m $PKG.config pages_url)manifest.json"
-          if curl -fsSL --max-time 20 -o .dbt-state/manifest.json "$url"; then
-            echo "have_state=true" >> "$GITHUB_OUTPUT"; echo "production manifest downloaded from $url"
-          else
-            echo "have_state=false" >> "$GITHUB_OUTPUT"; echo "no production manifest at $url; full fixture build"
-          fi
-      - name: dbt build on the fixture (slim on pull requests when state is available; ADR-0015 item 3)
+      - name: Build complete fixture warehouse
+        env:
+          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH: .duckdb/fixture.duckdb
+          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_THREADS: "1"
         run: |
           make dbt-deps DBT=dbt
-          # the fixture is served from data/landed with the default vars, so the state comparison
-          # runs with exactly the vars the production manifest was built with (ADR-0015 item 4);
-          # the target creates the git-ignored data/ directory, which a fresh checkout lacks
           make fixture-landed PY=python
           mkdir -p .duckdb
-          export EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ steps.state.outputs.have_state }}" = "true" ]; then
-            echo "slim build: modified models and their ancestors, state-selected against the published manifest (no deferral: a local DuckDB file has no shared warehouse to defer to)"
-            dbt build --project-dir dbt --profiles-dir dbt --target dev --full-refresh --select "+state:modified+" --state "$PWD/.dbt-state"
-          else
-            dbt build --project-dir dbt --profiles-dir dbt --target dev --full-refresh
-          fi
+          dbt build --project-dir dbt --profiles-dir dbt --target dev --full-refresh
       - name: Tests (offline; the fixture warehouse is built above; includes the exports contract)
-        run: python -m pytest tests
+        run: python -m pytest tests -ra
       - name: dbt docs generate + every model, column and source described
+        env:
+          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH: .duckdb/fixture.duckdb
+          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_THREADS: "1"
         run: |
-          EV_CHARGING_DATA_UNIFIED_SCHEMA_DUCKDB_PATH=.duckdb/fixture.duckdb dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --static
+          dbt docs generate --project-dir dbt --profiles-dir dbt --target dev --static
           python scripts/check_dbt_descriptions.py
       - name: sqlfluff
         run: sqlfluff lint dbt/models dbt/tests dbt/macros dbt/snapshots
